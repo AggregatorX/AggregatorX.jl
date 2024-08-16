@@ -1,7 +1,9 @@
 # Utility functions for AggregatorX
 
 # Dictionary that translates type string name from json description to Julia Type
+
 function build_typetable()
+    
     #return typetable
 end
 
