@@ -2,16 +2,12 @@ module AggregatorX
 
 import JSON
 
-export  buildaggregator
-# export buildaggregator, optimizeaggregator
+export  buildaggregator #optimizeaggregator
+export build_typetable # temporary
 
-# Construct AggregatorX objects from system description
+# Module for constructing AggregatorX objects from system description as JSON file
 include("BuildAggregator.jl")
-
-using .BuildAggregator
-
-# function buildaggregator(file::String) end
-# usage: aggregator = buildaggregator(systemdescription)
+using .BuildAggregator # usage: aggregator = buildaggregator("systemdescription.json")
 
 include("OptimizeAggregator.jl")
 # using .OptimizeAggregator
