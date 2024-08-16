@@ -6,7 +6,7 @@
 # -Time structures -
 abstract type AggregatorXAny end
 
-abstract type Components <: AggregatorXAny end
+abstract type Component <: AggregatorXAny end
 
 ## - Time structure -
 abstract type AbstractTime <: AggregatorXAny end
@@ -17,7 +17,7 @@ struct IndexedTimeStruct <: AbstractTime
 end
 
 ## - Resources -
-abstract type Resource <: Components end
+abstract type Resource <: Component end
 
 struct SimpleCharger <: Resource 
     max_power::Real
@@ -28,6 +28,54 @@ struct SimpleBattery <: Resource
     capacity::Real
     id::Signed
 end
+
+#  - Grids -
+abstract type Grid <: Component end
+
+struct SimpleGrid <: Grid
+    price::Array{AbstractFloat}
+end
+
+# - Markets -
+abstract type Market end
+
+struct SimpleMarket <: Market
+    price:: Array{AbstractFloat}
+end
+
+# - Loads -
+abstract type Load <: Component end
+
+abstract type ChargingStation <: Load end
+
+"A load where the average load over the simulation time must be greatet than some minimum load."
+struct MinAverageLoad <: Load
+    pmin::Number # minimum average power
+end
+
+# for testing
+struct MegaCharger <: ChargingStation
+    pmax::Number
+end
+
+# - Connections -
+abstract type Connection <: Component end # Should connections rather be subtype of AggregatorXAny?
+
+# Perhaps rename fields that reference ids as sourceId, sinkId etc.?
+struct Interconnection <: Connection
+    source::Integer
+    sink::Integer
+    name::String
+end
+
+struct GridToResource <: Connection
+    grid::Integer
+    resource::Integer
+end
+
+struct ResourceToLoad <: Connection
+end
+
 
 # ---Constructor wrapper methods ---
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
