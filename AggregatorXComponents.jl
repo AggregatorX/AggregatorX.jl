@@ -9,10 +9,10 @@ abstract type AggregatorXAny end
 abstract type Component <: AggregatorXAny end
 
 ## - Time structure -
-abstract type AbstractTime <: AggregatorXAny end
+abstract type TimeStruct <: AggregatorXAny end
 # Define some minimum requirements for all concrete types? I.e. there must be a periods variable
 # Timestructur that has no absolute duration or relation to absolute time, it is simply an index.
-struct IndexedTimeStruct <: AbstractTime 
+struct IndexedTimeStruct <: TimeStruct 
     periods::Int # The number of time periods
 end
 
@@ -37,7 +37,7 @@ struct SimpleGrid <: Grid
 end
 
 # - Markets -
-abstract type Market end
+abstract type Market <: Component end
 
 struct SimpleMarket <: Market
     price:: Array{AbstractFloat}
@@ -79,10 +79,34 @@ end
 
 # ---Constructor wrapper methods ---
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
+## - TimeStructs
 function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})
     return IndexedTimeStruct(ts["periods"])
 end
 
+## - Resources -
+function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any})
+    return SimpleCharger(r["max_power"],r["id"])
+end
+
+function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})
+    return SimpleBattery(r["capacity"],r["id"])
+end
+
+## - Grids -
+function build_aggregatorx_object(gt::Type{SimpleGrid}, g::Dict{String, Any})
+    return SimpleGrid(g["price"])
+end
+
+## - Loads -
+function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
+    return MinAverageLoad(l["pmin"])
+end
+
+## - Markets -
+function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any})
+    return SimpleMarket(m["price"])
+end
 
 # --- Optimization propblem definition functions ---
 

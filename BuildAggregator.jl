@@ -17,13 +17,26 @@ function buildaggregator(systemdescription::String)
     typetable = build_typetable()
 
     # Iterates ove all component types
-    components = ("Timestruct", "Grids", "Loads", "Markets", "Resources", "Connections") # Maybe keep timestruct seperate
+    parts = ("TimeStruct", "Grid", "Load", "Market", "Resource") # Maybe keep timestruct seperate
+    # Removed , "Connection" temporarily
 
-    aggregator = Dict{String, Any} # ? Could we make a type system where we can be more specific than Any
-    for c in components
-        # Functions that takes aggregatorx types and returns aggregatorx objects
-        #aggregator[c] = build_aggregatorx_object()
-        c
+    aggregator = Dict{String, Any}() # One entry for each parttype
+    for p in parts
+        if p == "TimeStruct"
+            partdef = sys[p]
+            println(typetable)
+            componenttype = typetable[partdef["type"]]
+            aggregator[p] = build_aggregatorx_object(componenttype, partdef)
+        else
+            partdef = sys[p] # Vector of Dicts for each component (except for timestruct)
+            component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
+            for (i,c)  in enumerate(partdef) # each component of component type
+                println(c)
+                componenttype = typetable[c["type"]]
+                component_array[i] = build_aggregatorx_object(componenttype, c)
+            end
+            aggregator[p] = component_array
+        end
     end
     # returns aggregatorx objects
     #TEMP
