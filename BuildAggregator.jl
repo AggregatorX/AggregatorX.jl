@@ -1,6 +1,6 @@
 module BuildAggregator
 
-export buildaggregator,  bob
+export buildaggregator
 export build_typetable # temporary
 
 import JSON
@@ -34,10 +34,5 @@ end
 # Function to instantiate aggregatorx objects
 include("AggregatorXComponents.jl")
 # include AggregatorXComponentsCustom user defined components
-
-# For testing
-function bob()
-    return " the builder!"
-end
 
 end

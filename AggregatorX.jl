@@ -2,7 +2,7 @@ module AggregatorX
 
 import JSON
 
-export  buildaggregator, you4, bob 
+export  buildaggregator
 # export buildaggregator, optimizeaggregator
 
 # Construct AggregatorX objects from system description
@@ -17,11 +17,5 @@ include("OptimizeAggregator.jl")
 # using .OptimizeAggregator
 
 # optimizeaggregator(aggregator)
-
-# For testing
-function you4()
-    print(bob())
-    return "rock"
-end
 
 end
