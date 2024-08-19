@@ -1,11 +1,12 @@
 module OptimizeAggregator
 
-import JuMP
+using JuMP
 
 export optimizeaggregator
 
 function optimizeaggregator(aggregator, optimizer)
 
+    model = Model(optimizer)
     # Set up variables
 
     # Set up objective function
@@ -13,7 +14,7 @@ function optimizeaggregator(aggregator, optimizer)
     # Set up constraints
 
     # Optimize
-    return nothing # return optimized model
+    return model
 end
 
 end
