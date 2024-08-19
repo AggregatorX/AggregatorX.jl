@@ -1,5 +1,7 @@
 module OptimizeAggregator
 
+import JuMP
+
 export optimizeaggregator
 
 function optimizeaggregator(aggregator, optimizer)

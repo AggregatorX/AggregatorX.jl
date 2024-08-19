@@ -1,7 +1,6 @@
 module BuildAggregator
 
 export buildaggregator
-export optimizeaggregator
 export build_typetable # temporary
 
 import JSON
