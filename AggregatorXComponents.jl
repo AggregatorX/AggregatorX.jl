@@ -65,7 +65,6 @@ abstract type Connection <: Component end # Should connections rather be subtype
 struct Interconnection <: Connection
     source::Integer
     sink::Integer
-    name::String
 end
 
 struct GridToResource <: Connection
@@ -74,6 +73,12 @@ struct GridToResource <: Connection
 end
 
 struct ResourceToLoad <: Connection
+    resource::Integer
+    load::Integer
+end
+
+struct ResourceToAggregator <: Connection
+    resource::Integer
 end
 
 
@@ -106,6 +111,23 @@ end
 ## - Markets -
 function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any})
     return SimpleMarket(m["price"])
+end
+
+## - Connections - 
+function build_aggregatorx_object(ct::Type{Interconnection}, idpair::Array{Any})
+    return Interconnection(idpair[1], idpair[2])
+end
+
+function build_aggregatorx_object(ct::Type{GridToResource}, idpair::Array{Any})
+    return GridToResource(idpair[1], idpair[2])
+end
+
+function build_aggregatorx_object(ct::Type{ResourceToLoad}, idpair::Array{Any})
+    return ResourceToLoad(idpair[1], idpair[2])
+end
+
+function build_aggregatorx_object(ct::Type{ResourceToAggregator}, id::Any)
+    return ResourceToAggregator(id)
 end
 
 # --- Optimization propblem definition functions ---

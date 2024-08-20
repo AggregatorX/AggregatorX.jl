@@ -1,5 +1,8 @@
 # Introduction
 
+# Usage
+Query variables using the registered name: var = model(:var).
+
 ## Terminology
 
 * Component - one of the boxes in the figure

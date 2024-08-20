@@ -18,6 +18,7 @@ function optimizeaggregator(aggregator, optimizer)
     @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
+    # Set up additional special variables
 
     # Set up objective function
 
