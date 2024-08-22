@@ -129,9 +129,3 @@ end
 function build_aggregatorx_object(ct::Type{ResourceToAggregator}, id::Any)
     return ResourceToAggregator(id)
 end
-
-# --- Optimization propblem definition functions ---
-
-## - Set up variables -
-
-## - Set up constraints - 

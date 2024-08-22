@@ -3,6 +3,7 @@ module OptimizeAggregator
 using JuMP
 
 include("AggregatorXComponents.jl")
+include("AggregatorXmethods.jl")
 
 export optimizeaggregator
 
@@ -18,7 +19,9 @@ function optimizeaggregator(aggregator, optimizer)
     @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
+    
     # Set up additional special variables
+    # For each resource of particular type
 
     # Set up objective function
 
