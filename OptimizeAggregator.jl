@@ -53,7 +53,7 @@ function optimizeaggregator(aggregator, optimizer)
         cost_grid[i,1:N] = g.price
     end
 
-    #@objective(model, min, sum( sum(p_grid.*c_grid) ))
+    @objective(model, Min, sum( sum(p_grid.*cost_grid) ))
 
     # Set up constraints
 
