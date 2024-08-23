@@ -13,6 +13,7 @@ function optimizeaggregator(aggregator, optimizer)
     
     #for i,l in loads
     # 
+    N = aggregator["TimeStruct"].periods
 
     # Set up variables
     # standard for all
@@ -46,7 +47,13 @@ function optimizeaggregator(aggregator, optimizer)
     # sum_t f(p)
     # expr: sum(fun,itr)
 
-    #@objective(model, min, sum( sum(p_grid[i,t].*c_grid[i,t]) ))
+    grids = aggregator["Grid"]
+    cost_grid = Array{AbstractFloat,2}(undef,length(grids),N)
+    for (i,g) in enumerate(grids)
+        cost_grid[i,1:N] = g.price
+    end
+
+    #@objective(model, min, sum( sum(p_grid.*c_grid) ))
 
     # Set up constraints
 
