@@ -19,13 +19,22 @@ function optimizeaggregator(aggregator, optimizer)
     @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
+
+    # map index to component id
+    loads = aggregator["Load"]
+    load_id_map = Vector{Int}(undef, length(loads))
+    for (i,load) in enumerate(loads)
+        load_id_map[i] = load.id
+    end
+    #load_id_map
+
+
     
     # Set up additional special variables
     # For each resource of particular type
     categories = ["Resource"]
     for category in categories
-        for component in aggregator[category]
-            println(string(typeof(component)) * "\n" * string(component isa SimpleBattery))
+        for component in aggregator[category]            
             if isa(component,SimpleBattery)
                 set_optimization_variables(model, component, aggregator["TimeStruct"])
             end
@@ -33,6 +42,11 @@ function optimizeaggregator(aggregator, optimizer)
     end
 
     # Set up objective function
+    # Minimize cost
+    # sum_t f(p)
+    # expr: sum(fun,itr)
+
+    #@objective(model, min, sum( sum(p_grid[i,t].*c_grid[i,t]) ))
 
     # Set up constraints
 

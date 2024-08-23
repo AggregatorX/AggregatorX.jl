@@ -35,6 +35,7 @@ abstract type Grid <: Component end
 
 struct SimpleGrid <: Grid
     price::Array{AbstractFloat}
+    id::Integer
 end
 
 # - Markets -
@@ -42,6 +43,7 @@ abstract type Market <: Component end
 
 struct SimpleMarket <: Market
     price:: Array{AbstractFloat}
+    id::Integer
 end
 
 # - Loads -
@@ -52,11 +54,13 @@ abstract type ChargingStation <: Load end
 "A load where the average load over the simulation time must be greatet than some minimum load."
 struct MinAverageLoad <: Load
     pmin::Number # minimum average power
+    id::Integer
 end
 
 # for testing
 struct MegaCharger <: ChargingStation
     pmax::Number
+    id::Integer
 end
 
 # - Connections -
@@ -101,17 +105,17 @@ end
 
 ## - Grids -
 function build_aggregatorx_object(gt::Type{SimpleGrid}, g::Dict{String, Any})
-    return SimpleGrid(g["price"])
+    return SimpleGrid(g["price"],g["id"])
 end
 
 ## - Loads -
 function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
-    return MinAverageLoad(l["pmin"])
+    return MinAverageLoad(l["pmin"],l["id"])
 end
 
 ## - Markets -
 function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any})
-    return SimpleMarket(m["price"])
+    return SimpleMarket(m["price"], m["id"])
 end
 
 ## - Connections - 
