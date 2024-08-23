@@ -24,9 +24,10 @@ struct SimpleCharger <: Resource
     id::Signed
 end
 
-struct SimpleBattery <: Resource
-    capacity::Real
+mutable struct SimpleBattery <: Resource
+    capacity::Real    
     id::Signed
+    chargeref::Any
 end
 
 #  - Grids -
@@ -95,7 +96,7 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any})
 end
 
 function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})
-    return SimpleBattery(r["capacity"],r["id"])
+    return SimpleBattery(r["capacity"],r["id"], missing)
 end
 
 ## - Grids -

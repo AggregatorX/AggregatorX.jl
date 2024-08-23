@@ -1,11 +1,11 @@
-module OptimizeAggregator
+#module OptimizeAggregator
 
-using JuMP
+#using JuMP
 
-include("AggregatorXComponents.jl")
-include("AggregatorXmethods.jl")
+#include("AggregatorXComponents.jl")
+#include("AggregatorXmethods.jl")
 
-export optimizeaggregator
+#export optimizeaggregator
 
 function optimizeaggregator(aggregator, optimizer)
 
@@ -22,6 +22,15 @@ function optimizeaggregator(aggregator, optimizer)
     
     # Set up additional special variables
     # For each resource of particular type
+    categories = ["Resource"]
+    for category in categories
+        for component in aggregator[category]
+            println(string(typeof(component)) * "\n" * string(component isa SimpleBattery))
+            if isa(component,SimpleBattery)
+                set_optimization_variables(model, component, aggregator["TimeStruct"])
+            end
+        end
+    end
 
     # Set up objective function
 
@@ -38,4 +47,4 @@ function set_optimization_variables(model::Model, load::MinAverageLoad, timestru
     # Maybe a dict which relates each load variable to load object that defined it
 end
 
-end
+#end

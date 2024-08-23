@@ -1,11 +1,11 @@
-module BuildAggregator
+#module BuildAggregator
 
-export buildaggregator
-export build_typetable # temporary
+#export buildaggregator
+#export build_typetable # temporary
 
 import JSON
 
-include("AggregatorXUtilities.jl")
+#include("AggregatorXUtilities.jl")
 
 # Instantiates aggregatorx objects from json descrption
 function buildaggregator(systemdescription::String)
@@ -61,7 +61,7 @@ function buildaggregator(systemdescription::String)
 end
 
 # Function to instantiate aggregatorx objects
-include("AggregatorXComponents.jl")
+#include("AggregatorXComponents.jl")
 # include AggregatorXComponentsCustom user defined components
 
-end
+#end

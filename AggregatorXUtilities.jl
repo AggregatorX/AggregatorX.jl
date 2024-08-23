@@ -26,3 +26,11 @@ function allsubtypes(parent)
     end
     return st
 end
+
+function lstrip_last_dot(s::AbstractString)
+    # Find the position of the last dot
+    last_dot_position = findlast(isequal('.'), s)
+    
+    # Return the substring after the last dot
+    return last_dot_position == nothing ? s : s[last_dot_position + 1:end]
+end
