@@ -21,12 +21,14 @@ function optimizeaggregator(aggregator, optimizer)
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
 
-    # map index to component id
+    # map index to component id # Maybe have a common for all the types. A dictionary
+    #categories = ["Load", "Grid", "Market"]
     loads = aggregator["Load"]
     load_id_map = Vector{Int}(undef, length(loads))
     for (i,load) in enumerate(loads)
         load_id_map[i] = load.id
     end
+    # idx_id_map["Load"] = load_id_map etc
     #load_id_map
 
 
@@ -53,12 +55,65 @@ function optimizeaggregator(aggregator, optimizer)
         cost_grid[i,1:N] = g.price
     end
 
-    @objective(model, Min, sum( sum(p_grid.*cost_grid) ))
+    markets = aggregator["Market"]
+    cost_market = Array{AbstractFloat,2}(undef,length(markets),N)
+    for (i,m) in enumerate(markets)
+        cost_market[i,1:N] = m.price
+    end
+
+    @objective(model, Min, sum( sum(p_grid.*cost_grid) ) - sum( sum(p_market.*cost_market) ) )
 
     # Set up constraints
+    
+    # Grid
+    #category = "Grid"
+    #for grid in aggregator[category]
+    
+    category = "Load"
+    loads = aggregator[category]
+    for (i,load) in enumerate(loads)
+        @constraint(model, c, sum(p_load[i,1:N]) >= load.pmin) # specific for MinAverageLoad, put into method
+    end
+
+    # Interconnection constraints, i.e. energy conservation
+    # Loop through every resource id
+    category = "Resource"
+    resources = aggregator[category]
+    for r in resources
+        if isa(r,SimpleCharger) # Only this implemented so far
+            set_optimization_constraints(model, aggregator, r, load_id_map)
+        end
+    end
+    # Find grid connection
+    
+    # Find Interconnections
+    # Find aggregator connections
+    # Internal properties, storage, loss, production
+    # p_load(i,t) + pij + p-market = pji + p_grid
+
 
     # Optimize
     return model
+end
+
+function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Vector{Int})
+    timestruct = aggregator["TimeStruct"]
+    
+    id = resource.id
+    load_id_map = id_map # for mulitple maps later
+
+    # Connected loads
+    rls = aggregator["Connection"]["ResourceToLoad"]
+    idx = Vector{Int}()
+    for rl in rls 
+        if rl.resource == id
+            load_id = rl.load
+            idx = push!(idx, findfirst(x->x==load_id, load_id_map)) # index of load used in constraint
+        end
+    end
+    # Connected grids
+    
+    @constraint(model, [t in 1:timestruct.periods], sum(model[:p_load][i,t] for i in idx) == 0)
 end
 
 # These are used for each load if there are additional variables to be defined depending on type

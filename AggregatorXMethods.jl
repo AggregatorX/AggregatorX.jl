@@ -15,3 +15,7 @@ function set_optimization_variables(model::Model, battery::SimpleBattery, timest
 end
 
 ## - Set up constraints - 
+
+function set_constraints(model::Model, charger::SimpleCharger, timestruct::TimeStruct)
+    
+end
