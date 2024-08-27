@@ -56,7 +56,7 @@ function buildaggregator(systemdescription::String)
     end
     # returns aggregatorx objects
     #TEMP
-    return (sys,aggregator, typetable)
+    return (sys,aggregator)
     #TEMP
 end
 
