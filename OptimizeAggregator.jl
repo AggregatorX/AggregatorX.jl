@@ -22,13 +22,14 @@ function optimizeaggregator(aggregator, optimizer)
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
 
     # map index to component id # Maybe have a common for all the types. A dictionary
+    id_map = Dict{String,Any}()
     #categories = ["Load", "Grid", "Market"]
     loads = aggregator["Load"]
     load_id_map = Vector{Int}(undef, length(loads))
     for (i,load) in enumerate(loads)
         load_id_map[i] = load.id
     end
-    # idx_id_map["Load"] = load_id_map etc
+    id_map["Load"] = load_id_map
     #load_id_map
 
 
@@ -81,7 +82,7 @@ function optimizeaggregator(aggregator, optimizer)
     resources = aggregator[category]
     for r in resources
         if isa(r,SimpleCharger) # Only this implemented so far
-            set_optimization_constraints(model, aggregator, r, load_id_map)
+            set_optimization_constraints(model, aggregator, r, id_map)
         end
     end
     # Find grid connection
@@ -96,13 +97,14 @@ function optimizeaggregator(aggregator, optimizer)
     return model
 end
 
-function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Vector{Int})
+function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any})
     timestruct = aggregator["TimeStruct"]
     
     id = resource.id
-    load_id_map = id_map # for mulitple maps later
+    
 
     # Connected loads
+    load_id_map = id_map["Load"] # for mulitple maps later
     rls = aggregator["Connection"]["ResourceToLoad"]
     idx = Vector{Int}()
     for rl in rls 
@@ -111,8 +113,16 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
             idx = push!(idx, findfirst(x->x==load_id, load_id_map)) # index of load used in constraint
         end
     end
-    # Connected grids
-    
+
+    # Connected grids. Assume only one resource connected to each grid
+    grs = aggregator["Connection"]["GridToResource"]
+    for gr in grs
+        if gr.resource == id
+            idx = 1 #TEMP
+        end
+    end
+
+
     @constraint(model, [t in 1:timestruct.periods], sum(model[:p_load][i,t] for i in idx) == 0)
 end
 
