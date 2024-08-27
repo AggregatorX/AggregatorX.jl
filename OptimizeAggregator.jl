@@ -23,15 +23,32 @@ function optimizeaggregator(aggregator, optimizer)
 
     # map index to component id # Maybe have a common for all the types. A dictionary
     id_map = Dict{String,Any}()
-    #categories = ["Load", "Grid", "Market"]
-    loads = aggregator["Load"]
-    load_id_map = Vector{Int}(undef, length(loads))
-    for (i,load) in enumerate(loads)
-        load_id_map[i] = load.id
+    categories = ["Load", "Grid"] #, "Market"]
+    for c in categories
+        loads = aggregator[c]
+        load_id_map = Vector{Int}(undef, length(loads))
+        for (i,load) in enumerate(loads)
+            load_id_map[i] = load.id
+        end
+        id_map[c] = load_id_map
     end
-    id_map["Load"] = load_id_map
     #load_id_map
 
+    # Set interconnection variables
+    # Find Interconnections
+    # Find aggregator connections
+    # Connected components
+    ics = aggregator["Connection"]["Interconnection"]
+    ic_varref = Vector{Vector{VariableRef}}(undef,length(ics))
+    for (i,ic) in enumerate(ics)
+        source = ic.source
+        sink = ic.sink
+        icref = @variable(model, [1:N])
+        ic_varref[i] = icref
+        for j in 1:N
+            set_name(icref[j], "p_ic-" * string(source) * "-" * string(sink) * "[" * string(j) * "]" )
+        end
+    end
 
     
     # Set up additional special variables
@@ -45,10 +62,7 @@ function optimizeaggregator(aggregator, optimizer)
         end
     end
 
-    # Set up objective function
-    # Minimize cost
-    # sum_t f(p)
-    # expr: sum(fun,itr)
+    
 
     grids = aggregator["Grid"]
     cost_grid = Array{AbstractFloat,2}(undef,length(grids),N)
@@ -82,31 +96,40 @@ function optimizeaggregator(aggregator, optimizer)
     resources = aggregator[category]
     for r in resources
         if isa(r,SimpleCharger) # Only this implemented so far
-            set_optimization_constraints(model, aggregator, r, id_map)
+            set_optimization_constraints(model, aggregator, r, id_map, ic_varref)
         end
     end
     # Find grid connection
     
-    # Find Interconnections
-    # Find aggregator connections
+    
+
     # Internal properties, storage, loss, production
     # p_load(i,t) + pij + p-market = pji + p_grid
 
-
+    # Set up objective function
+    # Minimize cost
+    # sum_t f(p)
+    # expr: sum(fun,itr)
     # Optimize
+
     return model
 end
 
-function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any})
+function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleBattery, id_map::Dict{String, Any}, ic_varref::Any)
+    
+end
+
+function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any}, ic_varref::Any)
     timestruct = aggregator["TimeStruct"]
     
+    N = timestruct.periods
+
     id = resource.id
     
-
     # Connected loads
     load_id_map = id_map["Load"] # for mulitple maps later
     rls = aggregator["Connection"]["ResourceToLoad"]
-    idx = Vector{Int}()
+    idx = Vector{Int}() # Multiple loads per resource allowed
     for rl in rls 
         if rl.resource == id
             load_id = rl.load
@@ -115,15 +138,47 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
     end
 
     # Connected grids. Assume only one resource connected to each grid
+    grid_id_map = id_map["Grid"]
     grs = aggregator["Connection"]["GridToResource"]
     for gr in grs
         if gr.resource == id
-            idx = 1 #TEMP
+            grid_id = gr.grid
+            idx = findfirst(x->x==grid_id, grid_id_map)
         end
     end
 
-
-    @constraint(model, [t in 1:timestruct.periods], sum(model[:p_load][i,t] for i in idx) == 0)
+    # Connected components
+    ics = aggregator["Connection"]["Interconnection"]
+    p_ic = Vector{AffExpr}(undef,N)
+    for i in eachindex(p_ic)
+        p_ic[i] = AffExpr(0.0)
+    end
+    
+    for (i,ic) in enumerate(ics)
+        icref = ic_varref[i]
+        source = ic.source
+        sink = ic.sink        
+        if source == id
+            # add
+            
+            term = @expression(model, ic_term, 1.0*icref)
+            
+            for (a,b) in zip(p_ic,term)
+                
+                add_to_expression!(a,b)            
+            end
+            
+        elseif sink == id
+            # subtract
+            term = @expression(model, ic_term, -icref)
+            add_to_expression!(p_ic, 1.0, term)
+            for (a,b) in zip(p_ic,term)
+                add_to_expression!(a,b)
+            end
+        end
+    end
+    c = @constraint(model, [t in 1:timestruct.periods], 
+        sum(model[:p_load][i,t] for i in idx) - model[:p_grid][idx,t] + p_ic[t]  == 0)
 end
 
 # These are used for each load if there are additional variables to be defined depending on type
