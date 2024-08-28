@@ -15,18 +15,18 @@ function optimizeaggregator(aggregator, optimizer)
 
     # -- Variables --
     categories = ["Load", "Grid", "Market"]
-    # standard for all
+
+    #  - Standard 'external variables'-
     @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
+    
+    id_map = idx_to_id(aggregator, categories) # map component index to component id: id = id_map["component"][idx] 
 
-    # map component index to component id: id = id_map["component"][idx] 
-    id_map = idx_to_id(aggregator, categories)
-
-    # Set interconnection variables
-    # Find Interconnections
-    # Find aggregator connections
-    # Connected components
+    # - Interconnection variables -
+    # ic_varref is a vector where each item is a variable (really vector of variables over time) that represents an interconnection.
+    # Resource ids are found by accesing the "Interconnection" vector in the aggregator with same index.
+    # The id is also indicated in the name of the variable for easier printing
     ics = aggregator["Connection"]["Interconnection"]
     ic_varref = Vector{Vector{VariableRef}}(undef,length(ics))
     for (i,ic) in enumerate(ics)
@@ -39,15 +39,11 @@ function optimizeaggregator(aggregator, optimizer)
         end
     end
 
-    
-    # Set up additional special variables
-    # For each resource of particular type
-    categories = ["Resource"]
+    # - Resource dependent variables -
+    categories = ["Resource"] # Also variables for external components?
     for category in categories
-        for component in aggregator[category]            
-            if isa(component,SimpleBattery)
-                set_optimization_variables(model, component, aggregator["TimeStruct"])
-            end
+        for component in aggregator[category]  
+            set_optimization_variables(model, component, aggregator["TimeStruct"])                      
         end
     end
 

@@ -45,6 +45,8 @@ The choice of adding the "look up table" between the single index of p_conn and 
 
 When a resource is initalized a power balance constraint is created. The program loops through the connections. If it finds the id of the resource it looks up the corresponding p_conn element corresponding to the id pair and adds this to the power balance. The element can be looked up by its name "p_i,j"
 
+When creating variables three main types are set: energy from 'external components', energy flow in interconnections, and component specific variables.
+
 --- Another idea could be to add connections as another type
 
 # Usage
