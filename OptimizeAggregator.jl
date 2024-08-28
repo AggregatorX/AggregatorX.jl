@@ -10,29 +10,18 @@
 function optimizeaggregator(aggregator, optimizer)
 
     model = Model(optimizer)
-    
-    #for i,l in loads
-    # 
+        
     N = aggregator["TimeStruct"].periods
 
-    # Set up variables
+    # -- Variables --
+    categories = ["Load", "Grid", "Market"]
     # standard for all
     @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
 
-    # map index to component id # Maybe have a common for all the types. A dictionary
-    id_map = Dict{String,Any}()
-    categories = ["Load", "Grid", "Market"]
-    for c in categories
-        loads = aggregator[c]
-        load_id_map = Vector{Int}(undef, length(loads))
-        for (i,load) in enumerate(loads)
-            load_id_map[i] = load.id
-        end
-        id_map[c] = load_id_map
-    end
-    #load_id_map
+    # map component index to component id: id = id_map["component"][idx] 
+    id_map = idx_to_id(aggregator, categories)
 
     # Set interconnection variables
     # Find Interconnections
@@ -200,7 +189,7 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
 
     # Connected components
     ics = aggregator["Connection"]["Interconnection"]
-    p_ic = Vector{AffExpr}(undef,N)
+    p_ic = Vector{AffExpr}(undef,N) # Should this be a variable
     for i in eachindex(p_ic)
         p_ic[i] = AffExpr(0.0)
     end

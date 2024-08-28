@@ -34,3 +34,16 @@ function lstrip_last_dot(s::AbstractString)
     # Return the substring after the last dot
     return last_dot_position == nothing ? s : s[last_dot_position + 1:end]
 end
+
+function idx_to_id(aggregator, categories)
+    id_map = Dict{String,Any}()    
+    for category in categories
+        components = aggregator[category]
+        component_id_map = Vector{Int}(undef, length(components))
+        for (i,component) in enumerate(components)
+            component_id_map[i] = component.id
+        end
+        id_map[category] = component_id_map
+    end
+    return id_map
+end

@@ -56,4 +56,10 @@ To create new components in the aggregator model the following steps must be tak
 * Create a new concret type, possibly with new abstract supertypes that are subtypes of one of the five top abstract types (AbstractTime, AbstractResource, AbstractGrid, AbstractMarket, Abstract Load)
 * Create a new build...(::NewType, JSON data) method that is dispatched when calling with the new type and sets that appropriate fields of the new type according to the JSON data.
 
+set_optimization_constraints(model, agg, comp, ..)
+If component is of type resource the connections must be found. There are four possible types: Load, Grid, Aggregator, interconnections.
+
+For loads an array of indicies is found that represent multiple loads connected to the component.
+For Grid only a single connection idx is allowed for each resource.
+
 
