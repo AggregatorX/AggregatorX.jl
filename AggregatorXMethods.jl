@@ -22,6 +22,12 @@ end
 
 ## - Constraints -
 
-function set_constraints(model::Model, charger::SimpleCharger, timestruct::TimeStruct)
+function set_optimization_constraints(model::Model, charger::SimpleCharger, timestruct::TimeStruct)
     
+end
+
+function set_optimization_constraints(model::Model, load::MinAverageLoad, i::Int,  timestruct::TimeStruct)
+    N = timestruct.periods
+    p_load = model[:p_load]
+    @constraint(model, sum(p_load[i,1:N]) >= load.pmin)
 end

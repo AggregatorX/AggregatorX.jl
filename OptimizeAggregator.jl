@@ -10,13 +10,15 @@
 function optimizeaggregator(aggregator, optimizer)
 
     model = Model(optimizer)
-        
-    N = aggregator["TimeStruct"].periods
+    
+    timestruct = aggregator["TimeStruct"]
+    N = timestruct.periods
 
     # -- Variables --
+
     categories = ["Load", "Grid", "Market"]
 
-    #  - Standard 'external variables'-
+    #  - Standard 'external variables' -
     @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
@@ -47,6 +49,31 @@ function optimizeaggregator(aggregator, optimizer)
         end
     end
 
+    # --- Constraints ---
+    
+    # - External component constraints -
+    category = "Load"
+    loads = aggregator[category]
+    for (i,load) in enumerate(loads)
+        set_optimization_constraints(model, load, i, timestruct)
+        #@constraint(model, c, sum(p_load[i,1:N]) >= load.pmin) # specific for MinAverageLoad, put into method
+    end
+
+    # Grid
+    #category = "Grid"
+    #for grid in aggregator[category]
+
+    # - Resource specific constraints - 
+    # As a minimum energy conservation for all connected components
+    category = "Resource"
+    resources = aggregator[category]
+    for r in resources # For every resource
+        if isa(r,SimpleCharger) # Only this implemented so far
+            set_optimization_constraints(model, aggregator, r, id_map, ic_varref)
+        end
+    end
+    # Find grid connection
+    
     grids = aggregator["Grid"]
     cost_grid = Array{AbstractFloat,2}(undef,length(grids),N)
     for (i,g) in enumerate(grids)
@@ -58,33 +85,7 @@ function optimizeaggregator(aggregator, optimizer)
     for (i,m) in enumerate(markets)
         cost_market[i,1:N] = m.price
     end
-
     @objective(model, Min, sum( sum(p_grid.*cost_grid) ) - sum( sum(p_market.*cost_market) ) )
-
-    # Set up constraints
-    
-    # Grid
-    #category = "Grid"
-    #for grid in aggregator[category]
-    
-    category = "Load"
-    loads = aggregator[category]
-    for (i,load) in enumerate(loads)
-        @constraint(model, c, sum(p_load[i,1:N]) >= load.pmin) # specific for MinAverageLoad, put into method
-    end
-
-    # Interconnection constraints, i.e. energy conservation
-    # Loop through every resource id
-    category = "Resource"
-    resources = aggregator[category]
-    for r in resources
-        if isa(r,SimpleCharger) # Only this implemented so far
-            set_optimization_constraints(model, aggregator, r, id_map, ic_varref)
-        end
-    end
-    # Find grid connection
-    
-    
 
     # Internal properties, storage, loss, production
     # p_load(i,t) + pij + p-market = pji + p_grid
