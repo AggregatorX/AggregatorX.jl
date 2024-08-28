@@ -84,6 +84,7 @@ end
 
 struct ResourceToAggregator <: Connection
     resource::Integer
+    aggregator_set::Integer
 end
 
 
@@ -129,6 +130,10 @@ end
 
 function build_aggregatorx_object(ct::Type{ResourceToLoad}, idpair::Array{Any})
     return ResourceToLoad(idpair[1], idpair[2])
+end
+
+function build_aggregatorx_object(ct::Type{ResourceToAggregator}, idpair::Array{Any})
+    return ResourceToAggregator(idpair[1], idpair[2])
 end
 
 function build_aggregatorx_object(ct::Type{ResourceToAggregator}, id::Any)

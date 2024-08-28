@@ -23,7 +23,7 @@ function optimizeaggregator(aggregator, optimizer)
 
     # map index to component id # Maybe have a common for all the types. A dictionary
     id_map = Dict{String,Any}()
-    categories = ["Load", "Grid"] #, "Market"]
+    categories = ["Load", "Grid", "Market"]
     for c in categories
         loads = aggregator[c]
         load_id_map = Vector{Int}(undef, length(loads))
@@ -61,8 +61,6 @@ function optimizeaggregator(aggregator, optimizer)
             end
         end
     end
-
-    
 
     grids = aggregator["Grid"]
     cost_grid = Array{AbstractFloat,2}(undef,length(grids),N)
@@ -106,17 +104,70 @@ function optimizeaggregator(aggregator, optimizer)
     # Internal properties, storage, loss, production
     # p_load(i,t) + pij + p-market = pji + p_grid
 
-    # Set up objective function
+    # -- Objective function --
     # Minimize cost
     # sum_t f(p)
     # expr: sum(fun,itr)
+    z = AffExpr()
+    # - Grid -    
+    id_grids = id_map["Grid"]
+    for i in 1:length(aggregator["Grid"])
+        id = id_grids[i]
+        grid = aggregator["Grid"][i]
+        c = grid.price 
+        expr = @expression(model, sum(p_grid[i,t].*c[t] for t in 1:N))
+        add_to_expression!(z, expr)
+    end
+    # - Load -    
+    # id_loads = id_map("Load")
+    # for i in length(aggregator["Load"])
+    # id = id_loads(i)
+    # load = aggregator["Load"][i]
+    # c = load.price # Some functionality if "free", no price
+    # expr = @expression(sum(p_load[i,t]*c[t] for t in [1:N]))
+    # add_to_expression(z,expr)
+    # end
+    # - Market 
+    id_markets = id_map["Market"]
+    for i in 1:length(aggregator["Market"])
+        id = id_markets[i]
+        market = aggregator["Market"][i]
+        c = market.price
+        expr = @expression(model, sum(p_market[i,t]*c[t] for t in 1:N))
+        add_to_expression!(z,-expr)
+    end
+    @objective(model, Min, z)
     # Optimize
+    # optimize!(model)
 
     return model
 end
 
 function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleBattery, id_map::Dict{String, Any}, ic_varref::Any)
+    timestruct = aggregator["TimeStruct"]
     
+    N = timestruct.periods
+
+    id = resource.id
+    # Constrained by energy balance
+    # Check all connections, 
+    c = aggregator["Connection"]
+
+    ras = c["ResourceToAggregator"]
+    for ra in ras
+        if ra.resource == id
+            # Add this to energy balance
+        end
+
+    end
+    # Resource to aggregator
+
+
+
+
+    # Constrained by charging capacity
+
+
 end
 
 function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any}, ic_varref::Any)
@@ -127,7 +178,7 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
     id = resource.id
     
     # Connected loads
-    load_id_map = id_map["Load"] # for mulitple maps later
+    load_id_map = id_map["Load"]
     rls = aggregator["Connection"]["ResourceToLoad"]
     idx = Vector{Int}() # Multiple loads per resource allowed
     for rl in rls 
