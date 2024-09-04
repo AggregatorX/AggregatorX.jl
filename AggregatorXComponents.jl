@@ -3,10 +3,20 @@
 
 # --- Type definitions ---
 
-# -Time structures -
 abstract type AggregatorXAny end
 
 abstract type Component <: AggregatorXAny end
+
+abstract type Grid <: Component end
+
+abstract type Market <: Component end
+
+struct Group <: AggregatorXAny
+    tech_class::String
+    markets::Set{Market}
+    resources::Set{Tuple{Int,Int}}
+    id::Integer
+end
 
 ## - Time structure -
 abstract type TimeStruct <: AggregatorXAny end
@@ -31,7 +41,6 @@ mutable struct SimpleBattery <: Resource
 end
 
 #  - Grids -
-abstract type Grid <: Component end
 
 struct SimpleGrid <: Grid
     price::Array{AbstractFloat}
@@ -39,7 +48,6 @@ struct SimpleGrid <: Grid
 end
 
 # - Markets -
-abstract type Market <: Component end
 
 struct SimpleMarket <: Market
     price:: Array{AbstractFloat}
