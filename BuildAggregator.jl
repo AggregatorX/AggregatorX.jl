@@ -44,6 +44,15 @@ function buildaggregator(systemdescription::String)
                 connections[ct] = connection_array
             end
             aggregator[p] = connections
+        elseif p == "Group"
+            partdef = sys[p] # returns a vector of group components
+            groups = Set{typetable[p]}
+            for g in partdef
+                grouptype = typetable[g["tech_class"]]
+                group = build_aggregatorx_object(grouptype, g)
+                push!(groups, group)
+            end 
+            aggregator[p] = groups
         else
             partdef = sys[p] # Vector of Dicts for each component (except for timestruct)
             component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
