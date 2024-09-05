@@ -17,7 +17,7 @@ function buildaggregator(systemdescription::String)
     typetable = build_typetable()
 
     # Iterates ove all component types
-    parts = ("TimeStruct", "Grid", "Load", "Market", "Resource", "Connection") # Maybe keep timestruct seperate
+    parts = ("TimeStruct", "Grid", "Load", "Market", "Resource", "Group",  "Connection") # Maybe keep timestruct seperate
     # Removed , "Connection" temporarily
 
     aggregator = Dict{String, Any}() # One entry for each parttype
@@ -46,7 +46,7 @@ function buildaggregator(systemdescription::String)
             aggregator[p] = connections
         elseif p == "Group"
             partdef = sys[p] # returns a vector of group components
-            groups = Set{typetable[p]}
+            groups = Set{typetable[p]}()
             for g in partdef
                 grouptype = typetable[g["tech_class"]]
                 group = build_aggregatorx_object(grouptype, g)

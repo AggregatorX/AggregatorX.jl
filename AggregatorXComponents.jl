@@ -110,17 +110,17 @@ function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
     markets = Set{Tuple{Int,Int}}()    
     mlist = g["markets"]
     for m in mlist
-        push!((id,m), markets)
+        push!(markets, (id,m))
     end
 
     resources = Set{Tuple{Int,Int}}()
-    rlist = r["resources"]
+    rlist = g["resources"]
     for r in rlist
-        push!(resources, id)
+        push!(resources, (r,id))
     end
 
     # Set all parameters, including tech_class and id
-    return Group(tech_class, resources, markets, id )
+    return FFRGroup(tech_class, resources, markets, id)
 end
 
 ## - TimeStructs
