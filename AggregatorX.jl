@@ -4,23 +4,21 @@ import JSON
 
 using JuMP
 
-export  buildaggregator
+export buildaggregator
 export optimizeaggregator
-export FFRGroup
-export build_typetable # temporary
+# export all concrete types
+export FFRGroup # Groups
+export IndexedTimeStruct # TimeStructs
+export SimpleCharger, SimpleBattery,MegaCharger # Resources
+export SimpleGrid # Grids, obsolete
+export SimpleMarket # Markets
+export MinAverageLoad # Loads 
+export Interconnection, GridToResource, ResourceToLoad, ResourceToAggregator # Connections
 
 include("AggregatorXUtilities.jl")
-
-
 include("AggregatorXComponents.jl")
-# Module for constructing AggregatorX objects from system description as JSON file
-include("BuildAggregator.jl")
-#using .BuildAggregator # usage: aggregator = buildaggregator("systemdescription.json")
-
 include("AggregatorXMethods.jl")
+
+include("BuildAggregator.jl")
 include("OptimizeAggregator.jl")
-#using .OptimizeAggregator
-
-# optimizeaggregator(aggregator)
-
 end

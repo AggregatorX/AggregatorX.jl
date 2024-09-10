@@ -232,5 +232,3 @@ function set_optimization_variables(model::Model, load::MinAverageLoad, timestru
     @variable(model, p_load[1:timestruct.periods])
     # Maybe a dict which relates each load variable to load object that defined it
 end
-
-#end

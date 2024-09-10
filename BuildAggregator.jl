@@ -1,13 +1,8 @@
-#module BuildAggregator
-
-#export buildaggregator
-#export build_typetable # temporary
-
 import JSON
 
-#include("AggregatorXUtilities.jl")
-
-# Instantiates aggregatorx objects from json descrption
+"""
+Instantiates aggregatorx objects from json descrption
+"""
 function buildaggregator(systemdescription::String)
 
     io = open(systemdescription, "r");
@@ -16,10 +11,9 @@ function buildaggregator(systemdescription::String)
     # Requires tables that translates string description of type (from json) to a Type object
     typetable = build_typetable()
 
-    # Iterates ove all component types
+    # Iterates over all component types
     parts = ("TimeStruct", "Grid", "Load", "Market", "Resource", "Group",  "Connection") # Maybe keep timestruct seperate
-    # Removed , "Connection" temporarily
-
+   
     aggregator = Dict{String, Any}() # One entry for each parttype
     for p in parts
         if p == "TimeStruct"
@@ -68,9 +62,3 @@ function buildaggregator(systemdescription::String)
     return (sys,aggregator)
     #TEMP
 end
-
-# Function to instantiate aggregatorx objects
-#include("AggregatorXComponents.jl")
-# include AggregatorXComponentsCustom user defined components
-
-#end
