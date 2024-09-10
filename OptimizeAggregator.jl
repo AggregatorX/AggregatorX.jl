@@ -50,6 +50,14 @@ function optimizeaggregator(aggregator, optimizer)
         end
     end
 
+    # Markets
+    markets = aggregator["Market"]
+    for m in markets
+        if isa(m, SimpleDAMarket)
+            set_optimization_variables(model, m, aggregator["TimeStruct"])
+        end        
+    end
+
     # - Group variables - 
     # For each group define available capacity to be reserved
     up_capacity, down_capacity = set_optimization_variables(model, aggregator["Group"], aggregator["TimeStruct"])
@@ -99,10 +107,10 @@ function optimizeaggregator(aggregator, optimizer)
     # p_load(i,t) + pij + p-market = pji + p_grid
 
     # -- Objective function --
-    # Minimize cost
-    # sum_t f(p)
-    # expr: sum(fun,itr)
+   #=
     z = AffExpr()
+
+    
     # - Grid -    
     id_grids = id_map["Grid"]
     for i in 1:length(aggregator["Grid"])
@@ -112,6 +120,7 @@ function optimizeaggregator(aggregator, optimizer)
         expr = @expression(model, sum(p_grid[i,t].*c[t] for t in 1:N))
         add_to_expression!(z, expr)
     end
+
     # - Load -    
     # id_loads = id_map("Load")
     # for i in length(aggregator["Load"])
@@ -121,6 +130,7 @@ function optimizeaggregator(aggregator, optimizer)
     # expr = @expression(sum(p_load[i,t]*c[t] for t in [1:N]))
     # add_to_expression(z,expr)
     # end
+
     # - Market 
     id_markets = id_map["Market"]
     for i in 1:length(aggregator["Market"])
@@ -130,6 +140,8 @@ function optimizeaggregator(aggregator, optimizer)
         expr = @expression(model, sum(p_market[i,t]*c[t] for t in 1:N))
         add_to_expression!(z,-expr)
     end
+    =#
+    z = set_objective(model, aggregator)
     @objective(model, Min, z)
     # Optimize
     # optimize!(model)
@@ -226,9 +238,18 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
         sum(model[:p_load][i,t] for i in idx) - model[:p_grid][idx,t] + p_ic[t]  == 0)
 end
 
-# These are used for each load if there are additional variables to be defined depending on type
-function set_optimization_variables(model::Model, load::MinAverageLoad, timestruct::TimeStruct) 
-    # return charge, charging, discharging
-    @variable(model, p_load[1:timestruct.periods])
-    # Maybe a dict which relates each load variable to load object that defined it
+function set_objective(model::Model, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+
+    markets = aggregator["Market"]
+    
+    z = 0 
+    for m in markets
+        if isa(m, SimpleDAMarket)
+        z = z + sum(m.power .* m.price)
+        end
+    end
+
+    return z
 end
+

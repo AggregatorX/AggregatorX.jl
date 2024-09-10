@@ -61,10 +61,22 @@ struct SimpleGrid <: Grid
 end
 
 # - Markets -
-
 struct SimpleMarket <: Market
     price:: Array{AbstractFloat}
     id::Integer
+end
+
+mutable struct SimpleDAMarket <: Market
+    power:: Vector{VariableRef}
+    price:: Vector{AbstractFloat} # price/cost    
+    id::Integer
+    sign::Integer
+    class::String
+end
+
+function build_aggregatorx_object(t::Type{SimpleDAMarket}, g::Dict{String, Any})
+    power = Vector{VariableRef}()
+    return SimpleDAMarket(power, g["price"],  g["id"], g["sign"], g["class"])
 end
 
 # - Loads -

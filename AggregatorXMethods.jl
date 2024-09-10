@@ -33,6 +33,18 @@ function set_optimization_variables(model::Model, charger::SimpleCharger,
 
 end
 
+# These are used for each load if there are additional variables to be defined depending on type
+function set_optimization_variables(model::Model, load::MinAverageLoad, timestruct::TimeStruct) 
+    # return charge, charging, discharging
+    @variable(model, p_load[1:timestruct.periods])
+    # Maybe a dict which relates each load variable to load object that defined it
+end
+
+function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct::TimeStruct)
+    N = timestruct.periods
+    m.power = @variable(model, [1:N], base_name = "SimpleDA-" * string(m.id))
+end
+
 ## For all groups
 """
     set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)

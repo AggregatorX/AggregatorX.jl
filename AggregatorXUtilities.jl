@@ -48,3 +48,11 @@ function idx_to_id(aggregator, categories)
     end
     return id_map
 end
+
+function init_expr_array(N)
+    z = Vector{AffExpr}(undef, N)
+    for i in eachindex(z)
+        z[i] = 0.0
+    end
+    return z
+end
