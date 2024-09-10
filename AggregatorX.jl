@@ -6,6 +6,7 @@ using JuMP
 
 export  buildaggregator
 export optimizeaggregator
+export FFRGroup
 export build_typetable # temporary
 
 include("AggregatorXUtilities.jl")

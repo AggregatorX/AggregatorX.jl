@@ -26,7 +26,8 @@ function optimizeaggregator(aggregator, optimizer)
     id_map = idx_to_id(aggregator, categories) # map component index to component id: id = id_map["component"][idx] 
 
     # - Interconnection variables -
-    # ic_varref is a vector where each item is a variable (really vector of variables over time) that represents an interconnection.
+    # ic_varref is a vector where each item is a variable (really vector of variables over time) that represents 
+    # an interconnection.
     # Resource ids are found by accesing the "Interconnection" vector in the aggregator with same index.
     # The id is also indicated in the name of the variable for easier printing
     ics = aggregator["Connection"]["Interconnection"]
@@ -49,8 +50,15 @@ function optimizeaggregator(aggregator, optimizer)
         end
     end
 
+    # - Group variables - 
+    # For each group define available capacity to be reserved
+    up_capacity, down_capacity = set_optimization_variables(model, aggregator["Group"], aggregator["TimeStruct"])
+
     # --- Constraints ---
-    
+    for group in aggregator["Group"]
+        set_optimization_constraints(model, group, aggregator["TimeStruct"])
+    end
+
     # - External component constraints -
     category = "Load"
     loads = aggregator[category]

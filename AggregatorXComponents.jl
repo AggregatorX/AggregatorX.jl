@@ -34,7 +34,15 @@ abstract type Resource <: Component end
 
 struct SimpleCharger <: Resource 
     max_power::Real
+    p::Dict{Integer, Vector{VariableRef}}
     id::Signed
+end
+
+# Temporary alternative constructor
+function SimpleCharger(max_power, id) 
+    vr = Vector{VariableRef}()
+    p = Dict(0 => vr)
+    return SimpleCharger(max_power, p, id)
 end
 
 mutable struct SimpleBattery <: Resource
