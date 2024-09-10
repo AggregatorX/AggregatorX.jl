@@ -35,6 +35,7 @@ abstract type Resource <: Component end
 struct SimpleCharger <: Resource 
     max_power::Real
     p::Dict{Integer, Vector{VariableRef}}
+    sources::Vector{Integer}
     id::Signed
 end
 
@@ -42,13 +43,14 @@ end
 function SimpleCharger(max_power, id) 
     vr = Vector{VariableRef}()
     p = Dict(0 => vr)
-    return SimpleCharger(max_power, p, id)
+    sources = [0]
+    return SimpleCharger(max_power, p, sources, id)
 end
 
 mutable struct SimpleBattery <: Resource
     capacity::Real    
     id::Signed
-    chargeref::Any
+    charge::Any
 end
 
 #  - Grids -

@@ -7,10 +7,10 @@
 
 # SimpleBattery
 function set_optimization_variables(model::Model, battery::SimpleBattery, timestruct::TimeStruct) 
-    battery.chargeref = @variable(model, [1:timestruct.periods])
+    battery.charge = @variable(model, [1:timestruct.periods])
     typestring = lstrip_last_dot(string(typeof(battery)))
-    for i in 1:length(battery.chargeref)
-        set_name(battery.chargeref[i], typestring * string(battery.id) * "_charge_"  * "[" * string(i) * "]" )
+    for i in 1:length(battery.charge)
+        set_name(battery.charge[i], typestring * string(battery.id) * "_charge_"  * "[" * string(i) * "]" )
     end
     # Maybe a dict which relates each load variable to load object that defined it
 end
