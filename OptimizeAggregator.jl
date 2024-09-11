@@ -55,6 +55,9 @@ function optimizeaggregator(aggregator, optimizer)
     for m in markets
         if isa(m, SimpleDAMarket)
             set_optimization_variables(model, m, aggregator["TimeStruct"])
+        end 
+        if isa(m, FFRProfil)
+            set_optimization_variables(model, m, aggregator["TimeStruct"])
         end        
     end
 

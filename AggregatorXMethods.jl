@@ -40,10 +40,19 @@ function set_optimization_variables(model::Model, load::MinAverageLoad, timestru
     # Maybe a dict which relates each load variable to load object that defined it
 end
 
+## Markets
+
 function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct::TimeStruct)
     N = timestruct.periods
     m.power = @variable(model, [1:N], base_name = "SimpleDA-" * string(m.id))
 end
+
+function set_optimization_variables(model::Model, m::FFRProfil, timestruct::TimeStruct)
+    N = timestruct.periods
+    m.capacity = @variable(model, [1:N], base_name = "FFRProfil-" * string(m.id))
+end
+
+
 
 ## For all groups
 """
@@ -76,6 +85,8 @@ function set_optimization_constraints(model::Model, load::MinAverageLoad, i::Int
     p_load = model[:p_load]
     @constraint(model, sum(p_load[i,1:N]) >= load.pmin)
 end
+
+### Markets
 
 # Groups
 
