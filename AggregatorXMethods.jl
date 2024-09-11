@@ -92,3 +92,12 @@ function set_optimization_constraints(model::Model, group::FFRGroup, timestruct:
     @constraint(model, dc[group,:] == 0)
     # Set upcapacity as sum of all resources
 end
+
+# Objective
+
+function get_objective_term(m::SimpleDAMarket)
+    zterm = sum(m.power .* m.price)
+    return zterm
+end
+
+# Objective function for ffr

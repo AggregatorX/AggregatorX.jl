@@ -246,7 +246,8 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
     z = 0 
     for m in markets
         if isa(m, SimpleDAMarket)
-        z = z + sum(m.power .* m.price)
+            zterm = get_objective_term(m)
+            z = z + zterm
         end
     end
 
