@@ -67,16 +67,34 @@ struct SimpleMarket <: Market
 end
 
 mutable struct SimpleDAMarket <: Market
-    power:: Vector{VariableRef}
-    price:: Vector{AbstractFloat} # price/cost    
-    id::Integer
+    power::Vector{VariableRef}
+    price::Vector{AbstractFloat}        
     sign::Integer
     class::String
+    id::Integer
 end
 
 function build_aggregatorx_object(t::Type{SimpleDAMarket}, g::Dict{String, Any})
     power = Vector{VariableRef}()
-    return SimpleDAMarket(power, g["price"],  g["id"], g["sign"], g["class"])
+    return SimpleDAMarket(power, g["price"], g["sign"], g["class"],  g["id"])
+end
+
+mutable struct FFRProfil <: Market
+    capacity::Vector{VariableRef} # reserved capacity
+    price::Vector{AbstractFloat}
+    armed::Vector{Bool} # Periods where FFR is armed
+    sign::Integer
+    class::String
+    id::Integer
+end
+
+function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any})
+    N = length(m["armed"])
+    price = ones(N) * m["price"]
+
+    capacity = Vector{VariableRef}()
+
+    return FFRProfil(capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
 end
 
 # - Loads -

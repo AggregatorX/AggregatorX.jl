@@ -11,7 +11,7 @@ export FFRGroup # Groups
 export IndexedTimeStruct # TimeStructs
 export SimpleCharger, SimpleBattery,MegaCharger # Resources
 export SimpleGrid # Grids, obsolete
-export SimpleMarket # Markets
+export SimpleMarket, SimpleDAMarket, FFRProfil # Markets
 export MinAverageLoad # Loads 
 export Interconnection, GridToResource, ResourceToLoad, ResourceToAggregator # Connections
 
