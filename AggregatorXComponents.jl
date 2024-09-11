@@ -1,8 +1,3 @@
-# Define different methods depending on type
-# Need to add new for every new type of resources (should maybe have *one* place where used extends resources)
-
-# --- Type definitions ---
-
 abstract type AggregatorXAny end
 
 abstract type Component <: AggregatorXAny end
@@ -13,12 +8,37 @@ abstract type Grid <: Component end
 
 abstract type Market <: Component end
 
+abstract type Resource <: Component end
+
+include("AggregatorXResources.jl")
+
 ## Groups
 struct FFRGroup <: Group
     tech_class::String
     resources::Set{Tuple{Int,Int}} # Set of tuples of resource and group ids.
     markets::Set{Tuple{Int,Int}} # Set of tuples of group and market ids.    
     id::Integer
+end
+
+function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
+    tech_class = g["tech_class"]
+    
+    id = g["id"]
+
+    markets = Set{Tuple{Int,Int}}()    
+    mlist = g["markets"]
+    for m in mlist
+        push!(markets, (id,m))
+    end
+
+    resources = Set{Tuple{Int,Int}}()
+    rlist = g["resources"]
+    for r in rlist
+        push!(resources, (r,id))
+    end
+
+    # Set all parameters, including tech_class and id
+    return FFRGroup(tech_class, resources, markets, id)
 end
 
 ## - Time structure -
@@ -29,29 +49,7 @@ struct IndexedTimeStruct <: TimeStruct
     periods::Int # The number of time periods
 end
 
-## - Resources -
-abstract type Resource <: Component end
 
-struct SimpleCharger <: Resource 
-    max_power::Real
-    p::Dict{Integer, Vector{VariableRef}}
-    sources::Vector{Integer}
-    id::Signed
-end
-
-# Temporary alternative constructor
-function SimpleCharger(max_power, id) 
-    vr = Vector{VariableRef}()
-    p = Dict(0 => vr)
-    sources = [0]
-    return SimpleCharger(max_power, p, sources, id)
-end
-
-mutable struct SimpleBattery <: Resource
-    capacity::Real    
-    id::Signed
-    charge::Any
-end
 
 #  - Grids -
 
@@ -142,39 +140,11 @@ end
 # ---Constructor wrapper methods ---
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
 ## - Groups
-function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
-    tech_class = g["tech_class"]
-    
-    id = g["id"]
 
-    markets = Set{Tuple{Int,Int}}()    
-    mlist = g["markets"]
-    for m in mlist
-        push!(markets, (id,m))
-    end
-
-    resources = Set{Tuple{Int,Int}}()
-    rlist = g["resources"]
-    for r in rlist
-        push!(resources, (r,id))
-    end
-
-    # Set all parameters, including tech_class and id
-    return FFRGroup(tech_class, resources, markets, id)
-end
 
 ## - TimeStructs
 function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})
     return IndexedTimeStruct(ts["periods"])
-end
-
-## - Resources -
-function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any})
-    return SimpleCharger(r["max_power"],r["id"])
-end
-
-function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})
-    return SimpleBattery(r["capacity"],r["id"], missing)
 end
 
 ## - Grids -
