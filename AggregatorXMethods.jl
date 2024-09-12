@@ -48,7 +48,7 @@ end
 
 function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct::TimeStruct)
     N = timestruct.periods
-    m.power = @variable(model, [1:N], base_name = "SimpleDA-" * string(m.id))
+    m.power[m.resource] = @variable(model, [1:N], base_name = "SimpleDA-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::FFRProfil, timestruct::TimeStruct)
@@ -80,16 +80,23 @@ end
 
 ## - Constraints -
 
-function set_optimization_constraints(model::Model, charger::SimpleCharger, timestruct::TimeStruct)
-    N = timestruct.periods
+function set_optimization_constraints(model::Model, charger::SimpleCharger, aggregator)
+    N = aggregator["TimeStruct"].periods
+    id = charger.id
 
     # Energy conserved
-    # sum (p_out, p_in) = 0
-    psum = init_expr_array(N)
-    for k in keys(charger.power)
-        psum = psum + charger.power[k]
+    net_power = init_expr_array(N)
+    for target in keys(charger.power)
+        net_power = net_power + charger.power[target]
+    end 
+    sources = charger.sources
+    for r in union(aggregator["Resource"], aggregator["Market"])
+        if r.id in sources
+            net_power = net_power - r.power[id]
+        end
     end
-    
+
+    @constraint(model, net_power == 0, base_name = "pnet-SimpleCharger-" * string(id))
 
     # up regulation limited by curtailable (eksternal) power
 
@@ -124,7 +131,7 @@ end
 # Objective
 
 function get_objective_term(m::SimpleDAMarket)
-    zterm = sum(m.power .* m.price)
+    zterm = sum(m.power[m.resource] .* m.price)
     return zterm
 end
 

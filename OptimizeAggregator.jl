@@ -88,7 +88,8 @@ function optimizeaggregator(aggregator, optimizer)
     resources = aggregator[category]
     for r in resources # For every resource
         if isa(r,SimpleCharger) # Only this implemented so far
-            set_optimization_constraints(model, aggregator, r, id_map, ic_varref)
+            set_optimization_constraints(model, r, aggregator)
+            #set_optimization_constraints(model, aggregator, r, id_map, ic_varref) -> renamed old, obsolet
         end
     end
     # Find grid connection
@@ -179,7 +180,7 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
 
 end
 
-function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any}, ic_varref::Any)
+function old_set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any}, ic_varref::Any)
     timestruct = aggregator["TimeStruct"]
     
     N = timestruct.periods

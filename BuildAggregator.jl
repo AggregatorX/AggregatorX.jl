@@ -54,6 +54,8 @@ function buildaggregator(systemdescription::String)
                 componenttype = typetable[c["type"]]
                 if c["type"] == "SimpleCharger"
                     component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])
+                elseif c["type"] == "SimpleDAMarket"
+                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])
                 else
                     component_array[i] = build_aggregatorx_object(componenttype, c)
                 end

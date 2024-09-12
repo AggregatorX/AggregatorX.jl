@@ -66,8 +66,6 @@ struct IndexedTimeStruct <: TimeStruct
     periods::Int # The number of time periods
 end
 
-
-
 #  - Grids -
 
 struct SimpleGrid <: Grid
@@ -82,16 +80,12 @@ struct SimpleMarket <: Market
 end
 
 mutable struct SimpleDAMarket <: Market
-    power::Vector{VariableRef}
-    price::Vector{AbstractFloat}        
+    power::Dict{Integer, Vector{VariableRef}}
+    price::Vector{AbstractFloat}
+    resource::Integer       
     sign::Integer
     class::String
     id::Integer
-end
-
-function build_aggregatorx_object(t::Type{SimpleDAMarket}, g::Dict{String, Any})
-    power = Vector{VariableRef}()
-    return SimpleDAMarket(power, g["price"], g["sign"], g["class"],  g["id"])
 end
 
 mutable struct FFRProfil <: Market
