@@ -158,7 +158,7 @@ end
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
 ## - Groups
 
-include("AggregatorXResources.jl")
+include("AggregatorXConstructors.jl")
 
 ## - TimeStructs
 function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})
