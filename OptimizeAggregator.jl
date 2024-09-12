@@ -56,6 +56,9 @@ function optimizeaggregator(aggregator, optimizer)
         if isa(m, SimpleDAMarket)
             set_optimization_variables(model, m, aggregator["TimeStruct"])
         end 
+        if isa(m, SimpleMarket)
+            set_optimization_variables(model, m, aggregator["TimeStruct"])
+        end 
         if isa(m, FFRProfil)
             set_optimization_variables(model, m, aggregator["TimeStruct"])
         end        
@@ -66,6 +69,21 @@ function optimizeaggregator(aggregator, optimizer)
     up_capacity, down_capacity = set_optimization_variables(model, aggregator["Group"], aggregator["TimeStruct"])
 
     # --- Constraints ---
+
+    # Markets
+    markets = aggregator["Market"]
+    for m in markets
+        if isa(m, SimpleDAMarket)
+            #set_optimization_variables(model, m, aggregator["TimeStruct"])
+        end 
+        if isa(m, SimpleMarket)
+            set_optimization_constraints(model, m, aggregator)
+        end 
+        if isa(m, FFRProfil)
+            #set_optimization_variables(model, m, aggregator["TimeStruct"])
+        end        
+    end
+
     for group in aggregator["Group"]
         set_optimization_constraints(model, group, aggregator["TimeStruct"])
     end

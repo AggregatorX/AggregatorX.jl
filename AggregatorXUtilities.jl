@@ -56,3 +56,12 @@ function init_expr_array(N)
     end
     return z
 end
+
+function get_resource(id ,aggregator)
+    resources = aggregator["Resource"]
+    for r in resources
+        if r.id == id
+            return r
+        end
+    end
+end

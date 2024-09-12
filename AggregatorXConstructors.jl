@@ -1,4 +1,4 @@
-
+# Resources
 
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
     connections::Vector{Interconnection})
@@ -35,12 +35,26 @@ function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})
 end
 
 # Markets
+function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, 
+    connections::Vector{Interconnection})
+
+    id = m["id"]
+    resource = -1
+    for c in connections
+        if c.sink == id
+            resource = c.source
+        end
+    end
+
+    power = Dict(resource => Vector{VariableRef}())
+
+    return SimpleMarket(power, m["price"], resource, m["sign"], m["class"], m["id"])
+end
 
 function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any}, 
     connections::Vector{Interconnection})
 
     id = m["id"]
-    println(id)
     resource = -1
     for c in connections
         if c.source == id

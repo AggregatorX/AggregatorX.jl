@@ -46,6 +46,11 @@ end
 
 ## Markets
 
+function set_optimization_variables(model::Model, m::SimpleMarket, timestruct::TimeStruct)
+    N = timestruct.periods
+    m.power[m.resource] = @variable(model, [1:N], base_name = "SimpleMarket-" * string(m.id))
+end
+
 function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct::TimeStruct)
     N = timestruct.periods
     m.power[m.resource] = @variable(model, [1:N], base_name = "SimpleDA-" * string(m.id))
@@ -99,7 +104,6 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
     @constraint(model, net_power == 0, base_name = "pnet-SimpleCharger-" * string(id))
 
     # up regulation limited by curtailable (eksternal) power
-
     # down regulation limited by maximum increase in (external) output
     
 end
@@ -111,6 +115,12 @@ function set_optimization_constraints(model::Model, load::MinAverageLoad, i::Int
 end
 
 ### Markets
+
+function set_optimization_constraints(model::Model, m::SimpleMarket, aggregator)
+    println(m.resource)
+    source = get_resource(m.resource, aggregator)
+    @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
+end
 
 # Groups
 

@@ -75,7 +75,11 @@ end
 
 # - Markets -
 struct SimpleMarket <: Market
+    power::Dict{Integer, Vector{VariableRef}} # redundant?
     price:: Array{AbstractFloat}
+    resource::Integer       
+    sign::Integer
+    class::String
     id::Integer
 end
 
@@ -169,10 +173,7 @@ function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any}
     return MinAverageLoad(l["pmin"],l["id"])
 end
 
-## - Markets -
-function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any})
-    return SimpleMarket(m["price"], m["id"])
-end
+
 
 ## - Connections - 
 function build_aggregatorx_object(ct::Type{Interconnection}, idpair::Array{Any})
