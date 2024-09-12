@@ -12,7 +12,7 @@ function buildaggregator(systemdescription::String)
     typetable = build_typetable()
 
     # Iterates over all component types
-    parts = ("TimeStruct", "Grid", "Load", "Market", "Resource", "Group",  "Connection") # Maybe keep timestruct seperate
+    parts = ("TimeStruct", "Connection", "Grid", "Load", "Market", "Resource", "Group" ) # Maybe keep timestruct seperate
    
     aggregator = Dict{String, Any}() # One entry for each parttype
     for p in parts
@@ -52,7 +52,11 @@ function buildaggregator(systemdescription::String)
             component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
             for (i,c)  in enumerate(partdef) # each component of component type
                 componenttype = typetable[c["type"]]
-                component_array[i] = build_aggregatorx_object(componenttype, c)
+                if c["type"] == "SimpleCharger"
+                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])
+                else
+                    component_array[i] = build_aggregatorx_object(componenttype, c)
+                end
             end
             aggregator[p] = component_array
         end

@@ -1,13 +1,24 @@
-# - SimpleCharger -
-struct SimpleCharger <: Resource 
-    max_power::Real
-    p::Dict{Integer, Vector{VariableRef}}
-    sources::Vector{Integer}
-    id::Signed
-end
 
-function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any})
-    return SimpleCharger(r["max_power"],r["id"])
+
+function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, connections::Vector{Interconnection})
+    power = Dict{Integer, Vector{VariableRef}}() 
+
+    id = r["id"]
+
+    power = Dict{Integer, Vector{VariableRef}}()
+    sources = Vector{Int}(undef,0)
+    for c in connections
+        if c.source == id
+            power[c.source] = Vector{VariableRef}()
+        elseif c.sink == id
+            push!(sources, c.source)
+        end
+    end
+
+    up_capacity = Vector{VariableRef}()
+    down_capacity = Vector{VariableRef}()
+
+    return SimpleCharger(power, up_capacity, down_capacity, sources, r["max_power"], id)
 end
 
 function SimpleCharger(max_power, id) # Temporary alternative constructor
@@ -17,16 +28,8 @@ function SimpleCharger(max_power, id) # Temporary alternative constructor
     return SimpleCharger(max_power, p, sources, id)
 end
 
-# - SimpleBattery -
-mutable struct SimpleBattery <: Resource
-    capacity::Real    
-    id::Signed
-    charge::Any
-end
+
 
 function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})
     return SimpleBattery(r["capacity"],r["id"], missing)
 end
-
-
-

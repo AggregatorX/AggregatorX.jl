@@ -1,3 +1,5 @@
+# Type declarations (must come before constructor functions)
+
 abstract type AggregatorXAny end
 
 abstract type Component <: AggregatorXAny end
@@ -10,7 +12,22 @@ abstract type Market <: Component end
 
 abstract type Resource <: Component end
 
-include("AggregatorXResources.jl")
+# - SimpleCharger -
+mutable struct SimpleCharger <: Resource 
+    power::Dict{Integer, Vector{VariableRef}}
+    up_capacity::Vector{VariableRef}
+    down_capacity::Vector{VariableRef}
+    sources::Vector{Integer}
+    max_power::Real
+    id::Signed
+end
+
+# - SimpleBattery -
+mutable struct SimpleBattery <: Resource
+    capacity::Real    
+    id::Signed
+    charge::Any
+end
 
 ## Groups
 struct FFRGroup <: Group
@@ -141,6 +158,7 @@ end
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
 ## - Groups
 
+include("AggregatorXResources.jl")
 
 ## - TimeStructs
 function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})

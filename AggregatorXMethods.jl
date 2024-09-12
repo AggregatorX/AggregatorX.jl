@@ -15,6 +15,7 @@ function set_optimization_variables(model::Model, battery::SimpleBattery, timest
     # Maybe a dict which relates each load variable to load object that defined it
 end
 
+# SimpleCharger
 """
     set_optimization_variables(model::Model, charger::SimpleCharger, 
     timestruct::TimeStruct)
@@ -25,12 +26,15 @@ charger, while down_capacity is given by the maximum_power minus the current
 load.
 """
 function set_optimization_variables(model::Model, charger::SimpleCharger, 
-    timestruct::TimeStruct) 
-    # No additional variables needed.
+    timestruct::TimeStruct)
+    N = timestruct.periods
 
-    # available capacity
-    # up_capacity = @variable(model, up_capacity[])
+    for k in keys(charger.power)
+        charger.power[k] = @variable(model, [1:N], base_name = "p-SimpleCharger-" * string(charger.id) * "-" * string(k))
+    end
 
+    charger.up_capacity = @variable(model, [1:N], base_name = "up-SimpleCharger-" * string(charger.id))
+    charger.down_capacity = @variable(model, [1:N], base_name = "down-SimpleCharger-" * string(charger.id))
 end
 
 # These are used for each load if there are additional variables to be defined depending on type
@@ -77,6 +81,19 @@ end
 ## - Constraints -
 
 function set_optimization_constraints(model::Model, charger::SimpleCharger, timestruct::TimeStruct)
+    N = timestruct.periods
+
+    # Energy conserved
+    # sum (p_out, p_in) = 0
+    psum = init_expr_array(N)
+    for k in keys(charger.power)
+        psum = psum + charger.power[k]
+    end
+    
+
+    # up regulation limited by curtailable (eksternal) power
+
+    # down regulation limited by maximum increase in (external) output
     
 end
 
