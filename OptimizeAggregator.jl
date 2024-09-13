@@ -16,11 +16,11 @@ function optimizeaggregator(aggregator, optimizer)
 
     # -- Variables --
 
-    categories = ["Load", "Grid", "Market"]
+    categories = [ "Grid", "Market"]
 
     #  - Standard 'external variables' -
-    @variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
-    @variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
+    #@variable(model, p_load[1:length(aggregator["Load"]), 1:aggregator["TimeStruct"].periods])
+    #@variable(model, p_grid[1:length(aggregator["Grid"]), 1:aggregator["TimeStruct"].periods])
     @variable(model, p_market[1:length(aggregator["Market"]), 1:aggregator["TimeStruct"].periods])
     
     id_map = idx_to_id(aggregator, categories) # map component index to component id: id = id_map["component"][idx] 
@@ -66,7 +66,11 @@ function optimizeaggregator(aggregator, optimizer)
 
     # - Group variables - 
     # For each group define available capacity to be reserved
-    up_capacity, down_capacity = set_optimization_variables(model, aggregator["Group"], aggregator["TimeStruct"])
+    # up_capacity, down_capacity = set_optimization_variables(model, aggregator["Group"], aggregator["TimeStruct"])
+    for g in aggregator["Group"]
+        set_optimization_variables(model, g, aggregator["TimeStruct"])
+    end
+
 
     # --- Constraints ---
 
@@ -85,16 +89,18 @@ function optimizeaggregator(aggregator, optimizer)
     end
 
     for group in aggregator["Group"]
-        set_optimization_constraints(model, group, aggregator["TimeStruct"])
+        set_optimization_constraints(model, group, aggregator)
     end
 
     # - External component constraints -
+    #=
     category = "Load"
     loads = aggregator[category]
     for (i,load) in enumerate(loads)
         set_optimization_constraints(model, load, i, timestruct)
         #@constraint(model, c, sum(p_load[i,1:N]) >= load.pmin) # specific for MinAverageLoad, put into method
     end
+    =#
 
     # Grid
     #category = "Grid"
@@ -123,48 +129,9 @@ function optimizeaggregator(aggregator, optimizer)
     for (i,m) in enumerate(markets)
         cost_market[i,1:N] = m.price
     end
-    @objective(model, Min, sum( sum(p_grid.*cost_grid) ) - sum( sum(p_market.*cost_market) ) )
-
-    # Internal properties, storage, loss, production
-    # p_load(i,t) + pij + p-market = pji + p_grid
-
-    # -- Objective function --
-   #=
-    z = AffExpr()
-
     
-    # - Grid -    
-    id_grids = id_map["Grid"]
-    for i in 1:length(aggregator["Grid"])
-        id = id_grids[i]
-        grid = aggregator["Grid"][i]
-        c = grid.price 
-        expr = @expression(model, sum(p_grid[i,t].*c[t] for t in 1:N))
-        add_to_expression!(z, expr)
-    end
-
-    # - Load -    
-    # id_loads = id_map("Load")
-    # for i in length(aggregator["Load"])
-    # id = id_loads(i)
-    # load = aggregator["Load"][i]
-    # c = load.price # Some functionality if "free", no price
-    # expr = @expression(sum(p_load[i,t]*c[t] for t in [1:N]))
-    # add_to_expression(z,expr)
-    # end
-
-    # - Market 
-    id_markets = id_map["Market"]
-    for i in 1:length(aggregator["Market"])
-        id = id_markets[i]
-        market = aggregator["Market"][i]
-        c = market.price
-        expr = @expression(model, sum(p_market[i,t]*c[t] for t in 1:N))
-        add_to_expression!(z,-expr)
-    end
-    =#
     z = set_objective(model, aggregator)
-    @objective(model, Min, z)
+    @objective(model, Max, z)
     # Optimize
     # optimize!(model)
 
@@ -250,8 +217,6 @@ function old_set_optimization_constraints(model::Model, aggregator::Dict{String,
             end
         end
     end
-    c = @constraint(model, [t in 1:timestruct.periods], 
-        sum(model[:p_load][i,t] for i in idx) - model[:p_grid][idx,t] + p_ic[t]  == 0)
 end
 
 function set_objective(model::Model, aggregator::Dict{String, Any})
@@ -259,12 +224,10 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
 
     markets = aggregator["Market"]
     
-    z = 0 
+    z = 0
     for m in markets
-        if isa(m, SimpleDAMarket)
-            zterm = get_objective_term(m)
-            z = z + zterm
-        end
+        zterm = get_objective_term(m)
+        z = z + zterm
     end
 
     return z

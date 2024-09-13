@@ -34,36 +34,16 @@ mutable struct SimpleBattery <: Resource
     max_charge::AbstractFloat
     max_discharge::AbstractFloat
     class::String
-    id::Signed
-end
-
-## Groups
-struct FFRGroup <: Group
-    tech_class::String
-    resources::Set{Tuple{Int,Int}} # Set of tuples of resource and group ids.
-    markets::Set{Tuple{Int,Int}} # Set of tuples of group and market ids.    
     id::Integer
 end
 
-function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
-    tech_class = g["tech_class"]
-    
-    id = g["id"]
-
-    markets = Set{Tuple{Int,Int}}()    
-    mlist = g["markets"]
-    for m in mlist
-        push!(markets, (id,m))
-    end
-
-    resources = Set{Tuple{Int,Int}}()
-    rlist = g["resources"]
-    for r in rlist
-        push!(resources, (r,id))
-    end
-
-    # Set all parameters, including tech_class and id
-    return FFRGroup(tech_class, resources, markets, id)
+## Groups
+mutable struct FFRGroup <: Group
+    up_capacity::Vector{VariableRef}
+    resources::Set{Int} # Set of tuples of resource and group ids.
+    markets::Set{Int} # Set of tuples of group and market ids.  
+    class::String  
+    id::Integer
 end
 
 ## - Time structure -
@@ -101,7 +81,7 @@ mutable struct SimpleDAMarket <: Market
 end
 
 mutable struct FFRProfil <: Market
-    capacity::Vector{VariableRef} # reserved capacity
+    up_capacity::Vector{VariableRef} # reserved capacity
     price::Vector{AbstractFloat}
     armed::Vector{Bool} # Periods where FFR is armed
     sign::Integer
@@ -113,9 +93,9 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any})
     N = length(m["armed"])
     price = ones(N) * m["price"]
 
-    capacity = Vector{VariableRef}()
+    up_capacity = Vector{VariableRef}()
 
-    return FFRProfil(capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
+    return FFRProfil(up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
 end
 
 # - Loads -

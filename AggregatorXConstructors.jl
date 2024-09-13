@@ -78,3 +78,24 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
     
     return SimpleDAMarket(power, m["price"], resource, m["sign"], m["class"],  id)
 end
+
+# Groups
+
+function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
+    up_capacity = Vector{VariableRef}()
+
+    markets = Set{Int}()    
+    mlist = g["markets"]
+    for m in mlist
+        push!(markets, m)
+    end
+
+    resources = Set{Int}()
+    rlist = g["resources"]
+    for r in rlist
+        push!(resources, r)
+    end
+
+    # Set all parameters, including tech_class and id
+    return FFRGroup(up_capacity, resources, markets, g["class"], g["id"])
+end

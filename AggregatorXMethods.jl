@@ -12,17 +12,17 @@ function set_optimization_variables(model::Model, battery::SimpleBattery,
     N = timestruct.periods
 
     for k in keys(battery.power)
-        battery.power[k] = @variable(model, [1:N], 
+        battery.power[k] = @variable(model, [1:N], lower_bound = 0.0,
             base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k))
     end
     
-    battery.state_of_charge = @variable(model, [1:N], 
+    battery.state_of_charge = @variable(model, [1:N], lower_bound = 0.0,
         base_name = "soc-SimpleBattery-" * string(battery.id))
     
-    battery.down_capacity = @variable(model, [1:N], 
+    battery.down_capacity = @variable(model, [1:N], lower_bound = 0.0,
         base_name = "down-SimpleBattery-" * string(battery.id))
     
-    battery.up_capacity = @variable(model, [1:N], 
+    battery.up_capacity = @variable(model, [1:N], lower_bound = 0.0, 
         base_name = "up-SimpleBattery-" * string(battery.id))
 
     # typestring = lstrip_last_dot(string(typeof(battery)))
@@ -49,11 +49,11 @@ function set_optimization_variables(model::Model, charger::SimpleCharger,
     N = timestruct.periods
 
     for k in keys(charger.power)
-        charger.power[k] = @variable(model, [1:N], base_name = "p-SimpleCharger-" * string(charger.id) * "-" * string(k))
+        charger.power[k] = @variable(model, [1:N], lower_bound = 0.0, base_name = "p-SimpleCharger-" * string(charger.id) * "-" * string(k))
     end
 
-    charger.up_capacity = @variable(model, [1:N], base_name = "up-SimpleCharger-" * string(charger.id))
-    charger.down_capacity = @variable(model, [1:N], base_name = "down-SimpleCharger-" * string(charger.id))
+    charger.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-SimpleCharger-" * string(charger.id))
+    charger.down_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "down-SimpleCharger-" * string(charger.id))
 end
 
 # These are used for each load if there are additional variables to be defined depending on type
@@ -67,22 +67,26 @@ end
 
 function set_optimization_variables(model::Model, m::SimpleMarket, timestruct::TimeStruct)
     N = timestruct.periods
-    m.power[m.resource] = @variable(model, [1:N], base_name = "SimpleMarket-" * string(m.id))
+    m.power[m.resource] = @variable(model, [1:N], lower_bound = 0.0, base_name = "SimpleMarket-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct::TimeStruct)
     N = timestruct.periods
-    m.power[m.resource] = @variable(model, [1:N], base_name = "SimpleDA-" * string(m.id))
+    m.power[m.resource] = @variable(model, [1:N], lower_bound = 0.0, base_name = "SimpleDA-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::FFRProfil, timestruct::TimeStruct)
     N = timestruct.periods
-    m.capacity = @variable(model, [1:N], base_name = "FFRProfil-" * string(m.id))
+    m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-FFRProfil-" * string(m.id))
 end
 
 
 
 ## For all groups
+function set_optimization_variables(model::Model, group::FFRGroup, timestruct::TimeStruct)
+    group.up_capacity = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "up-FFRgroup-" * string(group.id))
+end
+
 """
     set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)
 
@@ -94,13 +98,13 @@ end
     This is set in the corresponding constraint method. A given market can also set up additional constraints depending
     on the market regulations
 """
+#=
 function set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)
     up_capacity = @variable(model, up_capacity[groups,1:timestruct.periods])
     down_capacity = @variable(model, down_capacity[groups,1:timestruct.periods])
     return up_capacity, down_capacity
 end
-
-
+=#
 
 ## - Constraints -
 
@@ -175,12 +179,13 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     # modelling error.
 end
 
-
+#=
 function set_optimization_constraints(model::Model, load::MinAverageLoad, i::Int,  timestruct::TimeStruct)
     N = timestruct.periods
     p_load = model[:p_load]
     @constraint(model, sum(p_load[i,1:N]) >= load.pmin)
 end
+=#
 
 ### Markets
 
@@ -199,17 +204,43 @@ end
 
     For FFR there is no down regulation so down_capacity is set equal to zero
 """
-function set_optimization_constraints(model::Model, group::FFRGroup, timestruct::TimeStruct)
-    dc = model[:down_capacity]
-    @constraint(model, dc[group,:] == 0)
-    # Set upcapacity as sum of all resources
+function set_optimization_constraints(model::Model, group::FFRGroup, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+
+    # group capacity is sum of capacity of resources in group
+    sum_up_capacity = init_expr_array(N)
+
+    for id in group.resources
+        r = get_component(id, aggregator)
+        if :up_capacity in fieldnames(typeof(r)) # check if resource can provide up_capacity
+            sum_up_capacity = sum_up_capacity + r.up_capacity
+        end
+    end
+
+    @constraint(model, group.up_capacity == sum_up_capacity, base_name = "up-limit-FFRgroup-" * string(group.id) )
+
+    # capacity sold to markets is limited by available capacity
+    sum_sold_capacity = init_expr_array(N)
+    for id in group.markets
+        m = get_component(id, aggregator)
+        sum_sold_capacity = sum_sold_capacity + m.up_capacity
+    end
+    @constraint(model, group.up_capacity >= sum_sold_capacity,  base_name = "up-sold-FFRGroup-" * string(group.id))
 end
 
-# Objective
+# Objective functions contributions
 
 function get_objective_term(m::SimpleDAMarket)
-    zterm = sum(m.power[m.resource] .* m.price)
+    zterm = sum(m.power[m.resource] .* m.price .* (-m.sign))
     return zterm
 end
 
-# Objective function for ffr
+function get_objective_term(m::FFRProfil)
+    zterm = sum(m.up_capacity .* m.price .* m.armed .* (-m.sign))
+    return zterm
+end
+
+function get_objective_term(m::SimpleMarket)
+    zterm = sum(m.power[m.resource] .* m.price .* (-m.sign))
+    return zterm
+end
