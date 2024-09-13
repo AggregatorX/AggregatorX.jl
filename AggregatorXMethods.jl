@@ -104,6 +104,18 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
     @constraint(model, net_power == 0, base_name = "pnet-SimpleCharger-" * string(id))
 
     # up regulation limited by curtailable (eksternal) power
+    output = init_expr_array(N) 
+    for target in keys(charger.power) 
+        resource = get_component(target, aggregator)
+        println(target)
+        println(resource)
+        if resource.class == "Load"
+            output = output + charger.power[target]
+        end
+    end
+    @constraint(model, charger.down_capacity <= output, base_name = "max-down-SimpleCharger-" * string(charger.id) )
+    
+    
     # down regulation limited by maximum increase in (external) output
     
 end
@@ -117,8 +129,7 @@ end
 ### Markets
 
 function set_optimization_constraints(model::Model, m::SimpleMarket, aggregator)
-    println(m.resource)
-    source = get_resource(m.resource, aggregator)
+    source = get_component(m.resource, aggregator)
     @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
 end
 

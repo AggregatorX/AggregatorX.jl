@@ -57,11 +57,11 @@ function init_expr_array(N)
     return z
 end
 
-function get_resource(id ,aggregator)
-    resources = aggregator["Resource"]
-    for r in resources
-        if r.id == id
-            return r
+function get_component(id ,aggregator)
+    component = union(aggregator["Resource"], aggregator["Market"])
+    for c in component
+        if c.id == id
+            return c
         end
     end
 end

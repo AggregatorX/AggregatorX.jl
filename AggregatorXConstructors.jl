@@ -30,8 +30,8 @@ function SimpleCharger(max_power, id) # Temporary alternative constructor
     return SimpleCharger(max_power, p, sources, id)
 end
 
-function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})
-    return SimpleBattery(r["capacity"],r["id"], missing)
+function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})    
+    return SimpleBattery(r["capacity"], nothing, r["class"], r["id"])
 end
 
 # Markets

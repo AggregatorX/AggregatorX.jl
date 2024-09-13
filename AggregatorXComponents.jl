@@ -24,9 +24,10 @@ end
 
 # - SimpleBattery -
 mutable struct SimpleBattery <: Resource
-    capacity::Real    
-    id::Signed
+    capacity::Real     
     charge::Any
+    class::String
+    id::Signed
 end
 
 ## Groups
