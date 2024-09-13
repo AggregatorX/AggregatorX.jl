@@ -43,7 +43,7 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any},
     down_capacity = Vector{VariableRef}()
 
     return SimpleBattery(power, sources, state_of_charge, up_capacity, 
-    down_capacity, b["capacity"], b["max_charge"], b["max_discharge"],
+    down_capacity, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
      b["class"], b["id"])
 end
 

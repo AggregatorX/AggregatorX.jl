@@ -30,6 +30,7 @@ mutable struct SimpleBattery <: Resource
     up_capacity::Vector{VariableRef}
     down_capacity::Vector{VariableRef}
     capacity::AbstractFloat
+    initial_charge::AbstractFloat
     max_charge::AbstractFloat
     max_discharge::AbstractFloat
     class::String

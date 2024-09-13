@@ -17,13 +17,13 @@ function set_optimization_variables(model::Model, battery::SimpleBattery,
     end
     
     battery.state_of_charge = @variable(model, [1:N], 
-        base_name = "p-SimpleBattery-" * string(battery.id))
+        base_name = "soc-SimpleBattery-" * string(battery.id))
     
     battery.down_capacity = @variable(model, [1:N], 
         base_name = "down-SimpleBattery-" * string(battery.id))
     
     battery.up_capacity = @variable(model, [1:N], 
-        base_name = "down-SimpleBattery-" * string(battery.id))
+        base_name = "up-SimpleBattery-" * string(battery.id))
 
     # typestring = lstrip_last_dot(string(typeof(battery)))
     
@@ -135,6 +135,46 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
     @constraint(model, charger.down_capacity == charger.max_power .- output, base_name = "max-down-SimpleCharger-" * string(charger.id) )
     
 end
+
+function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+    id = r.id
+
+    power_out = init_expr_array(N)
+    for target in keys(r.power)
+        power_out = power_out + r.power[target]
+    end 
+
+    power_in = init_expr_array(N) # power_in is positive but for a net flow, a net outflow is defined as positive
+    sources = r.sources
+    for r in union(aggregator["Resource"], aggregator["Market"])
+        if r.id in sources
+            power_in = power_in + r.power[id]
+        end
+    end
+
+    # Energy conserved: Change in state of charge equal net power flow
+    net_power = init_expr_array(N)
+    net_power = power_out - power_in
+    @constraint(model, r.state_of_charge[1] == r.initial_charge)
+    @constraint(model,  r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] == 0, base_name = "soc-SimpleCharger-" * string(id))
+
+    # max charge
+    @constraint(model, r.state_of_charge .<= r.max_charge)
+
+    # charge/discharge rates
+    @constraint(model, power_out .<= r.max_discharge)
+    @constraint(model, power_in .<= r.max_charge)
+
+    # capacity for up/down regulation
+    @constraint(model, r.up_capacity == r.max_discharge .- power_out )
+    @constraint(model, r.down_capacity == r.max_charge .- power_in )
+    # We have implicitly assumed here that power_out and power_in are not simultaneously
+    # zero. The program throws a warning if this occurs and this should be considered
+    # a case that the software does not handle or an indication of the possibility of A
+    # modelling error.
+end
+
 
 function set_optimization_constraints(model::Model, load::MinAverageLoad, i::Int,  timestruct::TimeStruct)
     N = timestruct.periods

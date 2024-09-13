@@ -105,7 +105,7 @@ function optimizeaggregator(aggregator, optimizer)
     category = "Resource"
     resources = aggregator[category]
     for r in resources # For every resource
-        if isa(r,SimpleCharger) # Only this implemented so far
+        if isa(r,SimpleCharger) || isa(r,SimpleBattery) # Only this implemented so far
             set_optimization_constraints(model, r, aggregator)
             #set_optimization_constraints(model, aggregator, r, id_map, ic_varref) -> renamed old, obsolet
         end
@@ -170,7 +170,7 @@ function optimizeaggregator(aggregator, optimizer)
 
     return model
 end
-
+#=
 function set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleBattery, id_map::Dict{String, Any}, ic_varref::Any)
     timestruct = aggregator["TimeStruct"]
     
@@ -189,15 +189,9 @@ function set_optimization_constraints(model::Model, aggregator::Dict{String, Any
 
     end
     # Resource to aggregator
-
-
-
-
     # Constrained by charging capacity
-
-
 end
-
+=#
 function old_set_optimization_constraints(model::Model, aggregator::Dict{String, Any} , resource::SimpleCharger, id_map::Dict{String, Any}, ic_varref::Any)
     timestruct = aggregator["TimeStruct"]
     
