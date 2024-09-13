@@ -194,6 +194,14 @@ function set_optimization_constraints(model::Model, m::SimpleMarket, aggregator)
     @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
 end
 
+function set_optimization_constraints(model::Model, m::SimpleDAMarket, aggregator)
+    
+end
+
+function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
+    
+end
+
 # Groups
 
 """
@@ -229,6 +237,20 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
 end
 
 # Objective functions contributions
+
+function set_objective(model::Model, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+
+    markets = aggregator["Market"]
+    
+    z = 0
+    for m in markets
+        zterm = get_objective_term(m)
+        z = z + zterm
+    end
+
+    return z
+end
 
 function get_objective_term(m::SimpleDAMarket)
     zterm = sum(m.power[m.resource] .* m.price .* (-m.sign))
