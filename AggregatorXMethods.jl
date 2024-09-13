@@ -100,23 +100,20 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
             net_power = net_power - r.power[id]
         end
     end
-
     @constraint(model, net_power == 0, base_name = "pnet-SimpleCharger-" * string(id))
 
     # up regulation limited by curtailable (eksternal) power
     output = init_expr_array(N) 
     for target in keys(charger.power) 
         resource = get_component(target, aggregator)
-        println(target)
-        println(resource)
         if resource.class == "Load"
             output = output + charger.power[target]
         end
     end
-    @constraint(model, charger.down_capacity <= output, base_name = "max-down-SimpleCharger-" * string(charger.id) )
+    @constraint(model, charger.up_capacity == output, base_name = "max-up-SimpleCharger-" * string(charger.id) )
     
-    
-    # down regulation limited by maximum increase in (external) output
+    # down regulation limited by maximum increase in (external) output = p_max-p_current(ext)
+    @constraint(model, charger.down_capacity == charger.max_power .- output, base_name = "max-down-SimpleCharger-" * string(charger.id) )
     
 end
 

@@ -23,13 +23,6 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
     return SimpleCharger(power, up_capacity, down_capacity, sources, r["max_power"], id)
 end
 
-function SimpleCharger(max_power, id) # Temporary alternative constructor
-    vr = Vector{VariableRef}()
-    p = Dict(0 => vr)
-    sources = [0]
-    return SimpleCharger(max_power, p, sources, id)
-end
-
 function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})    
     return SimpleBattery(r["capacity"], nothing, r["class"], r["id"])
 end
