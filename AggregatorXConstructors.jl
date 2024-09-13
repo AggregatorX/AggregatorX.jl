@@ -3,8 +3,6 @@
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
     connections::Vector{Interconnection})
 
-    power = Dict{Integer, Vector{VariableRef}}() 
-
     id = r["id"]
 
     power = Dict{Integer, Vector{VariableRef}}()
@@ -23,8 +21,30 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
     return SimpleCharger(power, up_capacity, down_capacity, sources, r["max_power"], id)
 end
 
-function build_aggregatorx_object(rt::Type{SimpleBattery}, r::Dict{String, Any})    
-    return SimpleBattery(r["capacity"], nothing, r["class"], r["id"])
+function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, 
+    connections::Vector{Interconnection})
+
+    id = b["id"]
+
+    # Find all connected components
+    power = Dict{Integer, Vector{VariableRef}}()
+    sources = Vector{Int}(undef,0)
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{VariableRef}()
+        elseif c.sink == id
+            push!(sources, c.source)
+        end
+    end
+
+    state_of_charge = Vector{VariableRef}()
+
+    up_capacity = Vector{VariableRef}()
+    down_capacity = Vector{VariableRef}()
+
+    return SimpleBattery(power, sources, state_of_charge, up_capacity, 
+    down_capacity, b["capacity"], b["max_charge"], b["max_discharge"],
+     b["class"], b["id"])
 end
 
 # Markets

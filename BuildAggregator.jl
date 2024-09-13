@@ -52,7 +52,7 @@ function buildaggregator(systemdescription::String)
             component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
             for (i,c)  in enumerate(partdef) # each component of component type
                 componenttype = typetable[c["type"]]
-                if c["type"] == "SimpleCharger"
+                if c["type"] == "SimpleCharger" || c["type"] == "SimpleBattery"
                     component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])
                 elseif c["type"] == "SimpleDAMarket" || c["type"] == "SimpleMarket"
                     component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])

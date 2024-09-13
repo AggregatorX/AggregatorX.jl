@@ -24,8 +24,14 @@ end
 
 # - SimpleBattery -
 mutable struct SimpleBattery <: Resource
-    capacity::Real     
-    charge::Any
+    power::Dict{Integer, Vector{VariableRef}}
+    sources::Vector{Integer}
+    state_of_charge::Vector{VariableRef}
+    up_capacity::Vector{VariableRef}
+    down_capacity::Vector{VariableRef}
+    capacity::AbstractFloat
+    max_charge::AbstractFloat
+    max_discharge::AbstractFloat
     class::String
     id::Signed
 end

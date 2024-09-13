@@ -6,12 +6,31 @@
 # - Variables -
 
 # SimpleBattery
-function set_optimization_variables(model::Model, battery::SimpleBattery, timestruct::TimeStruct) 
-    battery.charge = @variable(model, [1:timestruct.periods])
-    typestring = lstrip_last_dot(string(typeof(battery)))
-    for i in 1:length(battery.charge)
-        set_name(battery.charge[i], typestring * string(battery.id) * "_charge_"  * "[" * string(i) * "]" )
+function set_optimization_variables(model::Model, battery::SimpleBattery, 
+    timestruct::TimeStruct) 
+    
+    N = timestruct.periods
+
+    for k in keys(battery.power)
+        battery.power[k] = @variable(model, [1:N], 
+            base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k))
     end
+    
+    battery.state_of_charge = @variable(model, [1:N], 
+        base_name = "p-SimpleBattery-" * string(battery.id))
+    
+    battery.down_capacity = @variable(model, [1:N], 
+        base_name = "down-SimpleBattery-" * string(battery.id))
+    
+    battery.up_capacity = @variable(model, [1:N], 
+        base_name = "down-SimpleBattery-" * string(battery.id))
+
+    # typestring = lstrip_last_dot(string(typeof(battery)))
+    
+    #for i in 1:length(battery.charge)
+    #    set_name(battery.charge[i], typestring * string(battery.id) * "_charge_"  * "[" * string(i) * "]" )
+    #end
+
     # Maybe a dict which relates each load variable to load object that defined it
 end
 
