@@ -10,9 +10,9 @@ using .AggregatorX
 #joinpath(@__DIR__, "test-systems", "missing.json")
 #@test_throws BoundsError buildaggregator("missing_id.jl")
 
-# no revenue
 
-@testset begin 
+@testset begin
+    # no revenue
     filepath = joinpath(@__DIR__, "test-systems", "no_revenue.json")
     print(filepath)
     sys, aggregator = buildaggregator(filepath)
