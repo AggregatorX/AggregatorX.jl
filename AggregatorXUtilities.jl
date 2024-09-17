@@ -65,3 +65,20 @@ function get_component(id ,aggregator)
         end
     end
 end
+
+function all_ids(sys::Dict{String, Any})
+    component_with_id = ["Resource", "Market", "Group"]
+
+    ids = Set{Integer}()
+
+    for c in component_with_id
+        if haskey(sys, c)
+            v = sys[c]
+            for i in v
+                push!(ids, i["id"])
+            end
+        end
+    end
+
+    return ids
+end
