@@ -1,6 +1,7 @@
 function optimizeaggregator(aggregator, optimizer)
 
     model = Model(optimizer)
+    set_attribute(model, "output_flag", false)
     
     timestruct = aggregator["TimeStruct"]
     N = timestruct.periods

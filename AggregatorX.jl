@@ -14,10 +14,12 @@ export SimpleGrid # Grids, obsolete
 export SimpleMarket, SimpleDAMarket, FFRProfil # Markets
 export MinAverageLoad # Loads 
 export Interconnection, GridToResource, ResourceToLoad, ResourceToAggregator # Connections
+export IncompleteSystemException, DuplicateIdException, MissingIdException
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXComponents.jl")
 include("AggregatorXMethods.jl")
+include("AggregatorXExceptions.jl")
 
 include("BuildAggregator.jl")
 include("OptimizeAggregator.jl")

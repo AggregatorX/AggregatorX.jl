@@ -1,17 +1,19 @@
+using Test
 using JuMP
 using HiGHS
-using Test
 optimizer = HiGHS.Optimizer
-
 include("AggregatorX.jl")
 using .AggregatorX
 
+@testset begin
+println("\n Running system description tests \n ")
 # missing id
-#joinpath(@__DIR__, "test-systems", "missing.json")
-#@test_throws BoundsError buildaggregator("missing_id.jl")
-
+filepath = joinpath(@__DIR__, "test-systems", "missing.json")
+@test_throws MissingIdException buildaggregator(filepath)
+end;
 
 @testset begin
+    println("\n Running basic optimality tests \n ")
     # no revenue
     filepath = joinpath(@__DIR__, "test-systems", "no_revenue.json")
     print(filepath)

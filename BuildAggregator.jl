@@ -12,7 +12,7 @@ function buildaggregator(systemdescription::String)
     typetable = build_typetable()
 
     ids = all_ids(sys)
-    println(ids)
+
     # Iterates over all component types
     parts = ("TimeStruct", "Connection",  "Market", "Resource", "Group" ) # Maybe keep timestruct seperate
     
@@ -32,8 +32,7 @@ function buildaggregator(systemdescription::String)
                 # for each id pair in Array
                 for (i,idpair) in enumerate(carray)
                     if !issubset(Set(idpair), ids)
-                        println(Set(idpair), ids)
-                        throw(BoundsError())
+                        throw(MissingIdException())
                     end
                     # Create aggregatorx connection object
                     connection = build_aggregatorx_object(connection_type,idpair)
