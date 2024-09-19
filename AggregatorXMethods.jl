@@ -113,17 +113,25 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
     id = charger.id
 
     # Energy conserved
+    power_out = init_expr_array(N)
     net_power = init_expr_array(N)
     for target in keys(charger.power)
-        net_power = net_power + charger.power[target]
+        #net_power = net_power + charger.power[target]
+        power_out = power_out + charger.power[target]
     end 
-    sources = charger.sources
+    #net_power = power_out
+    power_in = init_expr_array(N)
     for r in union(aggregator["Resource"], aggregator["Market"])
-        if r.id in sources
-            net_power = net_power - r.power[id]
+        if r.id in charger.sources
+            #net_power = net_power - r.power[id]
+            power_in = power_in + r.power[id]
         end
     end
+    net_power = power_out-power_in
     @constraint(model, net_power == 0, base_name = "pnet-SimpleCharger-" * string(id))
+
+    # Maximum power
+    @constraint(model, power_out .<= charger.max_power, base_name = "pmax-SimpleCharger-" * string(id))
 
     # up regulation limited by curtailable (eksternal) power
     output = init_expr_array(N) 
@@ -161,10 +169,16 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     net_power = init_expr_array(N)
     net_power = power_out - power_in
     @constraint(model, r.state_of_charge[1] == r.initial_charge)
-    @constraint(model,  r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] == 0, base_name = "soc-SimpleCharger-" * string(id))
+    @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] == 0, base_name = "soc-SimpleCharger-" * string(id))
+    
 
     # max charge
     @constraint(model, r.state_of_charge .<= r.max_charge)
+    @constraint(model, r.state_of_charge[N] - net_power[N] <= r.max_charge)
+
+    # min charge
+    @constraint(model, r.state_of_charge .>= 0.0)
+    @constraint(model, r.state_of_charge[N] - net_power[N] >= 0.0)
 
     # charge/discharge rates
     @constraint(model, power_out .<= r.max_discharge)
