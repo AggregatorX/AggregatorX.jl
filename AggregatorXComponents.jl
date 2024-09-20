@@ -89,15 +89,6 @@ mutable struct FFRProfil <: Market
     id::Integer
 end
 
-function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any})
-    N = length(m["armed"])
-    price = ones(N) * m["price"]
-
-    up_capacity = Vector{VariableRef}()
-
-    return FFRProfil(up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
-end
-
 # - Loads -
 abstract type Load <: Component end
 
@@ -146,16 +137,6 @@ end
 
 include("AggregatorXConstructors.jl")
 
-## - TimeStructs
-function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})
-    return IndexedTimeStruct(ts["periods"])
-end
-
-## - Grids -
-function build_aggregatorx_object(gt::Type{SimpleGrid}, g::Dict{String, Any})
-    return SimpleGrid(g["price"],g["id"])
-end
-
 ## - Loads -
 function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
     return MinAverageLoad(l["pmin"],l["id"])
@@ -163,10 +144,7 @@ end
 
 
 
-## - Connections - 
-function build_aggregatorx_object(ct::Type{Interconnection}, idpair::Array{Any})
-    return Interconnection(idpair[1], idpair[2])
-end
+
 
 function build_aggregatorx_object(ct::Type{GridToResource}, idpair::Array{Any})
     return GridToResource(idpair[1], idpair[2])

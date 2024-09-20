@@ -1,3 +1,13 @@
+## - TimeStructs
+function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})
+    return IndexedTimeStruct(ts["periods"])
+end
+
+## - Connections - 
+function build_aggregatorx_object(ct::Type{Interconnection}, idpair::Array{Any})
+    return Interconnection(idpair[1], idpair[2])
+end
+
 # Resources
 
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
@@ -77,6 +87,19 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
     power = Dict(resource => Vector{VariableRef}())
     
     return SimpleDAMarket(power, m["price"], resource, m["sign"], m["class"],  id)
+end
+
+function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any})
+    N = length(m["armed"])
+    price = ones(N) * m["price"]
+
+    up_capacity = Vector{VariableRef}()
+
+    return FFRProfil(up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
+end
+
+function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, connections::Vector{Interconnection})
+   build_aggregatorx_object(t,m)
 end
 
 # Groups
