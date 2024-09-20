@@ -68,3 +68,13 @@ using .AggregatorX
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 9.0 atol = 1e-6
 end;
+
+@testset begin
+
+    #Simple FFR market
+    println("Running group tests")
+    filepath = joinpath(@__DIR__, "test-systems", "ffr1.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 3.5 atol = 1e-6
+end;
