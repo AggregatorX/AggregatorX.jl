@@ -6,6 +6,29 @@ include("AggregatorX.jl")
 using .AggregatorX
 
 @testset begin
+    println("\n Running function tests...\n")
+
+    # parse_data()
+    a = [1,2,3]
+    @test a == parse_data(a)
+    b = [4,5,6]
+    @test a != parse_data(b)
+    filepath = joinpath(@__DIR__, "test-systems", "sample-data1.txt")
+    data = parse_data(filepath)
+    @test typeof(data) <: Vector{<:Number}
+    @test size(data) == (3,)
+    # Wrong dimensions in input file
+    filepath = joinpath(@__DIR__, "test-systems", "sample-data2.txt")
+    @test_throws DimensionMismatch parse_data(filepath)
+    # JSON file calling data from file
+    filepath = joinpath(@__DIR__, "test-systems", "data-from-file.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 9.0 atol = 1e-6
+
+end
+
+@testset begin
     println("\n Running system description tests... \n ")
 
     # non unique ids

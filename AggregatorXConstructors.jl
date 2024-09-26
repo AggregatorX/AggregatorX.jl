@@ -71,7 +71,10 @@ function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any},
 
     power = Dict(resource => Vector{VariableRef}())
 
-    return SimpleMarket(power, m["price"], resource, m["sign"], m["class"], m["id"])
+
+    price = parse_data(m["price"])
+
+    return SimpleMarket(power, price, resource, m["sign"], m["class"], m["id"])
 end
 
 function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any}, 

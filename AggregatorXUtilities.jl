@@ -1,5 +1,6 @@
 # Utility functions for AggregatorX
 using InteractiveUtils
+using DelimitedFiles
 
 # Dictionary that translates type string name from json description to Julia Type
 
@@ -81,4 +82,57 @@ function all_ids(sys::Dict{String, Any})
     end
 
     return ids
+end
+
+"""
+    parse_data(data::Vector{AbstractFloat})
+
+return data
+
+The parse data function dispatches on various data types and returns a vector
+which represent some parameter data for the system. This is the trivial function
+if the vector is already defined in the JSON file.
+"""
+function parse_data(data::Vector{<:Number})
+    return data
+end
+
+function parse_data(data::Vector{Any})
+    # JSON parse returns a Vector{Any} for a vector [..] in the data file
+
+    # Check if the elements are strings or numbers
+    element = data[1]
+    if typeof(element) <: AbstractString || typeof(element) <: Number
+        parse_data(element, data)
+    else
+        throw(TypeError)
+    end
+    return data
+end
+
+# for vector of numbers
+function parse_data(element::Number, data::Vector{Any})
+    return convert(Vector{Float64}, data)
+end
+
+# If multiple strings assume file and function
+function parse_data(element::AbstractString, data::Vector{Any})
+    return Nothing # Not yet implemented
+end
+
+"""
+    parse_data(data::String)
+
+The string data argument represents a file where the data is stored. The function
+reads the data and returns an appropriate string based on the data.
+"""
+function parse_data(datafile::String)
+    filepath = joinpath(@__DIR__, datafile)
+    data = open(readdlm, filepath)
+    
+    if size(data)[2] != 1
+        throw(DimensionMismatch("More than one column in file. Input data must be a single vector."))
+    end
+
+    return data[:,1]
 end

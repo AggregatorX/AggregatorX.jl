@@ -16,6 +16,9 @@ export MinAverageLoad # Loads
 export Interconnection, GridToResource, ResourceToLoad, ResourceToAggregator # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException
 
+# Internal functions. Export for testing
+export parse_data
+
 include("AggregatorXUtilities.jl")
 include("AggregatorXComponents.jl")
 include("AggregatorXMethods.jl")
