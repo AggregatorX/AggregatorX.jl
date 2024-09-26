@@ -46,6 +46,15 @@ mutable struct FFRGroup <: Group
     id::Integer
 end
 
+mutable struct FCRGroup <: Group
+    capacity::Vector{VariableRef}
+    activation::Vector{VariableRef}
+    resources::Set{Int} # Set of tuples of resource and group ids.
+    markets::Set{Int} # Set of tuples of group and market ids.  
+    class::String  
+    id::Integer
+end
+
 ## - Time structure -
 abstract type TimeStruct <: AggregatorXAny end
 # Define some minimum requirements for all concrete types? I.e. there must be a periods variable
@@ -84,6 +93,18 @@ mutable struct FFRProfil <: Market
     up_capacity::Vector{VariableRef} # reserved capacity
     price::Vector{AbstractFloat}
     armed::Vector{Bool} # Periods where FFR is armed
+    sign::Integer
+    class::String
+    id::Integer
+end
+
+# "FCR-N"
+mutable struct FCR_N_D1 <: Market
+    capacity::Vector{VariableRef}
+    activation::Vector{VariableRef}
+    price_capacity::Vector{AbstractFloat}
+    price_activation::Vector{AbstractFloat}
+    df::Vector{AbstractFloat} # Frequency deviation in Hz
     sign::Integer
     class::String
     id::Integer

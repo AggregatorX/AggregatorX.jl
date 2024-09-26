@@ -80,12 +80,22 @@ function set_optimization_variables(model::Model, m::FFRProfil, timestruct::Time
     m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-FFRProfil-" * string(m.id))
 end
 
-
+function set_optimization_variables(model::Model, m::FCR_N_D1, timestruct::TimeStruct)
+    N = timestruct.periods
+    m.capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-capacity-" * string(m.id))
+    m.activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-activation-" * string(m.id))
+end
 
 ## For all groups
 function set_optimization_variables(model::Model, group::FFRGroup, timestruct::TimeStruct)
     group.up_capacity = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "up-FFRgroup-" * string(group.id))
 end
+
+function set_optimization_variables(model::Model, group::FCRGroup, timestruct::TimeStruct)
+    group.capacity = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "FCRgroup-capacity-" * string(group.id))
+    group.activation = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "FCRgroup-activation-" * string(group.id))
+end
+
 
 """
     set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)
@@ -216,6 +226,10 @@ function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     
 end
 
+function set_optimization_constraints(model::Model, m::FCR_N_D1, aggregator)
+    
+end
+
 # Groups
 
 """
@@ -252,6 +266,10 @@ end
 
 # Objective functions contributions
 
+function set_optimization_constraints(model::Model, group::FCRGroup, aggregator::Dict{String, Any})
+    
+end
+
 function set_objective(model::Model, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
 
@@ -266,6 +284,11 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
     return z
 end
 
+function get_objective_term(m::SimpleMarket)
+    zterm = sum(m.power[m.resource] .* m.price .* (-m.sign))
+    return zterm
+end
+
 function get_objective_term(m::SimpleDAMarket)
     zterm = sum(m.power[m.resource] .* m.price .* (-m.sign))
     return zterm
@@ -276,7 +299,7 @@ function get_objective_term(m::FFRProfil)
     return zterm
 end
 
-function get_objective_term(m::SimpleMarket)
-    zterm = sum(m.power[m.resource] .* m.price .* (-m.sign))
-    return zterm
+function get_objective_term(m::FCR_N_D1)
+    zterm = 0
 end
+

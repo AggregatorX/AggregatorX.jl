@@ -6,7 +6,7 @@ include("AggregatorX.jl")
 using .AggregatorX
 
 @testset begin
-    println("\n Running system description tests \n ")
+    println("\n Running system description tests... \n ")
 
     # non unique ids
 
@@ -18,7 +18,23 @@ using .AggregatorX
     end;
 
 @testset begin
-    println("\n Running basic optimality tests \n ")
+    println("\n Running component tests...\n")
+
+    # FCR_N_D1
+    filepath = joinpath(@__DIR__, "test-systems", "fcr1.json")
+    sys,aggregator = buildaggregator(filepath)
+    markets = aggregator["Market"]
+    fcr_object = false
+    for m in markets
+        if m.class == "FCR"
+            fcr_object = true
+        end
+    end
+    @test fcr_object 
+end
+
+@testset begin
+    println("\n Running basic optimality tests... \n ")
 
     # no revenue
     filepath = joinpath(@__DIR__, "test-systems", "no_revenue.json")
@@ -46,7 +62,7 @@ using .AggregatorX
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 2.2 atol = 1e-6
 
-     # max power when sale price is sometimes higher than cost.
+    # max power when sale price is sometimes higher than cost.
     # Max power = 2.2
     # Buy [1.2, 0, 2.6, 3.9]
     # Sell [4.6, 8.2, 0, 4.6]
@@ -72,7 +88,7 @@ end;
 @testset begin
 
     #Simple FFR market
-    println("Running group tests")
+    println("\n Running group tests...")
     filepath = joinpath(@__DIR__, "test-systems", "ffr1.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)

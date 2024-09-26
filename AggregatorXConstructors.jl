@@ -102,8 +102,14 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, conn
    build_aggregatorx_object(t,m)
 end
 
-# Groups
+function build_aggregatorx_object(t::Type{FCR_N_D1}, m::Dict{String, Any})
+    capacity = Vector{VariableRef}()
+    activation = Vector{VariableRef}()
+    return FCR_N_D1(capacity, activation, m["price_capacity"], m["price_activation"],
+     m["df"], m["sign"], m["class"], m["id"])
+end
 
+# Groups
 function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
     up_capacity = Vector{VariableRef}()
 
@@ -121,4 +127,24 @@ function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
 
     # Set all parameters, including tech_class and id
     return FFRGroup(up_capacity, resources, markets, g["class"], g["id"])
+end
+
+function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any})
+    capacity = Vector{VariableRef}()
+    activation = Vector{VariableRef}()
+
+    markets = Set{Int}()    
+    mlist = g["markets"]
+    for m in mlist
+        push!(markets, m)
+    end
+
+    resources = Set{Int}()
+    rlist = g["resources"]
+    for r in rlist
+        push!(resources, r)
+    end
+
+    # Set all parameters, including tech_class and id
+    return FCRGroup(capacity, activation, resources, markets, g["class"], g["id"])
 end
