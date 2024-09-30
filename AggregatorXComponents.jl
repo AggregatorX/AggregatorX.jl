@@ -136,22 +136,6 @@ struct Interconnection <: Connection
     sink::Integer
 end
 
-struct GridToResource <: Connection
-    grid::Integer
-    resource::Integer
-end
-
-struct ResourceToLoad <: Connection
-    resource::Integer
-    load::Integer
-end
-
-struct ResourceToAggregator <: Connection
-    resource::Integer
-    aggregator_set::Integer
-end
-
-
 # ---Constructor wrapper methods ---
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
 ## - Groups
@@ -161,24 +145,4 @@ include("AggregatorXConstructors.jl")
 ## - Loads -
 function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
     return MinAverageLoad(l["pmin"],l["id"])
-end
-
-
-
-
-
-function build_aggregatorx_object(ct::Type{GridToResource}, idpair::Array{Any})
-    return GridToResource(idpair[1], idpair[2])
-end
-
-function build_aggregatorx_object(ct::Type{ResourceToLoad}, idpair::Array{Any})
-    return ResourceToLoad(idpair[1], idpair[2])
-end
-
-function build_aggregatorx_object(ct::Type{ResourceToAggregator}, idpair::Array{Any})
-    return ResourceToAggregator(idpair[1], idpair[2])
-end
-
-function build_aggregatorx_object(ct::Type{ResourceToAggregator}, id::Any)
-    return ResourceToAggregator(id)
 end

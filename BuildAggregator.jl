@@ -75,3 +75,7 @@ function buildaggregator(systemdescription::String)
     return (sys,aggregator)
     #TEMP
 end
+
+function build_timestruct(timestruct::Dict{String,Any}, timestructtype::Any)
+
+end
