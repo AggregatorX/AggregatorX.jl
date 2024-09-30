@@ -41,25 +41,28 @@ function buildaggregator(systemdescription::String)
                 aggregator[p] = groups
             end
 
-        else
+        elseif p == "Market" || p == "Resource"
 
             partdef = sys[p] # Vector of Dicts for each component (except for timestruct)
+
             component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
+            
             for (i,c)  in enumerate(partdef) # each component of component type
                 componenttype = typetable[c["type"]]
-                if c["type"] == "SimpleCharger" || c["type"] == "SimpleBattery"
-                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])
-                elseif c["type"] == "SimpleDAMarket" || c["type"] == "SimpleMarket"
+                if applicable(build_aggregatorx_object, componenttype, c, aggregator["Connection"] )
                     component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])
                 else
-                    component_array[i] = build_aggregatorx_object(componenttype, c)
+                    component_array[i] = build_aggregatorx_object(componenttype, c) # Temporary, implement all on above form
                 end
             end
-            aggregator[p] = component_array
 
+            aggregator[p] = component_array
+        
+        else
+            print("Warning: Read undefined system description key. Please check JSON system description")
         end
     end
-    # returns aggregatorx objects
+    
     #TEMP
     return (sys,aggregator)
     #TEMP

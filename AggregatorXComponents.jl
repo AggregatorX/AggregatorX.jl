@@ -146,8 +146,3 @@ end
 ## - Groups
 
 include("AggregatorXConstructors.jl")
-
-## - Loads -
-function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
-    return MinAverageLoad(l["pmin"],l["id"])
-end

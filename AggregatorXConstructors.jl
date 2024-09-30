@@ -61,6 +61,15 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any},
      b["class"], b["id"])
 end
 
+function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any},
+    connections::Vector{Interconnection})
+    return MinAverageLoad(l["pmin"],l["id"])
+end
+
+function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
+    return MinAverageLoad(l["pmin"],l["id"])
+end
+
 # Markets
 function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, 
     connections::Vector{Interconnection})
