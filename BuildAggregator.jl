@@ -8,66 +8,55 @@ function buildaggregator(systemdescription::String)
     io = open(systemdescription, "r");
     sys = JSON.parse(io)
 
-    # Requires tables that translates string description of type (from json) to a Type object
-    typetable = build_typetable()
+    typetable = build_typetable() # Translates string description of type (from json) to a AggregatorX Type
 
-    ids = all_ids(sys)
+    ids = all_ids(sys) # List of all ids
 
-    # Iterates over all component types
-    parts = ("TimeStruct", "Connection",  "Market", "Resource", "Group" ) # Maybe keep timestruct seperate
+    parts = ("TimeStruct", "Connection",  "Market", "Resource", "Group" ) 
     
     aggregator = Dict{String, Any}() # One entry for each parttype
+
+    # Iterates over all part types
     for p in parts
         if p == "TimeStruct"
-            partdef = sys[p]
-            componenttype = typetable[partdef["type"]]
-            aggregator[p] = build_aggregatorx_object(componenttype, partdef)
+
+            aggregator[p] = build_aggregatorx_object(typetable[sys[p]["type"]], sys[p])
+
         elseif p == "Connection"
-            connections = Dict{String, Any}()
-            partdef = sys[p]            
-            # For each key (connectiontype) in partdef            
-            for (ct, carray) in partdef
-                connection_type = typetable[ct]
-                connection_array = Vector{connection_type}(undef,length(carray))
-                # for each id pair in Array
-                for (i,idpair) in enumerate(carray)
-                    if !issubset(Set(idpair), ids)
-                        throw(MissingIdException())
-                    end
-                    # Create aggregatorx connection object
-                    connection = build_aggregatorx_object(connection_type,idpair)
-                    # Add to array of connectiontype
-                    connection_array[i] = connection
-                end
-                # Add to dict of connectiontypes
-                connections[ct] = connection_array
-            end
-            aggregator[p] = connections
+            
+            aggregator[p] = build_connection(sys[p], typetable, ids)
+
         elseif p == "Group"
+
             if haskey(sys,"Group")
-                partdef = sys[p] # returns a vector of group components
-                groups = Set{typetable[p]}()
-                for g in partdef
+                
+                groups = Set{typetable[p]}() # Initalize set to hold group objects
+
+                for g in sys[p]
                     grouptype = typetable[g["class"]]
                     group = build_aggregatorx_object(grouptype, g)
                     push!(groups, group)
                 end 
+
                 aggregator[p] = groups
             end
+
         else
+
             partdef = sys[p] # Vector of Dicts for each component (except for timestruct)
             component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
             for (i,c)  in enumerate(partdef) # each component of component type
                 componenttype = typetable[c["type"]]
                 if c["type"] == "SimpleCharger" || c["type"] == "SimpleBattery"
-                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])
+                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])
                 elseif c["type"] == "SimpleDAMarket" || c["type"] == "SimpleMarket"
-                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"]["Interconnection"])
+                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])
                 else
                     component_array[i] = build_aggregatorx_object(componenttype, c)
                 end
             end
             aggregator[p] = component_array
+
         end
     end
     # returns aggregatorx objects
@@ -78,4 +67,58 @@ end
 
 function build_timestruct(timestruct::Dict{String,Any}, timestructtype::Any)
 
+end
+
+"""
+Returns an array of connection objects
+
+The deprecated version is to have an interconnection inside a connection dict element
+
+Prefered just vector inside connection key
+"""
+function build_connection(connectiondef::Any, typetable, ids)
+    if isa(connectiondef, Dict)
+        connections = Dict{String, Any}()
+        for (ct, carray) in connectiondef # For each connection type in connectiondef
+            if ct != "Interconnection" # only this allowed
+                print(" \n Warning: type " * ct * " is not supported \n")
+                continue
+            end
+            connection_type = typetable[ct] # Convert string to type
+            connection_array = Vector{connection_type}(undef,length(carray)) # Initalize Vector of particular type to hold connection objects        
+            
+            for (i,idpair) in enumerate(carray) # loop over id-pairs in connection array
+                if !issubset(Set(idpair), ids) # Check if id in id-pair exists
+                    throw(MissingIdException())
+                end
+
+                connection = build_aggregatorx_object(connection_type, idpair) # Create single aggregatorx connection object
+                
+                connection_array[i] = connection # Add to array of connectiontype
+            end
+            
+            connections[ct] = connection_array # Add to dict of connectiontypes
+        end
+        return connections["Interconnection"]
+    end
+
+    # Implement new version with a direct vector
+    if isa(connectiondef, Array)
+
+        connection_array = Vector{Connection}(undef,length(connectiondef)) # Initalize Vector of particular type to hold connection objects  
+        
+        for (i,idpair) in enumerate(connectiondef) # loop over id-pairs in connection array
+            if !issubset(Set(idpair), ids) # Check if id in id-pair exists
+                throw(MissingIdException())
+            end
+
+            connection = build_aggregatorx_object(typetable["Connection"],idpair) # Create single aggregatorx connection object
+            
+            connection_array[i] = connection # Add to array of connectiontype
+        end
+
+        return connection_array
+    end
+
+    
 end

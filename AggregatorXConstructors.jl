@@ -8,6 +8,10 @@ function build_aggregatorx_object(ct::Type{Interconnection}, idpair::Array{Any})
     return Interconnection(idpair[1], idpair[2])
 end
 
+function build_aggregatorx_object(ct::Type{Connection}, idpair::Array{Any})
+    return Connection(idpair[1], idpair[2])
+end
+
 # Resources
 
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 

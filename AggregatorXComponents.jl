@@ -128,10 +128,15 @@ struct MegaCharger <: ChargingStation
 end
 
 # - Connections -
-abstract type Connection <: Component end # Should connections rather be subtype of AggregatorXAny?
+abstract type AbstractConnection <: Component end # Should connections rather be subtype of AggregatorXAny?
 
 # Perhaps rename fields that reference ids as sourceId, sinkId etc.?
-struct Interconnection <: Connection
+struct Interconnection <: AbstractConnection # deprecated
+    source::Integer
+    sink::Integer
+end
+
+struct Connection <: AbstractConnection
     source::Integer
     sink::Integer
 end

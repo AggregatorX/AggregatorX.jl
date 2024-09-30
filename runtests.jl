@@ -1,6 +1,7 @@
 using Test
 using JuMP
 using HiGHS
+import JSON
 optimizer = HiGHS.Optimizer
 include("AggregatorX.jl")
 using .AggregatorX
@@ -38,6 +39,15 @@ end
     @test_throws MissingIdException buildaggregator(filepath)
 
     # Missing market or resource
+
+    # Connections as array instead of dict with arrays
+    # Checks if build returns an array
+    filepath = joinpath(@__DIR__, "test-systems", "connection-list.json")
+    io = open(filepath, "r");
+    sys = JSON.parse(io)
+    typetable = build_typetable()
+    ids = all_ids(sys)
+    @test isa(build_connection(sys["Connection"], typetable, ids), Array)
     end;
 
 @testset begin
