@@ -43,7 +43,7 @@ end
 @testset begin
     println("\n Running component tests...\n")
 
-    # FCR_N_D1
+    # FCR_N_D1, just test construction
     filepath = joinpath(@__DIR__, "test-systems", "fcr1.json")
     sys,aggregator = buildaggregator(filepath)
     markets = aggregator["Market"]

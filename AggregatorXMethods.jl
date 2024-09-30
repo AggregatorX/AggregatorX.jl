@@ -223,7 +223,7 @@ function set_optimization_constraints(model::Model, m::SimpleDAMarket, aggregato
 end
 
 function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
-    
+    # Minimum bid
 end
 
 function set_optimization_constraints(model::Model, m::FCR_N_D1, aggregator)
@@ -267,7 +267,16 @@ end
 # Objective functions contributions
 
 function set_optimization_constraints(model::Model, group::FCRGroup, aggregator::Dict{String, Any})
-    
+    N = aggregator["TimeStruct"].periods
+
+    # Group capacity is is capacity of sum of capacity of individual resources
+    # Need symmetric capacity, minimum of up_capacity and down_capacity
+    symmetric_capacity = init_expr_array(N)
+
+    # Capacity sold to markets is limited by available capacity
+
+
+
 end
 
 function set_objective(model::Model, aggregator::Dict{String, Any})
