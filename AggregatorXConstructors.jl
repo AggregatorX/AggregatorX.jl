@@ -130,13 +130,13 @@ function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
     up_capacity = Vector{VariableRef}()
 
     markets = Set{Int}()    
-    mlist = g["markets"]
+    mlist = g["markets"] # vector of indicies of markets group is connected to. Defined in system file.
     for m in mlist
         push!(markets, m)
     end
 
     resources = Set{Int}()
-    rlist = g["resources"]
+    rlist = g["resources"] # vector of indicies of resources in group. Defined in system file.
     for r in rlist
         push!(resources, r)
     end

@@ -28,7 +28,7 @@ function buildaggregator(systemdescription::String)
 
         elseif p == "Group"
 
-            if haskey(sys,"Group")
+            if haskey(sys,"Group") # Groups are optional entities
                 
                 groups = Set{typetable[p]}() # Initalize set to hold group objects
 
