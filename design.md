@@ -37,6 +37,10 @@ The `aggregator` object is a dictionary with string keys that refer to particula
 # Book-keeping
 In general, each component has a dictionary power that reprsent the power flowing **from** the component. Each key is a component that is connected to an output from component, and the value is a vector of VariableRef that. Currently the `node` component is the only component that has multiple outputs, but the dictionary structure is used to maintain some unity in implementation and for flexibility in future versions that might require additional flexibility.
 
+# Connections
+Between components. Groups store internally the connected resources and balancing markets. 
+
+
 # Components
 
 
@@ -44,24 +48,73 @@ In general, each component has a dictionary power that reprsent the power flowin
 ## Markets
 Concrete market subtypes must implment at least the following fields: 
 
+* type - type of market, ie the concrete type
 * power - Dict(Integer->Vector(VariableRef)) the power flowing to or from the market
 * price - the cost of energy
-* resource - the resource (component) the market is connected to
-* sign - 1 if the market is a source of energy, 1 if the market is a sink of energy.
+* resource - the resource (component) the market is connected to (note this is different from source in other componets which is the input of the component. Resource can be both input and output.)
+* sign : 1 if the market is a source of energy, (-1) if the market is a sink of energy.
 * id - A unique identifier.
 
-The framework assumes that a market is only connected to a single entity.
+The framework assumes that a market is only connected to a single component.
 
 If the market is to be connected to a group it must also implement a `class` field which represent the technical requirements of the market, and thus which groups may be connected to it (this is primarily a check for mistakes in the connections in the system description where wrong markets may be connected to wrong type of group/resources). An optional `name` may also be included which is used for labeling variables and constraints and may be useful when interogating the optimization solution.
 
-When `buildaggregator()` the system reads all the market entries in the JSON file, determines the type it represents, and calls the appropriate constructor (dispatching on the market type). As a minimum, the constructur checks the connections and finds the market's id to determine which component it is connected to and assigns this to the resource field. 
+When `buildaggregator()` is called the system reads all the market entries in the JSON file, determines the type they represents, and calls the appropriate constructor (dispatching on the market type). As a minimum, the constructur checks the connections and finds the market's id to determine which component it is connected to and assigns this to the resource field. 
 
-It then instantiates power as a dictionary with one key value pair, Resource->empty vector of VariableRef (a julia type, note that this must be reimplemented to use the system with a different modelling package). This so that when the actual VariableRef is created, it can ba assigned to this key (**This seems redundant. One could to this instantiation in variable creation method.)
+It then instantiates power as a dictionary with one key value pair, Resource->empty vector of VariableRef (a julia type, note that this must be reimplemented to use the system with a different modelling package). This so that when the actual VariableRef is created, it can ba assigned to this key (**This seems redundant. One could to this instantiation in variable creation method. No probably need it for instantiating market object**)
 
-After building the aggregator object, the optimization problem is set up by calling `optimizeaggregator()`. This function goes through the three steps of setting up an optimization problem, define variables, define constraints, define objective function.
+The concrete market objects are stored in a vector of type market. This vector is stored in a dictionary value in the aggregator object
 
-For markets the variable creation simply creates a vector of variable ref an assigns this to the power dictionary.
+After building the aggregator object, the optimization problem is set up by calling `optimizeaggregator()`. This function goes through the three steps of setting up an optimization problem: define variables, define constraints, define objective function.
 
-The markets do not have to impose any particular constraint. However, for markets that are sinks of energy (energy is sold to the market) the power is constrained to be equal to the output power of the connected resource
+For markets the the minimum variable creation simply is a vector of variable ref an assigns this to the power dictionary. Special markets might add additional variables
+
+The markets do not in general have to impose any real constrainta. However, for markets that are sinks of energy (energy is sold to the market) the power is constrained to be equal to the output power of the connected resource (this is just a convenience implementation, having the power to the market available in the market object is more convenient than having to query the power in the resource connecte to the market)
 
 `optimizeaggregator()` calls `set_objective()`. This function loops over alle markets (other components that adds costs may be included, e.g. grid tariffs or degradation of batteries). For each market it calls `get_objective_term` that dispatches on the type of market. Any type of function of the variables may be used to describe the market (keeping in mind that anything but linear functions will make the problem harder to solve. Nonlinear functions is currently untested, there might be reasons why this will break the code, e.g. where variables are defined as AffExpr (linear expressions in JuMP)), but a typical implementation will be the price times the power * (-sign). Recall that the sign is 1 if power flow **from** the market, i.e. a cost (unless the price is negative). Power (as all varibles) is always positive (unidirectional connections).
+
+## Node
+A node is a lossless transmitter of energy between componets.
+
+A node has the following fields
+
+* `Power` A dictionary where the key is a target component and the value is a vector of VariableRef that represents the flow of energy to each resource
+* `Sources` A vector of integers that represent the id of the components that send energy to the node.
+* `id`
+
+In the json file the node simply needs to set and id (and connections).
+
+Buildaggregator calls constructor for each node in json list. Constructur resolves connections and sets power and sources.
+
+Optimizeaggregator sets the inputs equal to the outputs. No new variables are needed
+
+## Making new components
+An important feature of AggregatorX is that new components can be added to represent physical properties that are not possible with the existing library of components. This section describes the steps that are necessary for adding new components to the software.
+
+* Add type description
+* Add to export list of package
+* Add constructor (make sure it will be called from buildaggregator - check calling signature)
+*
+
+### Type description
+
+The first step is to define the type as a mutable struct in the AggregatorXMethods file. Making the concrete type a subtype of a meaningful parent is important. Some methods dispatch on the parent type. The necessary field types will vary somewhat between the types. All components must have an id field.
+
+The type must be added to the export list of the package in `AggregatorX.jl`
+
+The "type" key in the Josn file refers to this concrete type and used to dispatch the correct constructor.
+
+## Working with solution
+The JuMP model is stored in the variable `model`
+
+is_solved_and_feasible(model)
+
+solution_summary(model)
+
+A good place to start is `all_variables(model)` that lists all variable names
+
+most of the interesting power flows are stored in the power field of the different resources which is a vector of variableref. Use value.(x) to get value
+
+
+
+To get a variable you can assign x = variable_by_name(model, "name")

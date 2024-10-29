@@ -12,6 +12,15 @@ abstract type Market <: Component end
 
 abstract type Resource <: Component end
 
+abstract type Node <: Component end
+
+# - Node -
+mutable struct StandardNode <: Node
+    power::Dict{Integer, Vector{VariableRef}}
+    sources::Vector{Integer}
+    id::Signed
+end
+
 # - SimpleCharger -
 mutable struct SimpleCharger <: Resource 
     power::Dict{Integer, Vector{VariableRef}}
@@ -111,9 +120,15 @@ mutable struct FCR_N_D1 <: Market
 end
 
 # - Loads -
-abstract type Load <: Component end
+abstract type Load <: Resource end
 
 abstract type ChargingStation <: Load end
+
+struct MinLoad <: Load    
+    pmin::Number
+    source::Integer
+    id::Integer
+end
 
 "A load where the average load over the simulation time must be greatet than some minimum load."
 struct MinAverageLoad <: Load

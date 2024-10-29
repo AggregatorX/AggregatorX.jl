@@ -63,6 +63,10 @@ function set_optimization_variables(model::Model, load::MinAverageLoad, timestru
     # Maybe a dict which relates each load variable to load object that defined it
 end
 
+function set_optimization_variables(model::Model, load::MinLoad, timestruct::TimeStruct)
+    # No variables needed
+end
+
 ## Markets
 
 function set_optimization_variables(model::Model, m::SimpleMarket, timestruct::TimeStruct)
@@ -84,6 +88,14 @@ function set_optimization_variables(model::Model, m::FCR_N_D1, timestruct::TimeS
     N = timestruct.periods
     m.capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-capacity-" * string(m.id))
     m.activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-activation-" * string(m.id))
+end
+
+## Nodes
+function set_optimization_variables(model::Model, node::StandardNode, timestruct::TimeStruct)
+    N = timestruct.periods
+    for k in keys(node.power)
+        node.power[k] = @variable(model, [1:N], lower_bound = 0.0, base_name = "p-StandardNode-" * string(node.id) * "-" * string(k))
+    end
 end
 
 ## For all groups
@@ -131,7 +143,7 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
     end 
     #net_power = power_out
     power_in = init_expr_array(N)
-    for r in union(aggregator["Resource"], aggregator["Market"])
+    for r in all_components(aggregator) #union(aggregator["Resource"], aggregator["Market"]) and nodes
         if r.id in charger.sources
             #net_power = net_power - r.power[id]
             power_in = power_in + r.power[id]
@@ -166,10 +178,11 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     for target in keys(r.power)
         power_out = power_out + r.power[target]
     end 
+    
 
     power_in = init_expr_array(N) # power_in is positive but for a net flow, a net outflow is defined as positive
     sources = r.sources
-    for r in union(aggregator["Resource"], aggregator["Market"])
+    for r in all_components(aggregator) #union(aggregator["Resource"], aggregator["Market"])
         if r.id in sources
             power_in = power_in + r.power[id]
         end
@@ -191,7 +204,7 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     @constraint(model, r.state_of_charge[N] - net_power[N] >= 0.0)
 
     # charge/discharge rates
-    @constraint(model, power_out .<= r.max_discharge)
+    c = @constraint(model, power_out .<= r.max_discharge)
     @constraint(model, power_in .<= r.max_charge)
 
     # capacity for up/down regulation
@@ -201,6 +214,11 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     # zero. The program throws a warning if this occurs and this should be considered
     # a case that the software does not handle or an indication of the possibility of A
     # modelling error.
+end
+
+function set_optimization_constraints(model::Model, l::MinLoad, aggregator::Dict{String, Any})
+    source = get_component(l.source, aggregator)
+    @constraint(model, source.power[l.id] .>= l.pmin, base_name = "MinLoad-" * string(l.id))
 end
 
 #=
@@ -214,16 +232,44 @@ end
 ### Markets
 
 function set_optimization_constraints(model::Model, m::SimpleMarket, aggregator)
-    source = get_component(m.resource, aggregator)
-    @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
+    if m.sign == -1 # market is a sink
+        source = get_component(m.resource, aggregator)
+        @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
+    end
 end
 
 function set_optimization_constraints(model::Model, m::SimpleDAMarket, aggregator)
-    
+    if m.sign == -1 # market is a sink
+        source = get_component(m.resource, aggregator)
+        @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
+    end
 end
 
 function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     # Minimum bid
+end
+
+## Nodes
+function set_optimization_constraints(model::Model, node::StandardNode, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+    id = node.id
+
+    # Energy conserved
+    power_out = init_expr_array(N)
+    net_power = init_expr_array(N)
+    power_in = init_expr_array(N)
+
+    for target in keys(node.power)        
+        power_out = power_out + node.power[target]
+    end 
+        
+    for r in all_components(aggregator) #union(aggregator["Resource"], aggregator["Market"])
+        if r.id in node.sources
+            power_in = power_in + r.power[id]
+        end
+    end
+    net_power = power_out-power_in
+    @constraint(model, net_power == 0, base_name = "pnet-Standardode-" * string(id))
 end
 
 function set_optimization_constraints(model::Model, m::FCR_N_D1, aggregator)

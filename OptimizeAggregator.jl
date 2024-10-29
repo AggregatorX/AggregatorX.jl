@@ -23,8 +23,16 @@ function optimizeaggregator(aggregator, optimizer)
     end 
 
     # Groups
-    for g in aggregator["Group"]
-        set_optimization_variables(model, g, aggregator["TimeStruct"])
+    if haskey(aggregator,"Group")
+        for g in aggregator["Group"]
+            set_optimization_variables(model, g, aggregator["TimeStruct"])
+        end
+    end
+
+    # Nodes 
+    nodes = aggregator["Node"]
+    for n in nodes
+        set_optimization_variables(model, n, aggregator["TimeStruct"]) 
     end
 
     # --- Constraints ---
@@ -35,13 +43,21 @@ function optimizeaggregator(aggregator, optimizer)
     end
     
     # Groups
-    for group in aggregator["Group"]
-        set_optimization_constraints(model, group, aggregator)
+    if haskey(aggregator,"Group")
+        for group in aggregator["Group"]
+            set_optimization_constraints(model, group, aggregator)
+        end
     end
 
     # Resources
     for r in aggregator["Resource"] # For every resource
         set_optimization_constraints(model, r, aggregator)
+    end
+
+    # Nodes 
+    nodes = aggregator["Node"]
+    for n in nodes
+        set_optimization_constraints(model, n, aggregator) 
     end
 
     # --- Objective function ---

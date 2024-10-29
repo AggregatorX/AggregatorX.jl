@@ -5,14 +5,16 @@ Instantiates aggregatorx objects from json descrption
 """
 function buildaggregator(systemdescription::String)
 
-    io = open(systemdescription, "r");
+    io = open(systemdescription, "r")
     sys = JSON.parse(io)
+
+    validate_system_description(sys)
 
     typetable = build_typetable() # Translates string description of type (from json) to a AggregatorX Type
 
     ids = all_ids(sys) # List of all ids
 
-    parts = ("TimeStruct", "Connection",  "Market", "Resource", "Group" ) 
+    parts = ("TimeStruct", "Connection",  "Market", "Resource", "Group", "Node" ) 
     
     aggregator = Dict{String, Any}() # One entry for each parttype
 
@@ -41,7 +43,7 @@ function buildaggregator(systemdescription::String)
                 aggregator[p] = groups
             end
 
-        elseif p == "Market" || p == "Resource"
+        elseif p == "Market" || p == "Resource" || p == "Node"
 
             partdef = sys[p] # Vector of Dicts for each component (except for timestruct)
 
@@ -92,6 +94,7 @@ function build_connection(connectiondef::Any, typetable, ids)
             
             for (i,idpair) in enumerate(carray) # loop over id-pairs in connection array
                 if !issubset(Set(idpair), ids) # Check if id in id-pair exists
+                    println("Error: Missing id. Id in " * string(Set(idpair)) * " not found in " * string(ids))
                     throw(MissingIdException())
                 end
 
@@ -112,6 +115,7 @@ function build_connection(connectiondef::Any, typetable, ids)
         
         for (i,idpair) in enumerate(connectiondef) # loop over id-pairs in connection array
             if !issubset(Set(idpair), ids) # Check if id in id-pair exists
+                println("Error: Missing id. Id in " * string(Set(idpair)) * " not found in " * string(ids))
                 throw(MissingIdException())
             end
 

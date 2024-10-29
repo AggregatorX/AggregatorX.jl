@@ -59,16 +59,22 @@ function init_expr_array(N)
 end
 
 function get_component(id ,aggregator)
-    component = union(aggregator["Resource"], aggregator["Market"])
-    for c in component
-        if c.id == id
-            return c
+    #component = union(aggregator["Resource"], aggregator["Market"])
+    for (k,v) in aggregator
+        if k == "TimeStruct" || k == "Connection"
+            continue
+        end
+        for c in v
+            if c.id == id
+                return c
+            end
         end
     end
+    println("Warning: Could not find object with id " * string(id))
 end
 
 function all_ids(sys::Dict{String, Any})
-    component_with_id = ["Resource", "Market", "Group"]
+    component_with_id = ["Resource", "Market", "Group", "Node"]
 
     ids = Set{Integer}()
 
@@ -135,4 +141,31 @@ function parse_data(datafile::String)
     end
 
     return data[:,1]
+end
+
+function get_class(c::Dict{String, Any})
+    if haskey(c, "class")
+        class = c["class"]
+    else
+        class = ""
+    end
+    return class
+end
+
+function validate_system_description(sys)
+
+    required = ["TimeStruct", "Node", "Market", "Resource", "Connection"]
+    syskeys = keys(sys)
+    for k in required
+        if !(k in syskeys)
+            println("Mandatory key " * string(k) * " not found in system description")
+            throw(IncompleteSystemException)
+        end
+    end
+
+    # Validate each type 
+end
+
+function all_components(aggregator)
+    union(aggregator["Resource"], aggregator["Market"], aggregator["Node"]) # also grid if exists
 end
