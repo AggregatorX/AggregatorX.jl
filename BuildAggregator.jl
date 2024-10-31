@@ -48,8 +48,8 @@ function buildaggregator(systemdescription::String)
             
             for (i,c)  in enumerate(sys[p]) # each component of component type
                 componenttype = typetable[c["type"]]
-                if applicable(build_aggregatorx_object, componenttype, c, aggregator["Connection"] )
-                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])   
+                if applicable(build_aggregatorx_object, componenttype, c, aggregator)
+                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator)      
                 else
                     println("Matching constructor method not found.")
                 end

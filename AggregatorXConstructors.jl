@@ -1,27 +1,13 @@
-## - TimeStructs
+# ----------------
+# - TimeStructs -
+# ----------------
 function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String, Any})
     return IndexedTimeStruct(ts["periods"])
 end
 
-## - Nodes
-function build_aggregatorx_object(nt::Type{StandardNode}, n::Dict{String, Any}, connections::Vector{Connection})
-
-    id = n["id"]
-
-    power = Dict{Integer, Vector{VariableRef}}()
-    sources = Vector{Int}(undef,0)
-    for c in connections
-        if c.source == id
-            power[c.sink] = Vector{VariableRef}()
-        elseif c.sink == id
-            push!(sources, c.source)
-        end
-    end
-
-    return StandardNode(power, sources, id)
-end
-
-## - Connections - 
+# ----------------
+# - Connections - 
+#-----------------
 function build_aggregatorx_object(ct::Type{Connection}, idpair::Array{Any})
     return Connection(idpair[1], idpair[2])
 end
@@ -51,14 +37,36 @@ function build_connection(connectiondef::Any, typetable, ids)
 
 end
 
+# ----------
+# - Nodes -
+#-----------
+
+# - StandardNode -
+function build_aggregatorx_object(nt::Type{StandardNode}, n::Dict{String, Any}, aggregator::Dict{String,Any})
+
+    connections = aggregator["Connection"]
+    id = n["id"]
+
+    power = Dict{Integer, Vector{VariableRef}}()
+    sources = Vector{Int}(undef,0)
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{VariableRef}()
+        elseif c.sink == id
+            push!(sources, c.source)
+        end
+    end
+
+    return StandardNode(power, sources, id)
+end
+
 # --------------
 # - Resources -
 #---------------
 
 # - Simple Charger -
-function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
-    connections::Vector{Connection})
-
+function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, aggregator::Dict{String,Any})
+    connections = aggregator["Connection"]
     id = r["id"]
 
     power = Dict{Integer, Vector{VariableRef}}()
@@ -81,9 +89,9 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
 end
 
 # - SimpleBattery -
-function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, 
-    connections::Vector{Connection})
+function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, aggregator::Dict{String,Any})
 
+    connections = aggregator["Connection"]
     id = b["id"]
     class = get_class(b)
 
@@ -112,8 +120,9 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any},
 end
 
 # - MinLoad - !Not tested!
-function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, connections = Vector{Connection})
+function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
 
+    connections = aggregator["Connection"]
     pmin = l["pmin"]
     id = l["id"]
     
@@ -130,7 +139,7 @@ function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, conne
 end
 
 # - MinAverageLoad - !Not tested!
-function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
+function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
     return MinAverageLoad(l["pmin"],l["id"])
 end
 
@@ -139,9 +148,9 @@ end
 # ------------
 
 # SimpleMarket
-function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, 
-    connections::Vector{Connection})
+function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, aggregator::Dict{String,Any})
 
+    connections = aggregator["Connection"]
     id = m["id"]
     sign = m["sign"]
 
@@ -171,8 +180,9 @@ function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any},
 end
 
 # - SimpleDAMarket
-function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any}, 
-    connections::Vector{Connection})
+function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any}, aggregator::Dict{String,Any})
+
+    connections = aggregator["Connection"]
 
     id = m["id"]
     resource = -1
@@ -190,7 +200,8 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
 end
 
 # - FFRProfil -
-function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, connections::Vector{Connection})
+function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggregator::Dict{String,Any})
+
     N = length(m["armed"])
     price = ones(N) * m["price"]
 
@@ -200,7 +211,8 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, conn
 end
 
 # - FCR_N_D1 -
-function build_aggregatorx_object(t::Type{FCR_N_D1}, m::Dict{String, Any}, connections::Vector{Connection})
+function build_aggregatorx_object(t::Type{FCR_N_D1}, m::Dict{String, Any}, aggregator::Dict{String,Any})
+
     capacity = Vector{VariableRef}()
     activation = Vector{VariableRef}()
     return FCR_N_D1(capacity, activation, m["price_capacity"], m["price_activation"],
