@@ -22,37 +22,39 @@ function build_aggregatorx_object(nt::Type{StandardNode}, n::Dict{String, Any}, 
 end
 
 ## - Connections - 
-function build_aggregatorx_object(ct::Type{Interconnection}, idpair::Array{Any})
-    return Interconnection(idpair[1], idpair[2])
-end
 
 function build_aggregatorx_object(ct::Type{Connection}, idpair::Array{Any})
     return Connection(idpair[1], idpair[2])
 end
 
-# Resources
+"""
+Returns an array of connection objects
+"""
+function build_connection(connectiondef::Any, typetable, ids)
 
-function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
-    connections::Vector{Interconnection})
+    if isa(connectiondef, Array)
 
-    id = r["id"]
+        connection_array = Vector{Connection}(undef,length(connectiondef)) # Initalize Vector of particular type to hold connection objects  
+        
+        for (i,idpair) in enumerate(connectiondef) # loop over id-pairs in connection array
+            if !issubset(Set(idpair), ids) # Check if id in id-pair exists
+                println("Error: Missing id. Id in " * string(Set(idpair)) * " not found in " * string(ids))
+                throw(MissingIdException())
+            end
 
-    power = Dict{Integer, Vector{VariableRef}}()
-    sources = Vector{Int}(undef,0)
-    for c in connections
-        if c.source == id
-            power[c.sink] = Vector{VariableRef}()
-        elseif c.sink == id
-            push!(sources, c.source)
+            connection = build_aggregatorx_object(typetable["Connection"],idpair) # Create single aggregatorx connection object
+            
+            connection_array[i] = connection # Add to array of connectiontype
         end
+
+        return connection_array
     end
 
-    up_capacity = Vector{VariableRef}()
-    down_capacity = Vector{VariableRef}()
-
-    return SimpleCharger(power, up_capacity, down_capacity, sources, r["max_power"], id)
 end
 
+# Resources
+
+# - Simple Charger -
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
     connections::Vector{Connection})
 
@@ -77,37 +79,7 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
     return SimpleCharger(power, up_capacity, down_capacity, up_activation, down_activation, sources, r["max_power"], id)
 end
 
-# Depreceated, use COnnection instead of interconnection
-function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, 
-    connections::Vector{Interconnection})
-
-    id = b["id"]
-    class = get_class(b)
-
-    # Find all connected components
-    power = Dict{Integer, Vector{VariableRef}}()
-    sources = Vector{Int}(undef,0)
-    for c in connections
-        if c.source == id
-            power[c.sink] = Vector{VariableRef}()
-        elseif c.sink == id
-            push!(sources, c.source)
-        end
-    end
-
-    state_of_charge = Vector{VariableRef}()
-
-    up_capacity = Vector{VariableRef}()
-    down_capacity = Vector{VariableRef}()
-
-    up_activation = Dict{Integer, Vector{AffExpr}}()
-    down_activation = Dict{Integer, Vector{AffExpr}}()
-
-    return SimpleBattery(power, sources, state_of_charge, up_capacity, 
-    down_capacity, up_activation, down_activation, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
-     class, b["id"])
-end
-
+# - SimpleBattery -
 function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, 
     connections::Vector{Connection})
 
@@ -138,6 +110,7 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any},
      class, b["id"])
 end
 
+# - MinLoad - !Not tested!
 function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, connections = Vector{Connection})
 
     pmin = l["pmin"]
@@ -155,36 +128,16 @@ function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, conne
 
 end
 
-function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any},
-    connections::Vector{Interconnection})
-    
-    return MinAverageLoad(l["pmin"],l["id"])
-end
-
+# - MinAverageLoad - !Not tested!
 function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any})
     return MinAverageLoad(l["pmin"],l["id"])
 end
 
-# Markets - depreceated, use Connection instead of Interconnection
-function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, 
-    connections::Vector{Interconnection})
+# ------------
+# - Markets -
+# ------------
 
-    id = m["id"]
-    resource = -1
-    for c in connections
-        if c.sink == id
-            resource = c.source
-        end
-    end
-
-    power = Dict(resource => Vector{VariableRef}())
-
-
-    price = parse_data(m["price"])
-
-    return SimpleMarket(power, price, resource, m["sign"], m["class"], m["id"])
-end
-
+# SimpleMarket
 function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, 
     connections::Vector{Connection})
 
@@ -216,24 +169,7 @@ function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any},
     return SimpleMarket(power, price, resource, sign, class , id)
 end
 
-function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any}, 
-    connections::Vector{Interconnection})
-
-    id = m["id"]
-    resource = -1
-    for c in connections
-        if c.source == id
-            resource = c.sink
-        end
-    end
-
-    power = Dict(resource => Vector{VariableRef}())
-
-    class = get_class(m)
-    
-    return SimpleDAMarket(power, m["price"], resource, m["sign"], m["class"],  id)
-end
-
+# - SimpleDAMarket
 function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any}, 
     connections::Vector{Connection})
 
@@ -252,7 +188,8 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
     return SimpleDAMarket(power, m["price"], resource, m["sign"], m["class"],  id)
 end
 
-function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any})
+# - FFRProfil -
+function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, connections::Vector{Connection})
     N = length(m["armed"])
     price = ones(N) * m["price"]
 
@@ -261,18 +198,18 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any})
     return FFRProfil(up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
 end
 
-function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, connections::Vector{Interconnection})
-   build_aggregatorx_object(t,m)
-end
-
-function build_aggregatorx_object(t::Type{FCR_N_D1}, m::Dict{String, Any})
+# - FCR_N_D1 -
+function build_aggregatorx_object(t::Type{FCR_N_D1}, m::Dict{String, Any}, connections::Vector{Connection})
     capacity = Vector{VariableRef}()
     activation = Vector{VariableRef}()
     return FCR_N_D1(capacity, activation, m["price_capacity"], m["price_activation"],
      m["df"], m["sign"], m["class"], m["id"])
 end
 
-# Groups
+# -----------
+# - Groups -
+#------------
+
 function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
     up_capacity = Vector{VariableRef}()
 

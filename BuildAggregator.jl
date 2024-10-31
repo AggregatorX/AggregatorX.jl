@@ -55,6 +55,7 @@ function buildaggregator(systemdescription::String)
                     component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])
                 else
                     component_array[i] = build_aggregatorx_object(componenttype, c) # Temporary, implement all on above form
+                    println("buidling with old version")
                 end
             end
 
@@ -68,64 +69,4 @@ function buildaggregator(systemdescription::String)
     #TEMP
     return (sys,aggregator)
     #TEMP
-end
-
-function build_timestruct(timestruct::Dict{String,Any}, timestructtype::Any)
-
-end
-
-"""
-Returns an array of connection objects
-
-The deprecated version is to have an interconnection inside a connection dict element
-
-Prefered just vector inside connection key
-"""
-function build_connection(connectiondef::Any, typetable, ids)
-    if isa(connectiondef, Dict)
-        connections = Dict{String, Any}()
-        for (ct, carray) in connectiondef # For each connection type in connectiondef
-            if ct != "Interconnection" # only this allowed
-                print(" \n Warning: type " * ct * " is not supported \n")
-                continue
-            end
-            connection_type = typetable[ct] # Convert string to type
-            connection_array = Vector{connection_type}(undef,length(carray)) # Initalize Vector of particular type to hold connection objects        
-            
-            for (i,idpair) in enumerate(carray) # loop over id-pairs in connection array
-                if !issubset(Set(idpair), ids) # Check if id in id-pair exists
-                    println("Error: Missing id. Id in " * string(Set(idpair)) * " not found in " * string(ids))
-                    throw(MissingIdException())
-                end
-
-                connection = build_aggregatorx_object(connection_type, idpair) # Create single aggregatorx connection object
-                
-                connection_array[i] = connection # Add to array of connectiontype
-            end
-            
-            connections[ct] = connection_array # Add to dict of connectiontypes
-        end
-        return connections["Interconnection"]
-    end
-
-    # Implement new version with a direct vector
-    if isa(connectiondef, Array)
-
-        connection_array = Vector{Connection}(undef,length(connectiondef)) # Initalize Vector of particular type to hold connection objects  
-        
-        for (i,idpair) in enumerate(connectiondef) # loop over id-pairs in connection array
-            if !issubset(Set(idpair), ids) # Check if id in id-pair exists
-                println("Error: Missing id. Id in " * string(Set(idpair)) * " not found in " * string(ids))
-                throw(MissingIdException())
-            end
-
-            connection = build_aggregatorx_object(typetable["Connection"],idpair) # Create single aggregatorx connection object
-            
-            connection_array[i] = connection # Add to array of connectiontype
-        end
-
-        return connection_array
-    end
-
-    
 end

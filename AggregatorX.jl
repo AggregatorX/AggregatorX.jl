@@ -16,7 +16,7 @@ export SimpleCharger, SimpleBattery,MegaCharger # Resources
 export SimpleGrid # Grids, obsolete
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCR_N_D1 # Markets
 export MinAverageLoad, MinLoad # Loads 
-export Interconnection, Connection # Connections
+export Connection # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException
 
 # Internal functions. Export for testing

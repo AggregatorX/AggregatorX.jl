@@ -150,11 +150,6 @@ end
 abstract type AbstractConnection <: Component end # Should connections rather be subtype of AggregatorXAny?
 
 # Perhaps rename fields that reference ids as sourceId, sinkId etc.?
-struct Interconnection <: AbstractConnection # deprecated
-    source::Integer
-    sink::Integer
-end
-
 struct Connection <: AbstractConnection
     source::Integer
     sink::Integer
