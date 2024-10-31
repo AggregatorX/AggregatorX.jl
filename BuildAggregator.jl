@@ -18,7 +18,6 @@ function buildaggregator(systemdescription::String)
     
     aggregator = Dict{String, Any}() # One entry for each parttype
 
-    # Iterates over all part types
     for p in parts
         if p == "TimeStruct"
 
@@ -45,17 +44,14 @@ function buildaggregator(systemdescription::String)
 
         elseif p == "Market" || p == "Resource" || p == "Node"
 
-            partdef = sys[p] # Vector of Dicts for each component (except for timestruct)
-
-            component_array = Vector{typetable[p]}(undef, length(partdef)) # Vector to hold each component of a particular type
+            component_array = Vector{typetable[p]}(undef, length(sys[p])) # Vector to hold each component
             
-            for (i,c)  in enumerate(partdef) # each component of component type
+            for (i,c)  in enumerate(sys[p]) # each component of component type
                 componenttype = typetable[c["type"]]
                 if applicable(build_aggregatorx_object, componenttype, c, aggregator["Connection"] )
-                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])
+                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator["Connection"])   
                 else
-                    component_array[i] = build_aggregatorx_object(componenttype, c) # Temporary, implement all on above form
-                    println("buidling with old version")
+                    println("Matching constructor method not found.")
                 end
             end
 
