@@ -82,6 +82,32 @@ end
         end
     end
     @test fcr_found 
+
+    function load_system()
+        filepath = joinpath(@__DIR__, "test-systems", "fcr1.json")
+        sys,aggregator = buildaggregator(filepath)
+        return aggregator
+    end
+    @test typeof(load_system()) == Dict{String, Any}
+    # test activation component in Charger
+    up = @test hasfield(SimpleCharger, :up_activation)
+    @test hasfield(SimpleCharger, :down_activation)
+    aggregator = load_system()
+    sc = get_component(1,aggregator)
+    if typeof(up) == Test.Pass
+        @test typeof(sc.up_activation) == Dict{Integer, Vector{AffExpr}}
+        @test typeof(sc.down_activation) == Dict{Integer, Vector{AffExpr}}
+    else
+        println("skipped tests for simpleCharger")
+    end
+
+    # test activation fields in SimpleBattery
+    up = @test hasfield(SimpleBattery, :up_activation)
+    @test hasfield(SimpleBattery, :down_activation)
+    sb = get_component(2,aggregator)
+    @test typeof(sb.up_activation) == Dict{Integer, Vector{AffExpr}}
+    @test typeof(sb.down_activation) == Dict{Integer, Vector{AffExpr}}
+
 end
 
 @testset begin

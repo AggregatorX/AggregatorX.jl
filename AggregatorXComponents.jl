@@ -26,6 +26,8 @@ mutable struct SimpleCharger <: Resource
     power::Dict{Integer, Vector{VariableRef}}
     up_capacity::Vector{VariableRef}
     down_capacity::Vector{VariableRef}
+    up_activation::Dict{Integer, Vector{AffExpr}}
+    down_activation::Dict{Integer, Vector{AffExpr}}
     sources::Vector{Integer}
     max_power::Real
     id::Signed
@@ -38,6 +40,8 @@ mutable struct SimpleBattery <: Resource
     state_of_charge::Vector{VariableRef}
     up_capacity::Vector{VariableRef}
     down_capacity::Vector{VariableRef}
+    up_activation::Dict{Integer, Vector{AffExpr}}
+    down_activation::Dict{Integer, Vector{AffExpr}}
     capacity::AbstractFloat
     initial_charge::AbstractFloat
     max_charge::AbstractFloat

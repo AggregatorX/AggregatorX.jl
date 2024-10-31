@@ -20,7 +20,7 @@ export Interconnection, Connection # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException
 
 # Internal functions. Export for testing
-export parse_data, build_connection, build_typetable, all_ids
+export parse_data, build_connection, build_typetable, all_ids, get_component
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXComponents.jl")

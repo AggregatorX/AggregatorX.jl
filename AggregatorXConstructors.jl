@@ -71,7 +71,10 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
     up_capacity = Vector{VariableRef}()
     down_capacity = Vector{VariableRef}()
 
-    return SimpleCharger(power, up_capacity, down_capacity, sources, r["max_power"], id)
+    up_activation = Dict{Integer, Vector{AffExpr}}()
+    down_activation = Dict{Integer, Vector{AffExpr}}()
+
+    return SimpleCharger(power, up_capacity, down_capacity, up_activation, down_activation, sources, r["max_power"], id)
 end
 
 # Depreceated, use COnnection instead of interconnection
@@ -97,8 +100,11 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any},
     up_capacity = Vector{VariableRef}()
     down_capacity = Vector{VariableRef}()
 
+    up_activation = Dict{Integer, Vector{AffExpr}}()
+    down_activation = Dict{Integer, Vector{AffExpr}}()
+
     return SimpleBattery(power, sources, state_of_charge, up_capacity, 
-    down_capacity, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
+    down_capacity, up_activation, down_activation, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
      class, b["id"])
 end
 
@@ -124,8 +130,11 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any},
     up_capacity = Vector{VariableRef}()
     down_capacity = Vector{VariableRef}()
 
+    up_activation = Dict{Integer, Vector{AffExpr}}()
+    down_activation = Dict{Integer, Vector{AffExpr}}()
+
     return SimpleBattery(power, sources, state_of_charge, up_capacity, 
-    down_capacity, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
+    down_capacity, up_activation, down_activation, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
      class, b["id"])
 end
 
