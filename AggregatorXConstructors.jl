@@ -22,7 +22,6 @@ function build_aggregatorx_object(nt::Type{StandardNode}, n::Dict{String, Any}, 
 end
 
 ## - Connections - 
-
 function build_aggregatorx_object(ct::Type{Connection}, idpair::Array{Any})
     return Connection(idpair[1], idpair[2])
 end
@@ -52,7 +51,9 @@ function build_connection(connectiondef::Any, typetable, ids)
 
 end
 
-# Resources
+# --------------
+# - Resources -
+#---------------
 
 # - Simple Charger -
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, 
