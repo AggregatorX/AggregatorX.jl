@@ -71,7 +71,7 @@ end
 @testset begin
     println("\n Running component tests...\n")
 
-    # FCR_N_D1
+    # FCRN
     # Defintion
     @test hasfield(SimpleCharger, :up_activation)
     @test hasfield(SimpleCharger, :down_activation)

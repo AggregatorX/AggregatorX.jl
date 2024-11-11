@@ -235,12 +235,12 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggr
     return FFRProfil(up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
 end
 
-# - FCR_N_D1 -
-function build_aggregatorx_object(t::Type{FCR_N_D1}, m::Dict{String, Any}, aggregator::Dict{String,Any})
+# - FCRN
+function build_aggregatorx_object(t::Type{FCRN}, m::Dict{String, Any}, aggregator::Dict{String,Any})
 
     capacity = Vector{VariableRef}()
     activation = Vector{VariableRef}()
-    return FCR_N_D1(capacity, activation, m["price_capacity"], m["price_activation"],
+    return FCRN(capacity, activation, m["price_capacity"], m["price_activation"],
      m["df"], m["sign"], m["class"], m["id"])
 end
 

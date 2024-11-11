@@ -112,7 +112,7 @@ mutable struct FFRProfil <: Market
 end
 
 # "FCR-N"
-mutable struct FCR_N_D1 <: Market
+mutable struct FCRN <: Market
     capacity::Vector{VariableRef}
     activation::Vector{VariableRef}
     price_capacity::Vector{AbstractFloat}

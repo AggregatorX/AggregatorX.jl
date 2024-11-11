@@ -14,7 +14,7 @@ export IndexedTimeStruct # TimeStructs
 export StandardNode
 export SimpleCharger, SimpleBattery,MegaCharger # Resources
 export SimpleGrid # Grids, obsolete
-export SimpleMarket, SimpleDAMarket, FFRProfil, FCR_N_D1 # Markets
+export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN # Markets
 export MinAverageLoad, MinLoad # Loads 
 export Connection # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException

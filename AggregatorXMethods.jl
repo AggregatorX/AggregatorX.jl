@@ -84,7 +84,7 @@ function set_optimization_variables(model::Model, m::FFRProfil, timestruct::Time
     m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-FFRProfil-" * string(m.id))
 end
 
-function set_optimization_variables(model::Model, m::FCR_N_D1, timestruct::TimeStruct)
+function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruct)
     N = timestruct.periods
     m.capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-capacity-" * string(m.id))
     m.activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-activation-" * string(m.id))
@@ -273,7 +273,7 @@ function set_optimization_constraints(model::Model, node::StandardNode, aggregat
     @constraint(model, net_power == 0, base_name = "pnet-Standardode-" * string(id))
 end
 
-function set_optimization_constraints(model::Model, m::FCR_N_D1, aggregator)
+function set_optimization_constraints(model::Model, m::FCRN, aggregator)
     
 end
 
@@ -355,7 +355,7 @@ function get_objective_term(m::FFRProfil)
     return zterm
 end
 
-function get_objective_term(m::FCR_N_D1)
+function get_objective_term(m::FCRN)
     zterm = 0
 end
 
