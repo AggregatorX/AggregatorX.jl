@@ -14,10 +14,14 @@ function buildaggregator(systemdescription::String)
 
     ids = all_ids(sys) # List of all ids
 
-    parts = ("TimeStruct", "Connection",  "Market", "Resource", "Group", "Node" ) 
+    # Sequence here is relevant:
+    # Several parts use TimeStruct
+    # Markets, Resources, Nodes uses Connections
+    # Markets may need Groups
+    parts = ("TimeStruct", "Connection", "Group",  "Market", "Resource", "Node" ) 
     
     aggregator = Dict{String, Any}() # One entry for each parttype
-
+    
     for p in parts
         if p == "TimeStruct"
 
@@ -28,7 +32,7 @@ function buildaggregator(systemdescription::String)
             aggregator[p] = build_connection(sys[p], typetable, ids)
 
         elseif p == "Group"
-
+           
             if haskey(sys,"Group") # Groups are optional entities
                 
                 groups = Set{typetable[p]}() # Initalize set to hold group objects

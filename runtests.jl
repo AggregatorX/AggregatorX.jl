@@ -71,7 +71,11 @@ end
 @testset begin
     println("\n Running component tests...\n")
 
-    # FCR_N_D1, just test construction
+    # FCR_N_D1
+    # Defintion
+    @test hasfield(SimpleCharger, :up_activation)
+    @test hasfield(SimpleCharger, :down_activation)
+    #Construction
     filepath = joinpath(@__DIR__, "test-systems", "fcr1.json")
     sys,aggregator = buildaggregator(filepath)
     markets = aggregator["Market"]
@@ -82,6 +86,7 @@ end
         end
     end
     @test fcr_found 
+    
 
     function load_system()
         filepath = joinpath(@__DIR__, "test-systems", "fcr1.json")
@@ -95,8 +100,8 @@ end
     aggregator = load_system()
     sc = get_component(1,aggregator)
     if typeof(up) == Test.Pass
-        @test typeof(sc.up_activation) == Dict{Integer, Vector{AffExpr}}
-        @test typeof(sc.down_activation) == Dict{Integer, Vector{AffExpr}}
+        @test typeof(sc.up_activation) == Dict{Integer, Vector{VariableRef}}
+        @test typeof(sc.down_activation) == Dict{Integer, Vector{VariableRef}}
     else
         println("skipped tests for simpleCharger")
     end
@@ -105,8 +110,14 @@ end
     up = @test hasfield(SimpleBattery, :up_activation)
     @test hasfield(SimpleBattery, :down_activation)
     sb = get_component(2,aggregator)
-    @test typeof(sb.up_activation) == Dict{Integer, Vector{AffExpr}}
-    @test typeof(sb.down_activation) == Dict{Integer, Vector{AffExpr}}
+    @test typeof(sb.up_activation) == Dict{Integer, Vector{VariableRef}}
+    @test typeof(sb.down_activation) == Dict{Integer, Vector{VariableRef}}
+
+    @test typeof(sc.up_activation[7]) == Vector{VariableRef}
+    @test typeof(sc.down_activation[7]) == Vector{VariableRef}
+
+    @test typeof(sb.up_activation[7]) == Vector{VariableRef}
+    @test typeof(sb.down_activation[7]) == Vector{VariableRef}
 
 end
 
@@ -179,6 +190,10 @@ end;
     # DA price [1,1]
     # Simple market price [1,0.5]
     # FFR price [1,1]
+    # First timestep charge battery and charger at full power.
+    # -2 buy power, +2 from ffr, +1 from market = +1
+    # Second timestep, keep battery, charger full power
+    # -1 buy power, +2 from ffr +0.5 market = +1.5
     # FFR capacity given by charger power. Running at max gives 0 + 0.5 revenue
     # from simplemarket and 1 + 1 from FFR market.
     println("\n Running group tests...")

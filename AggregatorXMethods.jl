@@ -254,7 +254,6 @@ function set_optimization_constraints(model::Model, node::StandardNode, aggregat
     N = aggregator["TimeStruct"].periods
     id = node.id
 
-    # Energy conserved
     power_out = init_expr_array(N)
     net_power = init_expr_array(N)
     power_in = init_expr_array(N)
@@ -263,12 +262,14 @@ function set_optimization_constraints(model::Model, node::StandardNode, aggregat
         power_out = power_out + node.power[target]
     end 
         
-    for r in all_components(aggregator) #union(aggregator["Resource"], aggregator["Market"])
+    for r in all_components(aggregator) # Resources, markets, nodes, grids
         if r.id in node.sources
             power_in = power_in + r.power[id]
         end
     end
-    net_power = power_out-power_in
+
+    net_power = power_out-power_in # Energy conserved
+    
     @constraint(model, net_power == 0, base_name = "pnet-Standardode-" * string(id))
 end
 

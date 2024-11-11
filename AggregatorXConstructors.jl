@@ -68,6 +68,7 @@ end
 function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any}, aggregator::Dict{String,Any})
     connections = aggregator["Connection"]
     id = r["id"]
+    N = aggregator["TimeStruct"].periods
 
     power = Dict{Integer, Vector{VariableRef}}()
     sources = Vector{Int}(undef,0)
@@ -79,11 +80,22 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
         end
     end
 
-    up_capacity = Vector{VariableRef}()
-    down_capacity = Vector{VariableRef}()
+    up_capacity = Vector{VariableRef}() # make dict
+    down_capacity = Vector{VariableRef}() # make dict
+    
+    up_activation = Dict{Integer, Vector{VariableRef}}()
+    down_activation = Dict{Integer, Vector{VariableRef}}()
 
-    up_activation = Dict{Integer, Vector{AffExpr}}()
-    down_activation = Dict{Integer, Vector{AffExpr}}()
+    if haskey(aggregator, "Group")
+        groups = aggregator["Group"]        
+        for g in groups
+            if id in g.resources
+                # For each group add an entry in det capacity and activation dicts    
+                up_activation[g.id] = Vector{VariableRef}(undef, N)
+                down_activation[g.id] = Vector{VariableRef}(undef, N)
+            end
+        end
+    end
 
     return SimpleCharger(power, up_capacity, down_capacity, up_activation, down_activation, sources, r["max_power"], id)
 end
@@ -93,6 +105,8 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
 
     connections = aggregator["Connection"]
     id = b["id"]
+    N = aggregator["TimeStruct"].periods
+    
     class = get_class(b)
 
     # Find all connected components
@@ -111,8 +125,19 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
     up_capacity = Vector{VariableRef}()
     down_capacity = Vector{VariableRef}()
 
-    up_activation = Dict{Integer, Vector{AffExpr}}()
-    down_activation = Dict{Integer, Vector{AffExpr}}()
+    up_activation = Dict{Integer, Vector{VariableRef}}()
+    down_activation = Dict{Integer, Vector{VariableRef}}()
+
+    if haskey(aggregator, "Group")
+        groups = aggregator["Group"]        
+        for g in groups
+            if id in g.resources
+                # For each group add an entry in det capacity and activation dicts    
+                up_activation[g.id] = Vector{VariableRef}(undef, N)
+                down_activation[g.id] = Vector{VariableRef}(undef, N)
+            end
+        end
+    end
 
     return SimpleBattery(power, sources, state_of_charge, up_capacity, 
     down_capacity, up_activation, down_activation, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
@@ -227,13 +252,13 @@ function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
     up_capacity = Vector{VariableRef}()
 
     markets = Set{Int}()    
-    mlist = g["markets"] # vector of indicies of markets group is connected to. Defined in system file.
+    mlist = g["markets"] # vector of ids of markets group is connected to. Defined in system file.
     for m in mlist
         push!(markets, m)
     end
 
     resources = Set{Int}()
-    rlist = g["resources"] # vector of indicies of resources in group. Defined in system file.
+    rlist = g["resources"] # vector of ids of resources in group. Defined in system file.
     for r in rlist
         push!(resources, r)
     end
