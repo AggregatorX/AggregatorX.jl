@@ -73,19 +73,26 @@ end
 
     # FCRN
     # Defintion
-    @test hasfield(SimpleCharger, :up_activation)
-    @test hasfield(SimpleCharger, :down_activation)
+    @test hasfield(FCRN, :up_activation)
+    @test hasfield(FCRN, :down_activation)
+    @test hasfield(FCRN, :up_capacity)
+    @test hasfield(FCRN, :down_capacity)
     #Construction
     filepath = joinpath(@__DIR__, "test-systems", "fcr1.json")
     sys,aggregator = buildaggregator(filepath)
     markets = aggregator["Market"]
     fcr_found = false
+    fcrmarket = nothing
     for m in markets
         if m.class == "FCR"
             fcr_found = true
+            fcrmarket = m
         end
     end
-    @test fcr_found 
+    @test fcr_found
+
+    @test typeof(fcrmarket.up_activation) == Vector{VariableRef}
+    @test typeof(fcrmarket.up_capacity) == Vector{VariableRef}
     
 
     function load_system()

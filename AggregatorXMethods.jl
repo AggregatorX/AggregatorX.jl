@@ -86,8 +86,10 @@ end
 
 function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruct)
     N = timestruct.periods
-    m.capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-capacity-" * string(m.id))
-    m.activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCR-N-D1-activation-" * string(m.id))
+    m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRN-up-capacity-" * string(m.id))
+    m.down_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRN-down-capacity-" * string(m.id))
+    m.up_activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRN-up-activation-" * string(m.id))
+    m.down_activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRN-down-activation-" * string(m.id))
 end
 
 ## Nodes
@@ -249,6 +251,28 @@ function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     # Minimum bid
 end
 
+function set_optimization_constraints(model::Model, m::FCRN, aggregator)
+    
+    # Symmetric market
+    @constraint(model, m.up_capacity .== m.down_capacity, base_name = "fcrn-symmetric-" * string(m.id))
+
+    df = m.df
+    dfmax = m.dfmax
+
+    df_up = df
+    df_up[df .> 0 ] .= 0
+    df_up[df .< -dfmax] .= 0
+    
+    df_down = df
+    df_down[df .< 0 ] .= 0
+    df_up[df .> dfmax] .= 0
+
+    # Link activation to sold capacity and frequency deviation
+    @constraint(model, m.up_activation .== m.up_capacity .* df_up ./ dfmax )
+    @constraint(model, m.down_activation .== m.down_capacity .* df_down ./ dfmax )
+
+end
+
 ## Nodes
 function set_optimization_constraints(model::Model, node::StandardNode, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
@@ -271,10 +295,6 @@ function set_optimization_constraints(model::Model, node::StandardNode, aggregat
     net_power = power_out-power_in # Energy conserved
     
     @constraint(model, net_power == 0, base_name = "pnet-Standardode-" * string(id))
-end
-
-function set_optimization_constraints(model::Model, m::FCRN, aggregator)
-    
 end
 
 # Groups
@@ -321,8 +341,6 @@ function set_optimization_constraints(model::Model, group::FCRGroup, aggregator:
     symmetric_capacity = init_expr_array(N)
 
     # Capacity sold to markets is limited by available capacity
-
-
 
 end
 
