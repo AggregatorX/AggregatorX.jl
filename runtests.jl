@@ -189,6 +189,15 @@ end
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 8.5 atol = 1e-6
+
+    # FCRN capacity
+    # High FCR capacity price, no activation.
+    # Expect half power on charger even though market price is less than DA.
+    # Half power to maximize acitivity in the symmetric FCRN market
+    filepath = joinpath(@__DIR__, "test-systems", "fcr3.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 9.5 atol = 1e-6 broken = true
 end;
 
 @testset begin

@@ -118,7 +118,8 @@ mutable struct FCRN <: Market
     up_activation::Vector{VariableRef}    
     down_activation::Vector{VariableRef}
     price_capacity::Vector{AbstractFloat}
-    price_activation::Vector{AbstractFloat}
+    price_up_activation::Vector{AbstractFloat}
+    price_down_activation::Vector{AbstractFloat}
     df::Vector{AbstractFloat} # Frequency deviation in Hz
     dfmax::AbstractFloat # maximum frequency deviation
     sign::Integer

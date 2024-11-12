@@ -374,6 +374,10 @@ function get_objective_term(m::FFRProfil)
 end
 
 function get_objective_term(m::FCRN)
-    zterm = 0
+    capacity = sum(m.up_capacity .* m.price_capacity .* (-m.sign))
+    up_activation = sum(m.up_activation .* m.price_up_activation .* (-m.sign))
+    down_activation = sum(m.down_activation .* m.price_down_activation .* (-m.sign))
+    zterm = capacity + up_activation - down_activation
+    return zterm
 end
 

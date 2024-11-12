@@ -243,7 +243,7 @@ function build_aggregatorx_object(t::Type{FCRN}, m::Dict{String, Any}, aggregato
     up_activation = Vector{VariableRef}()
     down_activation = Vector{VariableRef}()
 
-    return FCRN(up_capacity, down_capacity, up_activation, down_activation, m["price_capacity"], m["price_activation"],
+    return FCRN(up_capacity, down_capacity, up_activation, down_activation, m["price_capacity"], m["price_up_activation"], m["price_down_activation"],
      m["df"], m["dfmax"], m["sign"], m["class"], m["id"])
 
 end

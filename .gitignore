@@ -1,5 +1,7 @@
 *.stackdump
 *.json
+*.ipynb
+.ipynp_checkpoints/
 start.jl
 plz_solve_my_problem.jl
 variables.jl
