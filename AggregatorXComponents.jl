@@ -60,8 +60,10 @@ mutable struct FFRGroup <: Group
 end
 
 mutable struct FCRGroup <: Group
-    capacity::Vector{VariableRef}
-    activation::Vector{VariableRef}
+    up_capacity::Vector{AffExpr} # These could be AffExpr to reduce number of variables.
+    down_capacity::Vector{AffExpr}
+    up_activation::Vector{VariableRef}
+    down_activation::Vector{VariableRef}
     resources::Set{Int} # Set of tuples of resource and group ids.
     markets::Set{Int} # Set of tuples of group and market ids.  
     class::String  

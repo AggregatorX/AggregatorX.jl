@@ -272,8 +272,10 @@ function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
 end
 
 function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any})
-    capacity = Vector{VariableRef}()
-    activation = Vector{VariableRef}()
+    up_capacity = Vector{AffExpr}()
+    down_capacity = Vector{AffExpr}()
+    up_activation = Vector{VariableRef}()    
+    down_activation = Vector{VariableRef}()
 
     markets = Set{Int}()    
     mlist = g["markets"]
@@ -288,5 +290,5 @@ function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any})
     end
 
     # Set all parameters, including tech_class and id
-    return FCRGroup(capacity, activation, resources, markets, g["class"], g["id"])
+    return FCRGroup(up_capacity,down_capacity, up_activation,down_activation, resources, markets, g["class"], g["id"])
 end
