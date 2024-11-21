@@ -169,6 +169,8 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
         end
     end
     net_power = power_out-power_in
+
+    # Planned consumption must be balanced
     @constraint(model, net_power == 0, base_name = "pnet-SimpleCharger-" * string(id))
 
     total_up_activation = init_expr_array(N)
@@ -179,27 +181,21 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
     for k in keys(charger.down_activation)
         total_down_activation = total_down_activation + charger.down_activation[k]
     end
-    net_activation = total_up_activation - total_down_activation
+    #net_activation = total_up_activation - total_down_activation
 
-    # Maximum power
-    @constraint(model, power_out - net_activation .<= charger.max_power, base_name = "pmax-SimpleCharger-" * string(id))
+    # Maximum power and down activation limit
+    @constraint(model, total_down_activation .<= charger.max_power .- power_out, base_name = "pmax-SimpleCharger-" * string(id))
 
-    # Non-negative power
-    @constraint(model, power_out - net_activation .>= 0, base_name = "pmin-SimpleCharger-" * string(id))
+    # Non-negative power and up activation limit
+    @constraint(model,  total_up_activation .<= power_out, base_name = "pmin-SimpleCharger-" * string(id))
 
-    # up regulation limited by curtailable (eksternal) power
-    output = init_expr_array(N) 
-    for target in keys(charger.power) 
-        resource = get_component(target, aggregator)
-        if resource.class == "Load"
-            output = output + charger.power[target]
-        end
-    end
-    @constraint(model, charger.up_capacity == output, base_name = "max-up-SimpleCharger-" * string(charger.id) )
-    
-    # down regulation limited by maximum increase in (external) output = p_max-p_current(ext)
-    @constraint(model, charger.down_capacity == charger.max_power .- output, base_name = "max-down-SimpleCharger-" * string(charger.id) )
-    
+    # down regulation limited by maximum possible increase in output
+    @constraint(model, charger.down_capacity == charger.max_power .- power_out, base_name = "max-down-SimpleCharger-" * string(charger.id) )
+
+    # Up regulation capacity limited by current power flow that can be curtailed.
+    @constraint(model, charger.up_capacity == power_out, base_name = "max-up-SimpleCharger-" * string(charger.id) )
+
+    # Should perhaps have a connection between direct linkt between available capacity and maximum acitvation
 end
 
 function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator::Dict{String, Any})
