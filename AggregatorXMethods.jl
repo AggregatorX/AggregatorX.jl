@@ -207,7 +207,6 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
         power_out = power_out + r.power[target]
     end 
     
-
     power_in = init_expr_array(N) # power_in is positive but for a net flow, a net outflow is defined as positive
     sources = r.sources
     for r in all_components(aggregator) #union(aggregator["Resource"], aggregator["Market"])
@@ -216,23 +215,37 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
         end
     end
 
-    # Energy conserved: Change in state of charge equal net power flow
     net_power = init_expr_array(N)
     net_power = power_out - power_in
+
+    total_up_activation = init_expr_array(N)
+    for k in keys(r.up_activation)
+        total_up_activation = total_up_activation + r.up_activation[k]
+    end
+
+    total_down_activation = init_expr_array(N)
+    for k in keys(r.down_activation)
+        total_down_activation = total_down_activation + r.down_activation[k]
+    end
+
+    net_activation = init_expr_array(N)
+    net_activation = total_up_activation - total_down_activation # Positive for net power out, that is up-regulation
+
+    # Energy conserved: Change in state of charge equal net power flow
     @constraint(model, r.state_of_charge[1] == r.initial_charge)
-    @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] == 0, base_name = "soc-SimpleCharger-" * string(id))
+    @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] + net_activation[1:N-1] == 0, base_name = "soc-SimpleCharger-" * string(id))
     
     # max charge
     @constraint(model, r.state_of_charge .<= r.max_charge)
-    @constraint(model, r.state_of_charge[N] - net_power[N] <= r.max_charge)
+    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.max_charge) # last time step
 
     # min charge
     @constraint(model, r.state_of_charge .>= 0.0)
-    @constraint(model, r.state_of_charge[N] - net_power[N] >= 0.0)
+    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] >= 0.0) # last time step
 
     # charge/discharge rates
-    c = @constraint(model, power_out .<= r.max_discharge)
-    @constraint(model, power_in .<= r.max_charge)
+    @constraint(model, power_out + total_up_activation .<= r.max_discharge)
+    @constraint(model, power_in + total_down_activation .<= r.max_charge)
 
     # capacity for up/down regulation
     @constraint(model, r.up_capacity == r.max_discharge .- power_out )
