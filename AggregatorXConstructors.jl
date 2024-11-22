@@ -80,8 +80,8 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
         end
     end
 
-    up_capacity = Vector{VariableRef}() # make dict
-    down_capacity = Vector{VariableRef}() # make dict
+    up_capacity = Dict{Integer, Vector{VariableRef}}()
+    down_capacity = Dict{Integer, Vector{VariableRef}}()
     
     up_activation = Dict{Integer, Vector{VariableRef}}()
     down_activation = Dict{Integer, Vector{VariableRef}}()
@@ -93,6 +93,8 @@ function build_aggregatorx_object(rt::Type{SimpleCharger}, r::Dict{String, Any},
                 # For each group add an entry in det capacity and activation dicts    
                 up_activation[g.id] = Vector{VariableRef}(undef, N)
                 down_activation[g.id] = Vector{VariableRef}(undef, N)
+                up_capacity[g.id] = Vector{VariableRef}(undef, N)
+                down_capacity[g.id] = Vector{VariableRef}(undef, N)
             end
         end
     end
@@ -122,8 +124,8 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
 
     state_of_charge = Vector{VariableRef}()
 
-    up_capacity = Vector{VariableRef}()
-    down_capacity = Vector{VariableRef}()
+    up_capacity = Dict{Integer, Vector{VariableRef}}()
+    down_capacity = Dict{Integer, Vector{VariableRef}}()
 
     up_activation = Dict{Integer, Vector{VariableRef}}()
     down_activation = Dict{Integer, Vector{VariableRef}}()
@@ -135,6 +137,8 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
                 # For each group add an entry in det capacity and activation dicts    
                 up_activation[g.id] = Vector{VariableRef}(undef, N)
                 down_activation[g.id] = Vector{VariableRef}(undef, N)
+                up_capacity[g.id] = Vector{VariableRef}(undef, N)
+                down_capacity[g.id] = Vector{VariableRef}(undef, N)
             end
         end
     end
@@ -274,8 +278,8 @@ end
 function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any})
     up_capacity = Vector{AffExpr}()
     down_capacity = Vector{AffExpr}()
-    up_activation = Vector{VariableRef}()    
-    down_activation = Vector{VariableRef}()
+    up_activation = Vector{AffExpr}()    
+    down_activation = Vector{AffExpr}()
 
     markets = Set{Int}()    
     mlist = g["markets"]

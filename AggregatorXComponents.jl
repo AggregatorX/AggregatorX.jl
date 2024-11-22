@@ -24,8 +24,8 @@ end
 # - SimpleCharger -
 mutable struct SimpleCharger <: Resource 
     power::Dict{Integer, Vector{VariableRef}}
-    up_capacity::Vector{VariableRef}
-    down_capacity::Vector{VariableRef}
+    up_capacity::Dict{Integer, Vector{VariableRef}}
+    down_capacity::Dict{Integer, Vector{VariableRef}}
     up_activation::Dict{Integer, Vector{VariableRef}}
     down_activation::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
@@ -38,8 +38,8 @@ mutable struct SimpleBattery <: Resource
     power::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
     state_of_charge::Vector{VariableRef}
-    up_capacity::Vector{VariableRef}
-    down_capacity::Vector{VariableRef}
+    up_capacity::Dict{Integer, Vector{VariableRef}}
+    down_capacity::Dict{Integer, Vector{VariableRef}}
     up_activation::Dict{Integer, Vector{VariableRef}}
     down_activation::Dict{Integer, Vector{VariableRef}}
     capacity::AbstractFloat
@@ -62,8 +62,8 @@ end
 mutable struct FCRGroup <: Group
     up_capacity::Vector{AffExpr} # These could be AffExpr to reduce number of variables.
     down_capacity::Vector{AffExpr}
-    up_activation::Vector{VariableRef}
-    down_activation::Vector{VariableRef}
+    up_activation::Vector{AffExpr}
+    down_activation::Vector{AffExpr}
     resources::Set{Int} # Set of tuples of resource and group ids.
     markets::Set{Int} # Set of tuples of group and market ids.  
     class::String  
