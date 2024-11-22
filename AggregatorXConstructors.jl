@@ -257,7 +257,7 @@ end
 #------------
 
 function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
-    up_capacity = Vector{VariableRef}()
+    up_capacity = Vector{AffExpr}()
 
     markets = Set{Int}()    
     mlist = g["markets"] # vector of ids of markets group is connected to. Defined in system file.

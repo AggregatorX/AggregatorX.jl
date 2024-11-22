@@ -52,7 +52,7 @@ end
 
 ## Groups
 mutable struct FFRGroup <: Group
-    up_capacity::Vector{VariableRef}
+    up_capacity::Vector{AffExpr}
     resources::Set{Int} # Set of tuples of resource and group ids.
     markets::Set{Int} # Set of tuples of group and market ids.  
     class::String  

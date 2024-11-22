@@ -131,7 +131,7 @@ end
 
 ## Groups
 function set_optimization_variables(model::Model, group::FFRGroup, timestruct::TimeStruct)
-    group.up_capacity = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "up-FFRgroup-" * string(group.id))
+    #group.up_capacity = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "up-FFRgroup-" * string(group.id))
 end
 
 function set_optimization_variables(model::Model, group::FCRGroup, timestruct::TimeStruct)
@@ -390,7 +390,8 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
         end
     end
 
-    @constraint(model, group.up_capacity == total_up_capacity, base_name = "up-limit-FFRgroup-" * string(group.id) )
+    group.up_capacity = total_up_capacity
+    #@constraint(model, group.up_capacity == total_up_capacity, base_name = "up-limit-FFRgroup-" * string(group.id) )
 
     # capacity sold to markets is limited by available capacity
     sum_sold_capacity = init_expr_array(N)
