@@ -100,17 +100,17 @@ end
 
 function set_optimization_variables(model::Model, m::SimpleMarket, timestruct::TimeStruct)
     N = timestruct.periods
-    m.power[m.resource] = @variable(model, [1:N], lower_bound = 0.0, base_name = "SimpleMarket-" * string(m.id))
+    m.power[m.resource] = @variable(model, [1:N], lower_bound = 0.0, base_name = "p-SimpleMarket-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct::TimeStruct)
     N = timestruct.periods
-    m.power[m.resource] = @variable(model, [1:N], lower_bound = 0.0, base_name = "SimpleDA-" * string(m.id))
+    m.power[m.resource] = @variable(model, [1:N], lower_bound = 0.0, base_name = "p-SimpleDA-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::FFRProfil, timestruct::TimeStruct)
     N = timestruct.periods
-    m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-FFRProfil-" * string(m.id))
+    m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-capacity-FFRProfil-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruct)
@@ -212,11 +212,13 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
         total_down_capacity = total_down_capacity + charger.down_capacity[k]
     end
     # down regulation limited by maximum possible increase in output
-    @constraint(model, total_down_capacity == charger.max_power .- power_out, base_name = "max-down-SimpleCharger-" * string(charger.id) )
-
+    if !(isempty(charger.up_capacity))
+        @constraint(model, total_down_capacity == charger.max_power .- power_out, base_name = "max-down-capacity-SimpleCharger-" * string(charger.id) )
+    end
     # Up regulation capacity limited by current power flow that can be curtailed.
-    @constraint(model, total_up_capacity == power_out, base_name = "max-up-SimpleCharger-" * string(charger.id) )
-
+    if !(isempty(charger.up_capacity))
+        @constraint(model, total_up_capacity == power_out, base_name = "max-up-capacity-SimpleCharger-" * string(charger.id) )
+    end
     # Should perhaps have a connection between direct linkt between available capacity and maximum acitvation
 end
 
@@ -254,35 +256,38 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     net_activation = total_up_activation - total_down_activation # Positive for net power out, that is up-regulation
 
     # Energy conserved: Change in state of charge equal net power flow
-    @constraint(model, r.state_of_charge[1] == r.initial_charge)
-    @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] + net_activation[1:N-1] == 0, base_name = "soc-SimpleCharger-" * string(id))
+    @constraint(model, r.state_of_charge[1] == r.initial_charge, base_name = "soc-init-SimpleBattery" * string(id))
+    @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] + net_activation[1:N-1] == 0, base_name = "soc-SimpleBattery-" * string(id))
     
     # max charge
-    @constraint(model, r.state_of_charge .<= r.max_charge)
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.max_charge) # last time step
+    @constraint(model, r.state_of_charge .<= r.max_charge, base_name ="max_soc-SimpleBattery" * string(id))
+    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.max_charge, base_name ="max_soc_last-SimpleBattery" * string(id)) # last time step
 
     # min charge
-    @constraint(model, r.state_of_charge .>= 0.0)
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] >= 0.0) # last time step
+    @constraint(model, r.state_of_charge .>= 0.0, base_name ="min-soc-SimpleBattery" * string(id))
+    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] >= 0.0, base_name ="min-soc-last-SimpleBattery" * string(id)) # last time step
 
     # charge/discharge rates
-    @constraint(model, power_out + total_up_activation .<= r.max_discharge)
-    @constraint(model, power_in + total_down_activation .<= r.max_charge)
+    @constraint(model, power_out + total_up_activation .<= r.max_discharge, base_name ="max-discharging-SimpleBattery" * string(id))
+    @constraint(model, power_in + total_down_activation .<= r.max_charge, base_name ="max-charging-SimpleBattery" * string(id))
 
     total_up_capacity = init_expr_array(N)
     for k in keys(r.up_capacity)
-        total_up_capacity = total_up_capacity + r.up_activation[k]
+        total_up_capacity = total_up_capacity + r.up_capacity[k]
     end
 
     total_down_capacity = init_expr_array(N)
     for k in keys(r.down_capacity)
-        total_down_capacity = total_down_capacity + r.down_activation[k]
+        total_down_capacity = total_down_capacity + r.down_capacity[k]
     end
 
     # capacity for up/down regulation
-    @constraint(model, total_up_capacity == r.max_discharge .- power_out .+ power_in )
-    @constraint(model, total_down_capacity == r.max_charge .- power_in .+ power_out )
-
+    if !(isempty(r.up_capacity))
+        @constraint(model, total_up_capacity == r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery" * string(id))
+    end
+    if !(isempty(r.up_capacity))
+        @constraint(model, total_down_capacity == r.max_charge .- power_in .+ power_out, base_name="max-down-capacity-SimpleBattery" * string(id) )
+    end
     # We have implicitly assumed here that power_out and power_in are not simultaneously
     # non-zero. The program should throw a warning if this occurs and this should be considered
     # a case that the software does not handle or an indication of the possibility of A
@@ -307,14 +312,14 @@ end
 function set_optimization_constraints(model::Model, m::SimpleMarket, aggregator)
     if m.sign == -1 # market is a sink
         source = get_component(m.resource, aggregator)
-        @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
+        @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "pnet-SimpleMarket-" * string(m.id))
     end
 end
 
 function set_optimization_constraints(model::Model, m::SimpleDAMarket, aggregator)
     if m.sign == -1 # market is a sink
         source = get_component(m.resource, aggregator)
-        @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "in-out-SimpleMarket-" * string(m.id))
+        @constraint(model, m.power[m.resource] ==  source.power[m.id], base_name = "pnet-SimpleMarket-" * string(m.id))
     end
 end
 
