@@ -209,6 +209,16 @@ end
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 19.5 atol = 1e-6
+
+    #FCR activation test.
+    # This system is to complex to easily 'see' what the solution should be and
+    # is therefore not really a test. However the solution has been evaluated and
+    # and seems reasonable. This is thus more a test that functionality is not 
+    # changing.
+    filepath = joinpath(@__DIR__, "test-systems", "fcr-activation.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 16.25 atol = 1e-6
 end;
 
 @testset begin
