@@ -192,12 +192,23 @@ end
 
     # FCRN capacity
     # High FCR capacity price, no activation.
+    # DA price [1,1]
+    # Simple market price [1,0.5]
+    # FCR capacity price [10,10]
+    # First time step:
+    # Charge battery at power = 1, battery has up_capacity 1, charger donw_capacity 1 -> FCR capacity 1
+    # Revenue = 10 - 1
+    # Second time step: Charger at power 1 from battery discharge. 
+    # Turning off battery downregulates, turning off charger uppregulates - FCR capacity 1
+    # 0.5 revenue from market
+    # Revenue = 10 + 0.5
+    # Total revenue 9 + 10.5 = 19.5
     # Expect half power on charger even though market price is less than DA.
     # Half power to maximize acitivity in the symmetric FCRN market
     filepath = joinpath(@__DIR__, "test-systems", "fcr3.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
-    @test objective_value(model) ≈ 9.5 atol = 1e-6 broken = true
+    @test objective_value(model) ≈ 19.5 atol = 1e-6
 end;
 
 @testset begin
@@ -206,15 +217,14 @@ end;
     # DA price [1,1]
     # Simple market price [1,0.5]
     # FFR price [1,1]
-    # First timestep charge battery and charger at full power.
-    # -2 buy power, +2 from ffr, +1 from market = +1
+    # First timestep charge battery and run charger at full power.
+    # -2 buy power, +2 from ffr (curtail both loads), +1 from market = +1
     # Second timestep, keep battery, charger full power
-    # -1 buy power, +2 from ffr +0.5 market = +1.5
-    # FFR capacity given by charger power. Running at max gives 0 + 0.5 revenue
-    # from simplemarket and 1 + 1 from FFR market.
+    # -1 buy power, +2 from ffr (curtail charger, discharge battery) +0.5 market = +1.5
+    # Sum is +2.5
     println("\n Running group tests...")
     filepath = joinpath(@__DIR__, "test-systems", "ffr1.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
-    @test objective_value(model) ≈ 3.5 atol = 1e-6
+    @test objective_value(model) ≈ 2.5 atol = 1e-6
 end;

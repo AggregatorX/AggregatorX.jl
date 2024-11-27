@@ -260,8 +260,8 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] + net_activation[1:N-1] == 0, base_name = "soc-SimpleBattery-" * string(id))
     
     # max charge
-    @constraint(model, r.state_of_charge .<= r.max_charge, base_name ="max_soc-SimpleBattery" * string(id))
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.max_charge, base_name ="max_soc_last-SimpleBattery" * string(id)) # last time step
+    @constraint(model, r.state_of_charge .<= r.capacity, base_name ="max-soc-SimpleBattery" * string(id))
+    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.capacity, base_name ="max-soc_last-SimpleBattery" * string(id)) # last time step
 
     # min charge
     @constraint(model, r.state_of_charge .>= 0.0, base_name ="min-soc-SimpleBattery" * string(id))
@@ -281,13 +281,20 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
         total_down_capacity = total_down_capacity + r.down_capacity[k]
     end
 
-    # capacity for up/down regulation
+    # Capacity for up/down regulation. Flow constrained
     if !(isempty(r.up_capacity))
-        @constraint(model, total_up_capacity == r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery" * string(id))
+        @constraint(model, total_up_capacity <= r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery-" * string(id))
     end
-    if !(isempty(r.up_capacity))
-        @constraint(model, total_down_capacity == r.max_charge .- power_in .+ power_out, base_name="max-down-capacity-SimpleBattery" * string(id) )
+    if !(isempty(r.down_capacity))
+        @constraint(model, total_down_capacity <= r.max_charge .- power_in .+ power_out, base_name="max-down-capacity-SimpleBattery-" * string(id) )
     end
+
+    # Capacity for up/down regulation. SoC constrained
+    if ( !(isempty(r.up_capacity)) & !(isempty(r.down_capacity)) )
+        @constraint(model, r.state_of_charge - net_power + total_down_capacity .<= r.capacity, base_name ="capacity-max-soc-SimpleBattery-" * string(id))
+        @constraint(model, r.state_of_charge - net_power - total_up_capacity .>= 0.0, base_name ="capacity-min-soc-SimpleBattery-" * string(id))
+    end
+
     # We have implicitly assumed here that power_out and power_in are not simultaneously
     # non-zero. The program should throw a warning if this occurs and this should be considered
     # a case that the software does not handle or an indication of the possibility of A
@@ -325,6 +332,7 @@ end
 
 function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     # Minimum bid
+    # capacity same for all time steps
 end
 
 function set_optimization_constraints(model::Model, m::FCRN, aggregator)
@@ -335,13 +343,13 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
     df = m.df
     dfmax = m.dfmax
 
-    df_up = df
-    df_up[df .> 0 ] .= 0
-    df_up[df .< -dfmax] .= 0
+    df_up = copy(m.df)
+    df_up[df_up .> 0 ] .= 0
+    df_up[df_up .< -dfmax] .= 0
     
-    df_down = df
-    df_down[df .< 0 ] .= 0
-    df_up[df .> dfmax] .= 0
+    df_down = copy(m.df)
+    df_down[df_down .< 0 ] .= 0
+    df_up[df_down .> dfmax] .= 0
 
     # Link activation to sold capacity and frequency deviation
     @constraint(model, m.up_activation .== m.up_capacity .* df_up ./ dfmax )
@@ -405,6 +413,18 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
         sum_sold_capacity = sum_sold_capacity + m.up_capacity
     end
     @constraint(model, group.up_capacity >= sum_sold_capacity,  base_name = "up-sold-FFRGroup-" * string(group.id))
+
+    # Activation 
+
+    # FFR markets have no activation component so this just ensures that the resources
+    # does not contribute activation to this group
+    for id in group.resources
+        r = get_component(id,aggregator)
+        @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+        @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+    end
+    
+
 end
 
 function set_optimization_constraints(model::Model, group::FCRGroup, aggregator::Dict{String, Any})
