@@ -89,12 +89,23 @@ Buildaggregator calls constructor for each node in json list. Constructur resolv
 Optimizeaggregator sets the inputs equal to the outputs. No new variables are needed
 
 ## Making new components
-An important feature of AggregatorX is that new components can be added to represent physical properties that are not possible with the existing library of components. This section describes the steps that are necessary for adding new components to the software.
+An important feature of AggregatorX is that new components can be added to represent physics, markets, resources or behaviour that are not possible with the existing library of components. This section describes the steps that are necessary for adding new components to the software. It simultanously suggest a best practice workflow where some things are not absolutly necessary but will decrease likelihood of errors and make the software and ecosystem easier to maintain.
 
-* Add type description
-* Add to export list of package
-* Add constructor (make sure it will be called from buildaggregator - check calling signature)
-*
+* Start with a mathematical description, preferably in the style of the Mathematical description of AggregatorX.
+* Add new type description. 
+    * First write a test that creates an object of the struct (In the following, always start each step by writing a test. Much less likelihood of logical errors and much quicker to remove simple typos).
+    * Implement the new struct/type in `AggregatorXComponents` and run thte test
+    * Add type to the export list of the package.
+* Add constructor for the new type
+    * Write a test that creates the object, that is you need a minimum system description that includes the new component and then call `buildaggregator()`.
+    * Write a method in `AggregatorXComponents` that returns the initalized object (make sure it will be called from buildaggregator - check calling signature) and test it.
+* Add methods to set variables, constraints and objective terms.
+    * Make a test for each method. The type of test will depend on the particular component and method content.
+    * Implement method and test it.
+* Make test cases
+    * One or more test cases that implements the component and with analytical results
+    * Focus on edge cases
+    * Test large systems
 
 ### Type description
 
