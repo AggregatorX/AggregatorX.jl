@@ -148,6 +148,22 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
      class, b["id"])
 end
 
+# FixedLoad
+function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
+    
+    N = aggregator["TimeStruct"].periods
+    
+    if typeof(l["load"]) <: Vector{}
+        load = l["load"]
+    elseif typeof(l["load"]) <: Real
+        load = ones(N) .* l["load"]
+    elseif isa(l["load"], String)
+        # read from file
+    end
+
+    return FixedLoad(load, l["id"])
+end
+
 # - MinLoad - !Not tested!
 function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
 
