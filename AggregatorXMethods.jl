@@ -85,6 +85,10 @@ function set_optimization_variables(model::Model, charger::SimpleCharger,
     end
 end
 
+function set_optimization_variables(model::Model, load::FixedLoad, timestruct::TimeStruct)
+    # No variables need
+end
+
 # These are used for each load if there are additional variables to be defined depending on type
 function set_optimization_variables(model::Model, load::MinAverageLoad, timestruct::TimeStruct) 
     # return charge, charging, discharging
@@ -299,6 +303,12 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     # non-zero. The program should throw a warning if this occurs and this should be considered
     # a case that the software does not handle or an indication of the possibility of A
     # modelling error.
+end
+
+function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+    source = get_component(l.source, aggregator)
+    @constraint(model, source.power[l.id][1:N] == l.load[1:N], base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id))
 end
 
 function set_optimization_constraints(model::Model, l::MinLoad, aggregator::Dict{String, Any})

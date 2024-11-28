@@ -21,6 +21,7 @@ export IncompleteSystemException, DuplicateIdException, MissingIdException
 
 # Internal functions. Export for testing
 export parse_data, build_connection, build_typetable, all_ids, get_component, build_aggregatorx_object
+export set_optimization_variables, set_optimization_constraints, set_objective, get_objective_term
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXComponents.jl")

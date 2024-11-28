@@ -151,8 +151,17 @@ end
 # FixedLoad
 function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
     
+    connections = aggregator["Connection"]
+    id = l["id"]
     N = aggregator["TimeStruct"].periods
     
+    source = 0
+    for c in connections
+        if c.sink == id
+            source =  c.source
+        end
+    end
+
     if typeof(l["load"]) <: Vector{}
         load = l["load"]
     elseif typeof(l["load"]) <: Real
@@ -161,7 +170,7 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
         # read from file
     end
 
-    return FixedLoad(load, l["id"])
+    return FixedLoad(source, load, id)
 end
 
 # - MinLoad - !Not tested!

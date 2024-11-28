@@ -143,16 +143,19 @@ end
     @test begin
         load = [1,2,3]
         id = 1
-        fixedload = FixedLoad(load, id)
+        source = 2
+        fixedload = FixedLoad(source, load, id)
         isa(fixedload, FixedLoad)
     end
     @test begin
         filepath = joinpath(@__DIR__, "test-systems", "fixed_load_test.json")
         sys,aggregator = buildaggregator(filepath)
-        println("hei")
         resources = aggregator["Resource"]
         isa(resources[1], FixedLoad)
     end
+    filepath = joinpath(@__DIR__, "test-systems", "fixed_load_test.json")
+    sys,aggregator = buildaggregator(filepath)
+    fixeload = aggregator["Resource"][1]
 end
 
 @testset begin

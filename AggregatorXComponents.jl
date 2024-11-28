@@ -147,6 +147,7 @@ struct MinAverageLoad <: Load
 end
 
 struct FixedLoad <: Load
+    source::Integer
     load::Vector{Real}
     id::Integer
 end
