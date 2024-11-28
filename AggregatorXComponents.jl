@@ -146,6 +146,11 @@ struct MinAverageLoad <: Load
     id::Integer
 end
 
+struct FixedLoad <: Load
+    load::Vector{Real}
+    id::Integer
+end
+
 # for testing
 struct MegaCharger <: ChargingStation
     pmax::Number
@@ -160,6 +165,7 @@ struct Connection <: AbstractConnection
     source::Integer
     sink::Integer
 end
+
 
 # ---Constructor wrapper methods ---
 # for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type

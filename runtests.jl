@@ -3,7 +3,20 @@ using JuMP
 using HiGHS
 import JSON
 optimizer = HiGHS.Optimizer
-include("AggregatorX.jl")
+
+loaded = false
+for n in names(Main)    
+    if n == :AggregatorX
+        global loaded = true
+    end
+end
+
+# Load AggregatorX
+if !loaded # Errors occur if module is loaded multiple times
+    include("AggregatorX.jl")
+    using .AggregatorX
+end
+
 using .AggregatorX
 
 
@@ -126,6 +139,15 @@ end
     @test typeof(sb.up_activation[7]) == Vector{VariableRef}
     @test typeof(sb.down_activation[7]) == Vector{VariableRef}
 
+    # Fixed Load
+    @test begin
+        load = [1,2,3]
+        id = 1
+        fixedload = FixedLoad(load, id)
+        isa(fixedload, FixedLoad)
+    end
+    
+    
 end
 
 @testset begin

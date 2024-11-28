@@ -94,8 +94,8 @@ An important feature of AggregatorX is that new components can be added to repre
 * Start with a mathematical description, preferably in the style of the Mathematical description of AggregatorX.
 * Add new type description. 
     * First write a test that creates an object of the struct (In the following, always start each step by writing a test. Much less likelihood of logical errors and much quicker to remove simple typos).
-    * Implement the new struct/type in `AggregatorXComponents` and run thte test
-    * Add type to the export list of the package.
+    * Implement the new struct/type in `AggregatorXComponents`.
+    * Add type to the export list of the package and run the test.
 * Add constructor for the new type
     * Write a test that creates the object, that is you need a minimum system description that includes the new component and then call `buildaggregator()`.
     * Write a method in `AggregatorXComponents` that returns the initalized object (make sure it will be called from buildaggregator - check calling signature) and test it.
