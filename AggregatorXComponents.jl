@@ -152,6 +152,14 @@ struct FixedLoad <: Load
     id::Integer
 end
 
+struct VariableLoad <: Load
+    power::Dict{Integer, Vector{AffExpr}}
+    sources::Vector{Integer}
+    lower_bound::Vector{Real}
+    upper_bound::Vector{Real}
+    id::Integer
+end
+
 # for testing
 struct MegaCharger <: ChargingStation
     pmax::Number

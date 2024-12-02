@@ -156,6 +156,17 @@ end
     filepath = joinpath(@__DIR__, "test-systems", "fixed_load_test.json")
     sys,aggregator = buildaggregator(filepath)
     fixeload = aggregator["Resource"][1]
+
+    # Variable load
+    @test begin
+        power = Dict{Integer, Vector{AffExpr}}(3 => Vector{AffExpr}(undef, 0))
+        sources = [2]
+        upper_bound = [4, 5, 6]
+        lower_bound = [3, 2, 1]
+        id = 1        
+        variableload = VariableLoad(power, sources, lower_bound, upper_bound, id)
+        isa(variableload, VariableLoad)
+    end
 end
 
 @testset begin

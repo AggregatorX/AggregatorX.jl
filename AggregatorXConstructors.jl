@@ -173,6 +173,11 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
     return FixedLoad(source, load, id)
 end
 
+# VariableLoad
+function build_aggregatorx_object() #t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String, Any}
+
+end
+
 # - MinLoad - !Not tested!
 function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
 
