@@ -167,6 +167,11 @@ end
         variableload = VariableLoad(power, sources, lower_bound, upper_bound, id)
         isa(variableload, VariableLoad)
     end
+    # Constructor
+    filepath = joinpath(@__DIR__, "test-systems", "variable_load_test.json")
+    sys,aggregator = buildaggregator(filepath)
+    variableload = aggregator["Resource"][1]
+    @test isa(variableload, VariableLoad)
 end
 
 @testset begin

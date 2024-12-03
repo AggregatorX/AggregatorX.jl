@@ -174,8 +174,48 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
 end
 
 # VariableLoad
-function build_aggregatorx_object() #t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String, Any}
+function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+    connections = aggregator["Connection"]
+    id = l["id"]
 
+    power = Dict{Integer, Vector{AffExpr}}()
+
+    sources = Vector{Int}(undef,0)
+    has_output = 0
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{AffExpr}()
+            has_output = has_output + 1
+        elseif c.sink == id
+            push!(sources, c.source)
+        end
+    end
+
+    if has_output > 1
+        # should throw an error
+    end
+
+    if has_output == 0 # if no market connected to output
+        power[0] = Vector{AffExpr}()
+    end
+
+    lower_bound = Vector{Real}(undef, N)
+    if isa(l["lower_bound"], Real) # Single number in system description
+        lower_bound = l["lower_bound"] * ones(N)
+    # elseif code if system description is a vector
+    # else code if system description is string representing a file.
+    # else error
+    end
+    upper_bound = Vector{Real}(undef, N)
+    if isa(l["upper_bound"], Real)
+        lower_bound = l["upper_bound"] * ones(N)
+     # elseif code if system description is a vector
+    # else code if system description is string representing a file.
+    # else error
+    end
+
+    return VariableLoad(power, sources, lower_bound, upper_bound, id)
 end
 
 # - MinLoad - !Not tested!
