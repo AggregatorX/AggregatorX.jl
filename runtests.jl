@@ -169,9 +169,15 @@ end
     end
     # Constructor
     filepath = joinpath(@__DIR__, "test-systems", "variable_load_test.json")
-    sys,aggregator = buildaggregator(filepath)
+    sys, aggregator = buildaggregator(filepath)
     variableload = aggregator["Resource"][1]
     @test isa(variableload, VariableLoad)
+    # Optimization
+    model = optimizeaggregator(aggregator, optimizer)
+    @test isa(model, Model)
+    # Min load 1 and 2, price 1 and 2, sum 5 (negative)
+    @test objective_value(model) ≈ -5.0 atol= 1e-6
+
 end
 
 @testset begin

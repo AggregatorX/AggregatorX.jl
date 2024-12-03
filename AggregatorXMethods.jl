@@ -89,6 +89,10 @@ function set_optimization_variables(model::Model, load::FixedLoad, timestruct::T
     # No variables need
 end
 
+function set_optimization_variables(model::Model, load::VariableLoad, timestruct::TimeStruct)
+    # No variables need
+end
+
 # These are used for each load if there are additional variables to be defined depending on type
 function set_optimization_variables(model::Model, load::MinAverageLoad, timestruct::TimeStruct) 
     # return charge, charging, discharging
@@ -309,6 +313,23 @@ function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Di
     N = aggregator["TimeStruct"].periods
     source = get_component(l.source, aggregator)
     @constraint(model, source.power[l.id][1:N] == l.load[1:N], base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id))
+end
+
+function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+    len = length(l.sources)
+
+    if len == 1
+        k = keys(l.sources)
+        sourceid = l.sources[k[1]]
+        source = get_component(sourceid, aggregator)
+    elseif len != 0
+        # throw error, mulitple (or zero) inputs, currently not supported
+    end
+    
+    @constraint(model, source.power[l.id][1:N] >= l.lower_bound[1:N], base_name = "lower-bound-variable-load-" * string(l.id))
+    @constraint(model, source.power[l.id][1:N] <= l.upper_bound[1:N], base_name = "upper-bound-variable-load-" * string(l.id))
+
 end
 
 function set_optimization_constraints(model::Model, l::MinLoad, aggregator::Dict{String, Any})

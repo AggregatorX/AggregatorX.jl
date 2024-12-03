@@ -203,14 +203,17 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     lower_bound = Vector{Real}(undef, N)
     if isa(l["lower_bound"], Real) # Single number in system description
         lower_bound = l["lower_bound"] * ones(N)
-    # elseif code if system description is a vector
-    # else code if system description is string representing a file.
+    elseif isa(l["lower_bound"], Vector{Any}) # if system description is a vector
+        lower_bound = l["lower_bound"]
+    # elseif code if system description is string representing a file.
     # else error
     end
+
     upper_bound = Vector{Real}(undef, N)
     if isa(l["upper_bound"], Real)
-        lower_bound = l["upper_bound"] * ones(N)
-     # elseif code if system description is a vector
+        upper_bound = l["upper_bound"] * ones(N)
+    elseif isa(l["upper_bound"], Vector{Any}) # if system description is a vector
+        upper_bound = l["upper_bound"]
     # else code if system description is string representing a file.
     # else error
     end
