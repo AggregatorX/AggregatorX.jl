@@ -179,13 +179,13 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     connections = aggregator["Connection"]
     id = l["id"]
 
-    power = Dict{Integer, Vector{AffExpr}}()
+    power = Dict{Integer, Vector{VariableRef}}()
 
     sources = Vector{Int}(undef,0)
     has_output = 0
     for c in connections
         if c.source == id
-            power[c.sink] = Vector{AffExpr}()
+            power[c.sink] = Vector{VariableRef}(undef, N)
             has_output = has_output + 1
         elseif c.sink == id
             push!(sources, c.source)
@@ -197,7 +197,7 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     end
 
     if has_output == 0 # if no market connected to output
-        power[0] = Vector{AffExpr}()
+        power[0] = Vector{VariableRef}(undef, N)
     end
 
     lower_bound = Vector{Real}(undef, N)
@@ -298,7 +298,7 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
 
     class = get_class(m)
     
-    return SimpleDAMarket(power, m["price"], resource, m["sign"], m["class"],  id)
+    return SimpleDAMarket(power, m["price"], resource, m["sign"], class,  id)
 end
 
 # - FFRProfil -

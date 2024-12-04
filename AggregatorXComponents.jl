@@ -153,7 +153,7 @@ struct FixedLoad <: Load
 end
 
 struct VariableLoad <: Load
-    power::Dict{Integer, Vector{AffExpr}}
+    power::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
     lower_bound::Vector{Real}
     upper_bound::Vector{Real}

@@ -90,7 +90,12 @@ function set_optimization_variables(model::Model, load::FixedLoad, timestruct::T
 end
 
 function set_optimization_variables(model::Model, load::VariableLoad, timestruct::TimeStruct)
-    # No variables need
+    N = timestruct.periods
+
+    for k in keys(load.power)
+        load.power[k] = @variable(model, [1:N], base_name = "power-VariableLoad-" * string(load.id))
+    end
+    
 end
 
 # These are used for each load if there are additional variables to be defined depending on type
@@ -318,18 +323,19 @@ end
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
     len = length(l.sources)
-
-    if len == 1
-        k = keys(l.sources)
-        sourceid = l.sources[k[1]]
-        source = get_component(sourceid, aggregator)
-    elseif len != 0
+    
+    if len == 1        
+        source = get_component(l.sources[1], aggregator)
+    elseif len != 1
         # throw error, mulitple (or zero) inputs, currently not supported
     end
     
     @constraint(model, source.power[l.id][1:N] >= l.lower_bound[1:N], base_name = "lower-bound-variable-load-" * string(l.id))
     @constraint(model, source.power[l.id][1:N] <= l.upper_bound[1:N], base_name = "upper-bound-variable-load-" * string(l.id))
 
+    for k = keys(l.power)
+        @constraint(model, l.power[k[1]][1:N] == source.power[l.id][1:N], base_name = "in-out-variable-load-" * string(l.id))
+    end
 end
 
 function set_optimization_constraints(model::Model, l::MinLoad, aggregator::Dict{String, Any})
