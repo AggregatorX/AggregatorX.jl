@@ -88,11 +88,6 @@ struct LinearTariff <: Grid
     id::Integer
 end
 
-struct SimpleGrid <: Grid
-    price::Array{AbstractFloat}
-    id::Integer
-end
-
 # - Markets -
 struct SimpleMarket <: Market
     power::Dict{Integer, Vector{VariableRef}} # redundant?
