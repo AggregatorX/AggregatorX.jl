@@ -178,6 +178,15 @@ end
     # Min load 1 and 2, price 1 and 2, sum 5 (negative)
     @test objective_value(model) ≈ -5.0 atol= 1e-6
 
+    # LinearTariff
+    @test begin
+        Dict{Integer, Vector{AffExpr}}(2 => Vector{AffExpr}(undef, 1))
+        sources = [3]
+        price = [1,2,3]
+        upper_bound = [1,2,3]
+        id = 1
+        lineartariff = LinearTariff(power, sources, price, upper_bound, id)    
+    end broken = true
 end
 
 @testset begin
