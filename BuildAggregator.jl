@@ -18,7 +18,7 @@ function buildaggregator(systemdescription::String)
     # Several parts use TimeStruct
     # Markets, Resources, Nodes uses Connections
     # Markets may need Groups
-    parts = ("TimeStruct", "Connection", "Group",  "Market", "Resource", "Node" ) 
+    parts = ("TimeStruct", "Connection", "Group",  "Market", "Resource", "Node", "Grid" ) 
     
     aggregator = Dict{String, Any}() # One entry for each parttype
     
@@ -48,19 +48,18 @@ function buildaggregator(systemdescription::String)
 
         elseif p == "Market" || p == "Resource" || p == "Node" || p == "Grid"
 
-            component_array = Vector{typetable[p]}(undef, length(sys[p])) # Vector to hold each component
-            
-            for (i,c)  in enumerate(sys[p]) # each component of component type
-                componenttype = typetable[c["type"]]
-                if applicable(build_aggregatorx_object, componenttype, c, aggregator)
-                    component_array[i] = build_aggregatorx_object(componenttype, c, aggregator)      
-                else
-                    println("Matching constructor method not found.")
+            if haskey(sys,p)
+                component_array = Vector{typetable[p]}(undef, length(sys[p])) # Vector to hold each component
+                for (i,c)  in enumerate(sys[p]) # each component of component type
+                    componenttype = typetable[c["type"]]
+                    if applicable(build_aggregatorx_object, componenttype, c, aggregator)
+                        component_array[i] = build_aggregatorx_object(componenttype, c, aggregator)      
+                    else
+                        println("Matching constructor method not found.")
+                    end
                 end
-            end
-
             aggregator[p] = component_array
-        
+            end
         else
             print("Warning: Read undefined system description key. Please check JSON system description")
         end
@@ -69,4 +68,5 @@ function buildaggregator(systemdescription::String)
     #TEMP
     return (sys,aggregator)
     #TEMP
+    
 end

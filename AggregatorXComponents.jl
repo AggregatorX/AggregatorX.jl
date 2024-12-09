@@ -83,8 +83,8 @@ end
 struct LinearTariff <: Grid
     power::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
-    price::Vector{Integer}
-    upper_bound::Vector{Integer}
+    price::Vector{Real}
+    upper_bound::Vector{Real}
     id::Integer
 end
 

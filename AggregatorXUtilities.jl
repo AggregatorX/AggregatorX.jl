@@ -74,7 +74,7 @@ function get_component(id ,aggregator)
 end
 
 function all_ids(sys::Dict{String, Any})
-    component_with_id = ["Resource", "Market", "Group", "Node"]
+    component_with_id = ["Resource", "Market", "Group", "Node", "Grid"]
 
     ids = Set{Integer}()
 

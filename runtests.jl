@@ -19,6 +19,7 @@ end
 
 using .AggregatorX
 
+println("\n Running component tests... \n ")
 
 @testset begin # Component tests
     power = Dict{Integer, Vector{VariableRef}}()
@@ -187,6 +188,13 @@ end
         id = 1
         lineartariff = LinearTariff(power, sources, price, upper_bound, id)  
         isa(lineartariff, LinearTariff)  
+    end
+    # Constructor
+    @test begin
+        filepath = joinpath(@__DIR__, "test-systems", "lineartariff-test1.json")
+        sys, aggregator = buildaggregator(filepath)
+        lineartariff = aggregator["Grid"][1]
+        isa(lineartariff, LinearTariff)
     end
 end
 

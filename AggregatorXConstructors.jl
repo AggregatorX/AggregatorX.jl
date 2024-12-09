@@ -246,6 +246,32 @@ function build_aggregatorx_object(lt::Type{MinAverageLoad}, l::Dict{String, Any}
 end
 
 # ------------
+# - Grids -
+# ------------
+function build_aggregatorx_object(gt::Type{LinearTariff}, g::Dict{String, Any}, aggregator::Dict{String,Any})
+    connections = aggregator["Connection"]
+    N = aggregator["TimeStruct"].periods
+    id = g["id"]
+    
+    power = Dict{Integer,Vector{VariableRef}}()
+    sources = Vector{Integer}(undef,0)
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{VariableRef}(undef,N)
+        end
+        if c.sink == id
+            push!(sources, c.source)
+        end
+    end
+
+    price = g["price"]
+
+    upper_bound = g["upper_bound"]
+
+    return LinearTariff(power, sources, price, upper_bound, id)
+end
+
+# ------------
 # - Markets -
 # ------------
 
