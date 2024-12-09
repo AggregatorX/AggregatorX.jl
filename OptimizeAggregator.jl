@@ -42,6 +42,13 @@ function optimizeaggregator(aggregator, optimizer)
         set_optimization_variables(model, n, aggregator["TimeStruct"]) 
     end
 
+    # Grids
+    if haskey(aggregator, "Grid")
+        for g in aggregator["Grid"]
+            set_optimization_variables(model, g, aggregator["TimeStruct"])
+        end
+    end
+
     # --- Constraints ---
 
     # Markets
@@ -64,7 +71,7 @@ function optimizeaggregator(aggregator, optimizer)
     # Groups
     if haskey(aggregator,"Grid")
         for g in aggregator["Grid"]
-            set_optimization_constraint(model, g, aggregator)
+            set_optimization_constraints(model, g, aggregator)
         end
     end
 

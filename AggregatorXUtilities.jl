@@ -167,5 +167,9 @@ function validate_system_description(sys)
 end
 
 function all_components(aggregator)
-    union(aggregator["Resource"], aggregator["Market"], aggregator["Node"]) # also grid if exists
+    if haskey(aggregator, "Grid")
+        union(aggregator["Resource"], aggregator["Market"], aggregator["Node"], aggregator["Grid"])
+    else
+        union(aggregator["Resource"], aggregator["Market"], aggregator["Node"])
+    end
 end

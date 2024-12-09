@@ -196,6 +196,12 @@ end
         lineartariff = aggregator["Grid"][1]
         isa(lineartariff, LinearTariff)
     end
+    @test begin
+        filepath = joinpath(@__DIR__, "test-systems", "lineartariff-test1.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        isa(model, Model)
+    end
 end
 
 @testset begin
