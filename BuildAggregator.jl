@@ -46,7 +46,7 @@ function buildaggregator(systemdescription::String)
                 aggregator[p] = groups
             end
 
-        elseif p == "Market" || p == "Resource" || p == "Node"
+        elseif p == "Market" || p == "Resource" || p == "Node" || p == "Grid"
 
             component_array = Vector{typetable[p]}(undef, length(sys[p])) # Vector to hold each component
             
