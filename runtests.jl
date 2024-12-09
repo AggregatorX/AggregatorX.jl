@@ -180,13 +180,14 @@ end
 
     # LinearTariff
     @test begin
-        Dict{Integer, Vector{AffExpr}}(2 => Vector{AffExpr}(undef, 1))
+        power = Dict{Integer, Vector{AffExpr}}(2 => Vector{AffExpr}(undef, 1))
         sources = [3]
         price = [1,2,3]
         upper_bound = [1,2,3]
         id = 1
-        lineartariff = LinearTariff(power, sources, price, upper_bound, id)    
-    end broken = true
+        lineartariff = LinearTariff(power, sources, price, upper_bound, id)  
+        isa(lineartariff, LinearTariff)  
+    end
 end
 
 @testset begin

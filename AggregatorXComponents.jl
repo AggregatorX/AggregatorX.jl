@@ -80,6 +80,14 @@ end
 
 #  - Grids -
 
+struct LinearTariff <: Grid
+    power::Dict{Integer, Vector{VariableRef}}
+    sources::Vector{Integer}
+    price::Vector{Integer}
+    upper_bound::Vector{Integer}
+    id::Integer
+end
+
 struct SimpleGrid <: Grid
     price::Array{AbstractFloat}
     id::Integer
