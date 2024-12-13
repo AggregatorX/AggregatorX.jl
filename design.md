@@ -1,18 +1,44 @@
-The work flow of the software is as follows:
+# AggregatorX - software design
 
-* Describe your system of interest in a json file. This file is refered to as the *system description*. This file can have any name but we fill refer to it as `system.json` as an example
+This document explains how (and to some degree why) the package AggregatorX is designed and used. The main purpose is to enable users to efficiently extend and contribute to the code.
+
+# Introduction
+
+## Usage
+
+Before diving into the details let us give a breif description of the motivation of the software and a typical workflow.
+
+### Motivation
+
+The main motivation for AggregatorX is to create a piece of software that simplifies the analysis of use flexible energy resources and their participation in multiple energy and balancing markets. By analysis we here mean optimization models that try to optimize the scheduled energy flow according to some defined profit. The idea is that must flexible energy resource and markets have many similar features and the software automates all the manual work of setting up the the optimization model (variables, constraints, objective function) based on a high level description of the system under study.
+
+### Work flow
+
+Here is a short description of atypical the work flow, hopefully to illustrate the simplicity of setting up and running an optimization model:
+
+* Describe your system of interest in a JSON file. This file is refered to as the *system description*. This file can have any name but typically called `system.json` and we will use this as a name in the following.
 * Import the AggregatorX package, `using AggregatorX`.
 * Build the system using `aggregator = buildaggregatorx("system.json")`. What this does is to create objects of AggregatorX types with the number and types of objects and their parameters based on the content of `system.json`. The aggregatorX objects are stored in the variable `aggregator` as a dictionary.
-* Create and run optimization of system using `optimizeaggregator(aggregator, optimizer)`. This creates a JuMP model based on the information in the `aggregator` object. It then tries to optimize the model using the optimizer referred to by `optimizer`.
+* Create and run optimization of system using `optimizeaggregator(aggregator, optimizer)`. This creates a JuMP model based on the information in the `aggregator` object. It then tries to optimize the model using the optimization solver referred to by `optimizer`.
 
+## Some words (of wisdom)
+A conceptual and mathematical description of what the software does is provided in the document `mathematical-description.tex`. It is probably a got idea to read this document first to understand to what the software tries to acheive, before diving into the nitty-gritty of the software design. 
 
+There are also some design-choices that might be somewhat non-intuitive (hopefully they will gradually become intuitive, otherwise it was probably a bad design-choice). We provide a list of these here and an attempt at explnation (and justification of the choice). You can skip this on a first read and refer back to it when necessary.
 
-# Some words
-Read the mathematical/conceptual description first
+* The objective sees to *maximize* profits. Any revenue (e.g. selling energy) should therefore be *negative*, and costs (e.g. buying energy) should be *positive*.
 
-Seeks to maximize profits (costs are negative, revenue positive)
+Some users may also not be familiar with the Julia programming language or the JuMP modelling language. We therefore provide a list of some terms that are used in the following that might be unfamiliar for these readers. Again, this may be skipped on a first read, and refered back to when confusion sets in.
 
-VariableRef
+* `VariableRef`. This is a Julia type defined by JuMP. An instance of this type is a reference to an internal JuMP optimization variable. I.e it provides access to the optimization variable from the scope where the VariableRef is defined. A Variable ref is returned by JuMP macros that create variables.
+
+# Software design
+
+OK, let's take a deep dive into the nitty gritty (Oh boy, I can't wait...)
+
+## File structure
+
+Let us first point to where you can find things. 
 
 # The AggregatorX type hierarchy
 
