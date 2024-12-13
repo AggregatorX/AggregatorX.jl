@@ -8,9 +8,6 @@ function optimizeaggregator(aggregator, optimizer)
 
     # -- Variables --
 
-    #categories = [ "Grid", "Market"]
-    #id_map = idx_to_id(aggregator, categories) # map component index to component id: id = id_map["component"][idx] 
-
     # Resources
     for component in aggregator["Resource"]  
         set_optimization_variables(model, component, aggregator["TimeStruct"])                      

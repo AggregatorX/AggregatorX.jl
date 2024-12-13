@@ -34,7 +34,6 @@ function build_connection(connectiondef::Any, typetable, ids)
 
         return connection_array
     end
-
 end
 
 # ----------
@@ -206,7 +205,7 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     elseif isa(l["lower_bound"], Vector{Any}) # if system description is a vector
         lower_bound = l["lower_bound"]
     # elseif code if system description is string representing a file.
-    # else error
+    # else error/infinity unbounded
     end
 
     upper_bound = Vector{Real}(undef, N)
@@ -215,7 +214,7 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     elseif isa(l["upper_bound"], Vector{Any}) # if system description is a vector
         upper_bound = l["upper_bound"]
     # else code if system description is string representing a file.
-    # else error
+    # else error/infinity unbounded
     end
 
     return VariableLoad(power, sources, lower_bound, upper_bound, id)
