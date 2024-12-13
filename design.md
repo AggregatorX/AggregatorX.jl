@@ -27,6 +27,7 @@ A conceptual and mathematical description of what the software does is provided 
 There are also some design-choices that might be somewhat non-intuitive (hopefully they will gradually become intuitive, otherwise it was probably a bad design-choice). We provide a list of these here and an attempt at explnation (and justification of the choice). You can skip this on a first read and refer back to it when necessary.
 
 * The objective sees to *maximize* profits. Any revenue (e.g. selling energy) should therefore be *negative*, and costs (e.g. buying energy) should be *positive*.
+* *Parts*. You will see later that there is a hierarchy of different types in the system (e.g. Resources, Markets, etc.). To refer to all of them we will use the term *parts* (also in code). Hence, anything that is a subtype of `AggregatorXAny` is a part (you can think of all the parts that make the clockwork tick...)
 
 Some users may also not be familiar with the Julia programming language or the JuMP modelling language. We therefore provide a list of some terms that are used in the following that might be unfamiliar for these readers. Again, this may be skipped on a first read, and refered back to when confusion sets in.
 
@@ -46,7 +47,15 @@ This is where the main module is defined. It only contains a list of function wh
 
 `AggregatorXComponents.jl`
 
-The type system is often an essential part of a piece of Julia software and important for software design. This file describes the hierarchy of new abstract types defined in AggregatorX as well as all the conrecte types (i.e `structs`) that may be instantiated. These concrete types typically represent physical (e.g. battery) or conceptual (e.g. a market) objects in the system we want to study.
+The type system is often an essential part of a piece of Julia software and important for software design. This file describes the hierarchy of new abstract types defined in AggregatorX as well as all the conrecte types (i.e `structs`) that may be instantiated. These concrete types typically represent physical (e.g. battery) or conceptual (e.g. a market) objects in the system we want to study. When you want to create a new type to represent some new physical object, you start here by defining the necessary fields that describe the characteristics of the object. The system description you write provide the parameter values that go into these types during a particular run of the software.
+
+`BuildAggregatorX.j`
+
+This file defines the function `buildaggregator()`. What this function does is to take the path of the system description as an argument and return a dictionary that contains instances of the various components defined in the above file. It basicall translates what you have defined in your system description to the internal data structure of AggregatorX. The function first parses the system description file into individual components. Each component as a `type` field in the JSON file. The software translates this to an AggregatorX type with using a typetable which translates string type descriptions to a Julia type. It then calls `build_aggregatorx_object()` with the type as an argument. This function call dispatches to different functions depending on the type argument, which contains the appropriate code for that given type. All the instantiated objects are grouped in a dictionary which is returned by `buildaggregator()`
+
+`AggregatorXConstructors.jl`
+
+This file con
 
 # The AggregatorX type hierarchy
 

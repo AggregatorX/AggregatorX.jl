@@ -10,17 +10,18 @@ function buildaggregator(systemdescription::String)
 
     validate_system_description(sys)
 
-    typetable = build_typetable() # Translates string description of type (from json) to a AggregatorX Type
+    typetable = build_typetable() # Translates string description of type (from json) to a AggregatorX type
 
     ids = all_ids(sys) # List of all ids
 
-    # Sequence here is relevant:
-    # Several parts use TimeStruct
-    # Markets, Resources, Nodes uses Connections
+    # The sequence we loop over the components is relevant. Some components may
+    # need other components allready built during construction:
+    # Several parts need TimeStruct
+    # Markets, Resources, Nodes needs Connections
     # Markets may need Groups
     parts = ("TimeStruct", "Connection", "Group",  "Market", "Resource", "Node", "Grid" ) 
     
-    aggregator = Dict{String, Any}() # One entry for each parttype
+    aggregator = Dict{String, Any}() # One entry for each type of part
     
     for p in parts
         if p == "TimeStruct"
