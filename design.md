@@ -22,7 +22,7 @@ Here is a short description of atypical the work flow, hopefully to illustrate t
 * Create and run optimization of system using `optimizeaggregator(aggregator, optimizer)`. This creates a JuMP model based on the information in the `aggregator` object. It then tries to optimize the model using the optimization solver referred to by `optimizer`.
 
 ## Some words (of wisdom)
-A conceptual and mathematical description of what the software does is provided in the document `mathematical-description.tex`. It is probably a got idea to read this document first to understand to what the software tries to acheive, before diving into the nitty-gritty of the software design. 
+A conceptual and mathematical description of what the software does is provided in the document `mathematical-description.tex`. It is probably a good idea to read this document first to understand to what the software tries to acheive, before diving into the nitty-gritty of the software design. 
 
 There are also some design-choices that might be somewhat non-intuitive (hopefully they will gradually become intuitive, otherwise it was probably a bad design-choice). We provide a list of these here and an attempt at explnation (and justification of the choice). You can skip this on a first read and refer back to it when necessary.
 

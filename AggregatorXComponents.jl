@@ -1,6 +1,10 @@
-# Type declarations (must come before constructor functions)
+### Abstract types ###
 
 abstract type AggregatorXAny end
+
+abstract type TimeStruct <: AggregatorXAny end
+
+abstract type AbstractConnection <: AggregatorXAny end
 
 abstract type Component <: AggregatorXAny end
 
@@ -12,13 +16,30 @@ abstract type Market <: Component end
 
 abstract type Resource <: Component end
 
+abstract type Load <: Resource end
+
 abstract type Node <: Component end
+
+### Concrete types ###
+
+# -------------------
+# - Time structure -
+# -------------------
+
+# IndexedTimeStruct has no relation to absolute time, it is simply an index.
+struct IndexedTimeStruct <: TimeStruct 
+    periods::Int # The number of time steps
+end
+
+# -------------
+# - Components
+# -------------
 
 # - Node -
 mutable struct StandardNode <: Node
     power::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
-    id::Signed
+    id::Integer
 end
 
 # - SimpleCharger -
@@ -30,7 +51,7 @@ mutable struct SimpleCharger <: Resource
     down_activation::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
     max_power::Real
-    id::Signed
+    id::Integer
 end
 
 # - SimpleBattery -
@@ -50,100 +71,16 @@ mutable struct SimpleBattery <: Resource
     id::Integer
 end
 
-## Groups
-mutable struct FFRGroup <: Group
-    up_capacity::Vector{AffExpr}
-    resources::Set{Int} # Set of tuples of resource and group ids.
-    markets::Set{Int} # Set of tuples of group and market ids.  
-    class::String  
-    id::Integer
-end
-
-mutable struct FCRGroup <: Group
-    up_capacity::Vector{AffExpr} # These could be AffExpr to reduce number of variables.
-    down_capacity::Vector{AffExpr}
-    up_activation::Vector{AffExpr}
-    down_activation::Vector{AffExpr}
-    resources::Set{Int} # Set of tuples of resource and group ids.
-    markets::Set{Int} # Set of tuples of group and market ids.  
-    class::String  
-    id::Integer
-end
-
-## - Time structure -
-abstract type TimeStruct <: AggregatorXAny end
-# Define some minimum requirements for all concrete types? I.e. there must be a periods variable
-# Timestructur that has no absolute duration or relation to absolute time, it is simply an index.
-struct IndexedTimeStruct <: TimeStruct 
-    periods::Int # The number of time periods
-end
-
-#  - Grids -
-
-struct LinearTariff <: Grid
-    power::Dict{Integer, Vector{VariableRef}}
-    sources::Vector{Integer}
-    price::Vector{Real}
-    upper_bound::Vector{Real}
-    id::Integer
-end
-
-# - Markets -
-struct SimpleMarket <: Market
-    power::Dict{Integer, Vector{VariableRef}} # redundant?
-    price:: Array{AbstractFloat}
-    resource::Integer       
-    sign::Integer
-    class::String
-    id::Integer
-end
-
-mutable struct SimpleDAMarket <: Market
-    power::Dict{Integer, Vector{VariableRef}}
-    price::Vector{AbstractFloat}
-    resource::Integer       
-    sign::Integer
-    class::String
-    id::Integer
-end
-
-mutable struct FFRProfil <: Market
-    up_capacity::Vector{VariableRef} # reserved capacity
-    price::Vector{AbstractFloat}
-    armed::Vector{Bool} # Periods where FFR is armed
-    sign::Integer
-    class::String
-    id::Integer
-end
-
-# "FCR-N"
-mutable struct FCRN <: Market
-    up_capacity::Vector{VariableRef}
-    down_capacity::Vector{VariableRef}
-    up_activation::Vector{VariableRef}    
-    down_activation::Vector{VariableRef}
-    price_capacity::Vector{AbstractFloat}
-    price_up_activation::Vector{AbstractFloat}
-    price_down_activation::Vector{AbstractFloat}
-    df::Vector{AbstractFloat} # Frequency deviation in Hz
-    dfmax::AbstractFloat # maximum frequency deviation
-    sign::Integer
-    class::String
-    id::Integer
-end
-
+# ----------
 # - Loads -
-abstract type Load <: Resource end
+# ----------
 
-abstract type ChargingStation <: Load end
-
-struct MinLoad <: Load    
+struct MinLoad <: Load # Depreceated, use VariableLoad with fixed lower_bound and no upper_bound (e.g. infinity)
     pmin::Number
     source::Integer
     id::Integer
 end
 
-"A load where the average load over the simulation time must be greatet than some minimum load."
 struct MinAverageLoad <: Load
     pmin::Number # minimum average power
     id::Integer
@@ -163,24 +100,92 @@ struct VariableLoad <: Load
     id::Integer
 end
 
-# for testing
-struct MegaCharger <: ChargingStation
-    pmax::Number
+# ----------
+# - Grids -
+# ----------
+
+struct LinearTariff <: Grid
+    power::Dict{Integer, Vector{VariableRef}}
+    sources::Vector{Integer}
+    price::Vector{Real}
+    upper_bound::Vector{Real}
     id::Integer
 end
 
-# - Connections -
-abstract type AbstractConnection <: Component end # Should connections rather be subtype of AggregatorXAny?
+# -----------
+# - Groups -
+# -----------
 
-# Perhaps rename fields that reference ids as sourceId, sinkId etc.?
+mutable struct FFRGroup <: Group
+    up_capacity::Vector{AffExpr}
+    resources::Set{Int} # ids of resources in the group.
+    markets::Set{Int} # ids of markets connected to the group.
+    class::String  
+    id::Integer
+end
+
+mutable struct FCRGroup <: Group
+    up_capacity::Vector{AffExpr}
+    down_capacity::Vector{AffExpr}
+    up_activation::Vector{AffExpr}
+    down_activation::Vector{AffExpr}
+    resources::Set{Int} # ids of resources in the group.
+    markets::Set{Int} # ids of markets connected to the group.
+    class::String  
+    id::Integer
+end
+
+# ------------
+# - Markets -
+# ------------
+
+struct SimpleMarket <: Market
+    power::Dict{Integer, Vector{VariableRef}}
+    price:: Array{AbstractFloat}
+    resource::Integer       
+    sign::Integer
+    class::String
+    id::Integer
+end
+
+mutable struct SimpleDAMarket <: Market
+    power::Dict{Integer, Vector{VariableRef}}
+    price::Vector{AbstractFloat}
+    resource::Integer       
+    sign::Integer
+    class::String
+    id::Integer
+end
+
+mutable struct FFRProfil <: Market
+    up_capacity::Vector{VariableRef} # Reserved capacity.
+    price::Vector{AbstractFloat}
+    armed::Vector{Bool} # Time steps where FFR is armed.
+    sign::Integer
+    class::String
+    id::Integer
+end
+
+mutable struct FCRN <: Market
+    up_capacity::Vector{VariableRef}
+    down_capacity::Vector{VariableRef}
+    up_activation::Vector{VariableRef}    
+    down_activation::Vector{VariableRef}
+    price_capacity::Vector{AbstractFloat}
+    price_up_activation::Vector{AbstractFloat}
+    price_down_activation::Vector{AbstractFloat}
+    df::Vector{AbstractFloat} # Frequency deviation in Hz.
+    dfmax::AbstractFloat # Maximum frequency deviation in Hz.
+    sign::Integer
+    class::String
+    id::Integer
+end
+
+# ----------------
+# - Connections -
+# ----------------
+
 struct Connection <: AbstractConnection
     source::Integer
     sink::Integer
 end
-
-
-# ---Constructor wrapper methods ---
-# for instantiating aggragtorX objects. One constructor needed for each type aggregatorx type
-## - Groups
-
-include("AggregatorXConstructors.jl")
