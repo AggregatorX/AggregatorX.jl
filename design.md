@@ -44,6 +44,10 @@ Let us first point to where you can find things.
 
 This is where the main module is defined. It only contains a list of function which the module exports (available when `using` the package) as well as an `include` statement for all the files where all the other code as been organized.
 
+`AggregatorXComponents.jl`
+
+The type system is often an essential part of a piece of Julia software and important for software design. This file describes the hierarchy of new abstract types defined in AggregatorX as well as all the conrecte types (i.e `structs`) that may be instantiated. These concrete types typically represent physical (e.g. battery) or conceptual (e.g. a market) objects in the system we want to study.
+
 # The AggregatorX type hierarchy
 
 The AggregatorX software defines a set of new abstract and concrete types (The concrete types are akin to classes in other OO languages. Abstract types cannot be instantiated, but can be used for dispatching on functions). All the information about the system under analysis is stored in instances of these types.
