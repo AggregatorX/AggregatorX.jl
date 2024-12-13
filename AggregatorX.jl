@@ -1,7 +1,6 @@
 module AggregatorX
 
 import JSON
-
 using JuMP
 
 # export user functions
@@ -19,8 +18,12 @@ export MinAverageLoad, MinLoad, FixedLoad, VariableLoad # Loads
 export Connection # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException
 
-# Internal functions. Export for testing
-export parse_data, build_connection, build_typetable, all_ids, get_component, build_aggregatorx_object
+# export utilitites
+export get_component
+get_component, all_ids
+
+# Internal functions. Export for testing, to be removed for release version
+export parse_data, build_connection, build_typetable, build_aggregatorx_object
 export set_optimization_variables, set_optimization_constraints, set_objective, get_objective_term
 
 include("AggregatorXUtilities.jl")
