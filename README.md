@@ -1,3 +1,5 @@
+This piece of software is currently under **Development**. While it is the intention that the main branch is stable and provides the described functionality, testing is limted so far and breaking changes may occur. **Contributions** are welcome and may speed up the process to an inital (alpha/beta) release.
+
 
 # Introduction
 
