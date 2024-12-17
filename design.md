@@ -100,8 +100,7 @@ In general, each component has a dictionary `power` that reprsent the power flow
 
 ## Components
 
-### Connections
-Simplify determines which components are connected, i.e. can exchange energy. For balancing markets, the Group object defines which resources are connected to the different markets. 
+### Resources
 
 ### Markets
 Concrete market subtypes must implment at least the following fields: 
@@ -124,15 +123,24 @@ A node is a lossless transmitter of energy between componets.
 
 A node has the following fields
 
-* `Power` A dictionary where the key is a target component and the value is a vector of VariableRef that represents the flow of energy to each resource
-* `Sources` A vector of integers that represent the id of the components that send energy to the node.
+* `power` A dictionary where the key is a target component and the value is a vector of VariableRef that represents the flow of energy to each resource
+* `sources` A vector of integers that represent the id of the components that send energy to the node.
 * `id`
 
-In the json file the node simply needs to set and id (and connections).
+In the JSON file the node simply needs to set and id (and connections).
 
-Buildaggregator calls constructor for each node in json list. Constructur resolves connections and sets power and sources.
+Buildaggregator calls constructor for each node in json list. The constructor resolves connections and sets power and sources.
 
-Optimizeaggregator sets the inputs equal to the outputs. No new variables are needed
+Optimizeaggregator sets the inputs equal to the outputs. No new variables are needed.
+
+### Grids
+
+### Connections
+Simplify determines which components are connected, i.e. can exchange energy. For balancing markets, the Group object defines which resources are connected to the different markets. 
+
+## Groups
+
+## TimeStruct
 
 # Making new components
 An important feature of AggregatorX is that new components can be added to represent physics, markets, resources or behaviour that are not possible with the existing library of components. This section describes the steps that are necessary for adding new components to the software. It simultanously suggest a best practice workflow where some things are not absolutly necessary but will decrease likelihood of errors and make the software and ecosystem easier to maintain.
@@ -159,19 +167,24 @@ The first step is to define the type as a mutable struct in the AggregatorXMetho
 
 The type must be added to the export list of the package in `AggregatorX.jl`
 
-The "type" key in the Josn file refers to this concrete type and used to dispatch the correct constructor.
+The "type" key in the JSON file refers to this concrete type and used to dispatch the correct constructor.
 
-## Working with the solution
-The JuMP model is stored in the variable `model`
+## Make constructor
 
-is_solved_and_feasible(model)
+## Methods to define optimization problem
 
-solution_summary(model)
+## Testing
 
-A good place to start is `all_variables(model)` that lists all variable names
+The script `runtests.jl` runs a series of test that can be used to verify system behavior after changes have been maded. It uses system descriptions from the `test-systems` folder. 
 
-most of the interesting power flows are stored in the power field of the different resources which is a vector of variableref. Use value.(x) to get value
+# Working with the solution
 
+Here are some tips for how to look at the output from the optimization. It primarily a review of key JuMP commands
 
+The JuMP model is stored in the variable `model`. This object contains all the results from the optimization.
 
-To get a variable you can assign x = variable_by_name(model, "name")
+Before doing anything else, first check that an optimum has been found `is_solved_and_feasible(model)`. If that is the case then information about the solution can be found with `solution_summary(model)`. 
+
+Next you would probably like to acces the values of the variables in the optimal solution. To do this you need a reference a `VariableRef` object that points to a particular variable in the model. These reference are stored in the the different components. There are several ways to get this. One quick way is if you know the id of the component (see the system description). You can then use `get_component(id, aggregator)` which returns a reference to the component. The component typically has a field (e.g. `power`) which stores a `VariableRef` object. Letting the `VariableRef` object be called `ref`, you can then use `value(ref)`to get its value. Usually one gets a `Vector` of `VariableRef` and you have to use the broadcasting operator in Julia `.`,   `value.(ref)`.
+
+Another way is to access the variables by name. You can find these from `all_variables(model)` that lists all variable names. To get a reference to the variable you can use `variable_by_name(model, "name")`
