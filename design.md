@@ -73,8 +73,9 @@ This is the meat and potatoes of the software. This is were the JuMP optimizatio
 
 This friendly file solves whatever problems you might have:D. Just kidding, it is just a script that contains all the commands needed to run the whole optimization procedure. All you need to do is changed the system description file.
 
+# Software design
 
-# The AggregatorX type hierarchy
+## The AggregatorX type hierarchy
 
 The AggregatorX software defines a set of new abstract and concrete types (The concrete types are akin to classes in other OO languages. Abstract types cannot be instantiated, but can be used for dispatching on functions). All the information about the system under analysis is stored in instances of these types.
 
@@ -82,30 +83,27 @@ There is a hierarchy of abstract types. Not all levels of the hierarchy are in u
 
 At the top is AggregatorXAny, which extended by three abstract types `Components`, `Groups`and `TimeStruct`. 
 
-`Components` represent concrete elements in the system, either physical objects (batteries, EV charger, connections) or market places. It is the parent of four abstract types `Resources`, `Markets`, `Node`, `Grids` and `AbstractConnection`. `Resources` are components that represent flexible energy resources, conceptually they are either generation/loads or storage units. `Markets`are components where energy is bought or sold and typically adds terms to the objective function. `Grid` componets represent limitations or cost due to local distribution grid. `Node` represents a distribution point of energy among resources and markets. `AbstractConnection` represents connections between the other components.
+`Components` represent concrete elements in the system, either physical objects (batteries, EV charger, connections) or market places. It is the parent of five abstract types `Resources`, `Markets`, `Node`, `Grids` and `AbstractConnection`. `Resources` are components that represent flexible energy resources, conceptually they are either generation/loads or storage units. `Markets`are components where energy is bought or sold and typically adds terms to the objective function. `Grid` componets represent limitations or cost due to local distribution grids. `Node` represents a distribution point of energy among resources and markets. `AbstractConnection` represents connections between the other components.
 
 One can visualize the `Components` as the nodes of the graph that represent the system. Conceptually one can think of the components as entities that exchange energy.
 
-`Groups`are collections of resources that can participate in balancing markets. The groups keep track of reserved capacity and activated energy of the resources in the group and can sell this to various concrete balancing markets.
+`Groups`are collections of resources that can participate in balancing markets. The groups keep track of reserved capacity and activated energy of the resources in the group and can sell this to various balancing markets.
 
 `TimeStruct` represents the timestep used in the system.
 
-# The aggregator dictionary
+## The aggregator dictionary
 
-The `aggregator` object is a dictionary with string keys that refer to particular abstract types: TimeStruct, Market, Resource, Node, Grid, Connection. The key points to a vector of instances of concrete types that are subtypes of these abstract types.
+The `aggregator` object is a dictionary with string keys that refer to particular abstract types: TimeStruct, Market, Resource, Node, Grid, Connection. The key points to a vector of instances of concrete types that are subtypes of these abstract types. This dictionary holds all the information about the system.
 
-# Book-keeping
+### Keeping track of the energy
 In general, each component has a dictionary power that reprsent the power flowing **from** the component. Each key is a component that is connected to an output from component, and the value is a vector of VariableRef that. Currently the `node` component is the only component that has multiple outputs, but the dictionary structure is used to maintain some unity in implementation and for flexibility in future versions that might require additional flexibility.
 
-# Connections
+## Components
+
+### Connections
 Between components. Groups store internally the connected resources and balancing markets. 
 
-
-# Components
-
-
-
-## Markets
+### Markets
 Concrete market subtypes must implment at least the following fields: 
 
 * type - type of market, ie the concrete type
@@ -133,7 +131,7 @@ The markets do not in general have to impose any real constrainta. However, for 
 
 `optimizeaggregator()` calls `set_objective()`. This function loops over alle markets (other components that adds costs may be included, e.g. grid tariffs or degradation of batteries). For each market it calls `get_objective_term` that dispatches on the type of market. Any type of function of the variables may be used to describe the market (keeping in mind that anything but linear functions will make the problem harder to solve. Nonlinear functions is currently untested, there might be reasons why this will break the code, e.g. where variables are defined as AffExpr (linear expressions in JuMP)), but a typical implementation will be the price times the power * (-sign). Recall that the sign is 1 if power flow **from** the market, i.e. a cost (unless the price is negative). Power (as all varibles) is always positive (unidirectional connections).
 
-## Node
+### Node
 A node is a lossless transmitter of energy between componets.
 
 A node has the following fields
@@ -148,7 +146,7 @@ Buildaggregator calls constructor for each node in json list. Constructur resolv
 
 Optimizeaggregator sets the inputs equal to the outputs. No new variables are needed
 
-## Making new components
+# Making new components
 An important feature of AggregatorX is that new components can be added to represent physics, markets, resources or behaviour that are not possible with the existing library of components. This section describes the steps that are necessary for adding new components to the software. It simultanously suggest a best practice workflow where some things are not absolutly necessary but will decrease likelihood of errors and make the software and ecosystem easier to maintain.
 
 * Start with a mathematical description, preferably in the style of the Mathematical description of AggregatorX.
@@ -167,7 +165,7 @@ An important feature of AggregatorX is that new components can be added to repre
     * Focus on edge cases
     * Test large systems
 
-### Type description
+## Type description
 
 The first step is to define the type as a mutable struct in the AggregatorXMethods file. Making the concrete type a subtype of a meaningful parent is important. Some methods dispatch on the parent type. The necessary field types will vary somewhat between the types. All components must have an id field.
 
@@ -175,7 +173,7 @@ The type must be added to the export list of the package in `AggregatorX.jl`
 
 The "type" key in the Josn file refers to this concrete type and used to dispatch the correct constructor.
 
-## Working with solution
+## Working with the solution
 The JuMP model is stored in the variable `model`
 
 is_solved_and_feasible(model)

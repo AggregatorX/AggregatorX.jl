@@ -1,67 +1,28 @@
+
 # Introduction
 
-# Usage
-Query variables using the registered name: var = model(:var).
+AggregatorX provides a high level, efficient modelling framework for the analysis of distributed, flexible energy resources and their participation in various energy markets. By analysis, we here primarily mean optimization.
 
-## Terminology
+# Usage and documentation
+There are three sources of documentation:
 
-* Component - one of the boxes in the figure
-* Resources - one of the components that belongs to the aggregator
+* A mathamatical description of the software is provided in a LaTeX document `mathematical-description.tex` which can be found in the `\tex` folder. This provides a precise mathematical description of the the optimization model (i.e variables, constraints and objective function`. However it does not provide much information about the software implementation. That can be found in the next bullet point.
+* The file `design.md` provides a more detailed description of the software, how it is structured, and importantly how it can be extended if the current functionality is not sufficient. 
+* To get started with using the software, a jupyter notebook is provided that provides some simple examples of how the software is used.
 
-# Design
+## Prerequisites
 
+AggregatorX uses various other pieces of software and a knowledge of this will help in it's understanding
 
+* The software is written in *Julia*.
+* To express the optimization the modelling language *JuMP* is used (this allows your own choice of solver).
+* The system you want to study must be expressed in a *JSON* format.
+* Documentation is written in *LaTeX*, *Markdown* and *Jupyter Notebook*
 
-## Overall software design
+If there are some of these you havn't heard of, it might be a good idea to check out an introductio to them first. 
 
-The most general description of the package concept is illustrated in the figure. The aggregator is represented by the dashed line. The components 
+## Nano-introduction
 
-## Variables
-The main variables in the optimization problem are the power or energy flow between the different components of the model. For the variables that represent flow in or out of the aggregator, these variables are represented by two-dimensional vectors x[i,t] where i is the index of the component in a list of components of the same top level abstract type. These applies to grids, loads and markets. These variables are thus
+Please refer to the above list of documentation for a solid introduction. Here follows a miniscule to description to explain how things are put togheter.
 
-* p_grid[i,t]
-* p_load[i,t]
-* a_market[m,t]
-* r_market[m,t]
-
-All these variables participate in the overall energy balance and thus enters the corresponding constraint in a similar way (an option would be to name every variable based on the concrete component type, but theis seems more cumpersome).
-
-In addition comes the internal power flow for the aggregator, the interconnections and contributions to the markets.
-
-The contribution to the acitvated markets from the individual components are
-
-* a_resource[i,t]
-* r_resource[i,t]
-
-The power flow between resources is a variable in the model. The connection between resources is defined by a pair of numbers (i,j) that represent the id of the resources, as defined in the JSON model description file. After parsing the JSON file the connections between the resources is represented by a Vector  of 2 element vectors. [[i,j], [k,l], ...], where the elements are resource id's.
-
-A JuMP array variable p_conn is created to represent the power flow. The length of the array is equal to the number of connections.
-
-p_conn[k,t]
-
-The jump name of the p_conn[k] elements are set to "p_i,j" where i and j are the corresponding element ids.
-
-The choice of adding the "look up table" between the single index of p_conn and the id pair in the variable name is that it would be easier to inspect in model during runtime, as opposed to being some table hidden deeper in the program.
-
-When a resource is initalized a power balance constraint is created. The program loops through the connections. If it finds the id of the resource it looks up the corresponding p_conn element corresponding to the id pair and adds this to the power balance. The element can be looked up by its name "p_i,j"
-
-When creating variables three main types are set: energy from 'external components', energy flow in interconnections, and component specific variables.
-
---- Another idea could be to add connections as another type
-
-# Usage
-
-## Creating new components
-
-To create new components in the aggregator model the following steps must be taken:
-
-* Create a new concret type, possibly with new abstract supertypes that are subtypes of one of the five top abstract types (AbstractTime, AbstractResource, AbstractGrid, AbstractMarket, Abstract Load)
-* Create a new build...(::NewType, JSON data) method that is dispatched when calling with the new type and sets that appropriate fields of the new type according to the JSON data.
-
-set_optimization_constraints(model, agg, comp, ..)
-If component is of type resource the connections must be found. There are four possible types: Load, Grid, Aggregator, interconnections.
-
-For loads an array of indicies is found that represent multiple loads connected to the component.
-For Grid only a single connection idx is allowed for each resource.
-
-
+The first thing you do is decide upon the system you want to study (resources, markets, and how these are connected and grouped, parameters, etc.). This information is entered into a JSON file. By passing this file to a function in the software, the information is converted to an internal data structure in the software. Next you call another function wich takes this information, sets up the optimization problem automatically (using JuMP) and tells it to solve the problem with the solver you have specified. Done! Simple, eh?
