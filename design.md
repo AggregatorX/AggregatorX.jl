@@ -115,21 +115,9 @@ Concrete market subtypes must implment at least the following fields:
 
 The framework assumes that a market is only connected to a single component.
 
-If the market is to be connected to a group it must also implement a `class` field which represent the technical requirements of the market, and thus which groups may be connected to it (this is primarily a check for mistakes in the connections in the system description where wrong markets may be connected to wrong type of group/resources). An optional `name` may also be included which is used for labeling variables and constraints and may be useful when interogating the optimization solution.
-
-When `buildaggregator()` is called the system reads all the market entries in the JSON file, determines the type they represents, and calls the appropriate constructor (dispatching on the market type). As a minimum, the constructur checks the connections and finds the market's id to determine which component it is connected to and assigns this to the resource field. 
-
-It then instantiates power as a dictionary with one key value pair, Resource->empty vector of VariableRef (a julia type, note that this must be reimplemented to use the system with a different modelling package). This so that when the actual VariableRef is created, it can ba assigned to this key (**This seems redundant. One could to this instantiation in variable creation method. No probably need it for instantiating market object**)
-
 The concrete market objects are stored in a vector of type market. This vector is stored in a dictionary value in the aggregator object
 
-After building the aggregator object, the optimization problem is set up by calling `optimizeaggregator()`. This function goes through the three steps of setting up an optimization problem: define variables, define constraints, define objective function.
-
-For markets the the minimum variable creation simply is a vector of variable ref an assigns this to the power dictionary. Special markets might add additional variables
-
-The markets do not in general have to impose any real constrainta. However, for markets that are sinks of energy (energy is sold to the market) the power is constrained to be equal to the output power of the connected resource (this is just a convenience implementation, having the power to the market available in the market object is more convenient than having to query the power in the resource connecte to the market)
-
-`optimizeaggregator()` calls `set_objective()`. This function loops over alle markets (other components that adds costs may be included, e.g. grid tariffs or degradation of batteries). For each market it calls `get_objective_term` that dispatches on the type of market. Any type of function of the variables may be used to describe the market (keeping in mind that anything but linear functions will make the problem harder to solve. Nonlinear functions is currently untested, there might be reasons why this will break the code, e.g. where variables are defined as AffExpr (linear expressions in JuMP)), but a typical implementation will be the price times the power * (-sign). Recall that the sign is 1 if power flow **from** the market, i.e. a cost (unless the price is negative). Power (as all varibles) is always positive (unidirectional connections).
+The markets do not in general have to impose any real constraints. However, for markets that are sinks of energy (energy is sold to the market) the power is constrained to be equal to the output power of the connected resource (this is just a convenience implementation, having the power to the market available in the market object is more convenient than having to query the power in the resource connecte to the market)
 
 ### Node
 A node is a lossless transmitter of energy between componets.
