@@ -10,7 +10,7 @@ Before diving into the details let us give a breif description of the motivation
 
 ### Motivation
 
-The main motivation for AggregatorX is to create a piece of software that simplifies the analysis of use flexible energy resources and their participation in multiple energy and balancing markets. By analysis we here mean optimization models that try to optimize the scheduled energy flow according to some defined profit. The idea is that must flexible energy resource and markets have many similar features and the software automates all the manual work of setting up the the optimization model (variables, constraints, objective function) based on a high level description of the system under study.
+The main motivation for AggregatorX is to create a piece of software that simplifies the analysis of flexible energy resources and their participation in multiple energy and balancing markets. By analysis we here mean optimization models that try to optimize the scheduled energy flow according to some defined profit. The idea is that most flexible energy resource and markets have many similar features and the software automates all the manual work of setting up the the optimization model (variables, constraints, objective function) based on a high level description of the system under study.
 
 ### Work flow
 
@@ -19,14 +19,14 @@ Here is a short description of atypical the work flow, hopefully to illustrate t
 * Describe your system of interest in a JSON file. This file is refered to as the *system description*. This file can have any name but typically called `system.json` and we will use this as a name in the following.
 * Import the AggregatorX package, `using AggregatorX`.
 * Build the system using `aggregator = buildaggregatorx("system.json")`. What this does is to create objects of AggregatorX types with the number and types of objects and their parameters based on the content of `system.json`. The aggregatorX objects are stored in the variable `aggregator` as a dictionary.
-* Create and run optimization of system using `optimizeaggregator(aggregator, optimizer)`. This creates a JuMP model based on the information in the `aggregator` object. It then tries to optimize the model using the optimization solver referred to by `optimizer`.
+* Create and run an optimization of the system with `optimizeaggregator(aggregator, optimizer)`. This creates a JuMP model based on the information in the `aggregator` object. It then tries to optimize the model using the solver referred to by `optimizer`.
 
 ## Some words (of wisdom)
-A conceptual and mathematical description of what the software does is provided in the document `mathematical-description.tex`. It is probably a good idea to read this document first to understand to what the software tries to acheive, before diving into the nitty-gritty of the software design. 
+A conceptual and mathematical description of what the software does is provided in the document `tex\mathematical-description.tex`. It is probably a good idea to read this document first to understand to what the software tries to acheive, before diving into the nitty-gritty of the software design. 
 
-There are also some design-choices that might be somewhat non-intuitive (hopefully they will gradually become intuitive, otherwise it was probably a bad design-choice). We provide a list of these here and an attempt at explnation (and justification of the choice). You can skip this on a first read and refer back to it when necessary.
+There are also some design-choices that might be somewhat non-intuitive (hopefully they will gradually become intuitive, otherwise it was probably a bad design-choice...). We provide a list of these here in an attempt at explnation (and justification) of the choice. You can skip this on a first read and refer back to it when necessary.
 
-* The objective sees to *maximize* profits. Any revenue (e.g. selling energy) should therefore be *negative*, and costs (e.g. buying energy) should be *positive*.
+* The objective sees to *maximize* profits. Any revenue (e.g. selling energy) should therefore be *positive*, and costs (e.g. buying energy) should be *negative*.
 * *Parts*. You will see later that there is a hierarchy of different types in the system (e.g. Resources, Markets, etc.). To refer to all of them we will use the term *parts* (also in code). Hence, anything that is a subtype of `AggregatorXAny` is a part (you can think of all the parts that make the clockwork tick...)
 
 Some users may also not be familiar with the Julia programming language or the JuMP modelling language. We therefore provide a list of some terms that are used in the following that might be unfamiliar for these readers. Again, this may be skipped on a first read, and refered back to when confusion sets in.
@@ -55,7 +55,7 @@ Defines specialized exceptions that are used by the package to provide detailed 
 
 `BuildAggregatorX.j`
 
-This file defines the function `buildaggregator()`. What this function does is to take the path of the system description as an argument and return a dictionary that contains instances of the various components defined in the above file. It basicall translates what you have defined in your system description to the internal data structure of AggregatorX. The function first parses the system description file into individual components. Each component as a `type` field in the JSON file. The software translates this to an AggregatorX type with using a typetable which translates string type descriptions to a Julia type. It then calls `build_aggregatorx_object()` with the type as an argument. This function call dispatches to different functions depending on the type argument, which contains the appropriate code for that given type. All the instantiated objects are grouped in a dictionary which is returned by `buildaggregator()`. We will refer to this dictionary as the `aggregator` object/dictionary.
+This file defines the function `buildaggregator()`. What this function does is to take the path of the system description as an argument and return a dictionary that contains instances of the various components defined in `AggregatorXComponents.jl`. It basicall translates what you have defined in your system description to the internal data structure of AggregatorX. The function first parses the system description file into individual components. Each component has a `type` field in the JSON file. The software translates this to an AggregatorX type using a dictionary (called typetable) which translates string type descriptions to a Julia type. It then calls `build_aggregatorx_object()` with the type as an argument. This function call dispatches to different functions depending on the type argument, which contains the appropriate code for that given type. All the instantiated objects are grouped in a dictionary which is returned by `buildaggregator()`. We will refer to this dictionary as the `aggregator` object/dictionary.
 
 `AggregatorXConstructors.jl`
 
@@ -63,7 +63,7 @@ This file contains the definitions of all the different `build_aggregatorx_objec
 
 `OptimizeAggregator.jl`
 
-This file contains the single function `optimizeaggregator()`. This function does two things. First it sets up the optimization problem based on the information in the `aggregator` object. This is done by repeated calls `set_optimization_variables()`, `set_optimization_constraints()` and `set_objective` which respectively defines the variables, constraints and objective function in a JuMP model. Finally it calls `optimize!(model)` to try to optimize the model and return the (hopefully) feasible solution.
+This file contains the single function `optimizeaggregator()`. This function does two things. First it sets up the optimization problem based on the information in the `aggregator` object. This is done by repeated calls to `set_optimization_variables()`, `set_optimization_constraints()` and `set_objective()` which respectively defines the variables, constraints and objective function in a JuMP model. Finally it calls `optimize!(model)` to try to optimize the model and return the (hopefully) feasible solution.
 
 `AggregatorXMethods.jl`
 
@@ -79,11 +79,11 @@ This friendly file solves whatever problems you might have:D. Just kidding, it i
 
 The AggregatorX software defines a set of new abstract and concrete types (The concrete types are akin to classes in other OO languages. Abstract types cannot be instantiated, but can be used for dispatching on functions). All the information about the system under analysis is stored in instances of these types.
 
-There is a hierarchy of abstract types. Not all levels of the hierarchy are in use, but as been implemented to provide conceptual overview of the types and with the idea that a sensible hierarchy will make extending the code easier in the future.
+There is a hierarchy of abstract types. Not all levels of the hierarchy are in use, but has been implemented to provide conceptual overview of the types and with the idea that a sensible hierarchy will make extending the code easier in the future.
 
-At the top is AggregatorXAny, which extended by three abstract types `Components`, `Groups`and `TimeStruct`. 
+At the top is AggregatorXAny, which is extended by three abstract types `Components`, `Groups`and `TimeStruct`. 
 
-`Components` represent concrete elements in the system, either physical objects (batteries, EV charger, connections) or market places. It is the parent of five abstract types `Resources`, `Markets`, `Node`, `Grids` and `AbstractConnection`. `Resources` are components that represent flexible energy resources, conceptually they are either generation/loads or storage units. `Markets`are components where energy is bought or sold and typically adds terms to the objective function. `Grid` componets represent limitations or cost due to local distribution grids. `Node` represents a distribution point of energy among resources and markets. `AbstractConnection` represents connections between the other components.
+`Components` represent concrete elements in the system, either physical objects (batteries, EV charger, connections) or markets. It is the parent of five abstract types `Resources`, `Markets`, `Node`, `Grids` and `AbstractConnection`. `Resources` are components that represent flexible energy resources, conceptually they are either generation/loads or storage units. `Markets`are components where energy is bought or sold and typically adds terms to the objective function. `Grid` componets represent limitations or cost due to local distribution grids. `Node` represents a distribution point of energy among resources and markets. `AbstractConnection` represents connections between the various components.
 
 One can visualize the `Components` as the nodes of the graph that represent the system. Conceptually one can think of the components as entities that exchange energy.
 
@@ -96,22 +96,22 @@ One can visualize the `Components` as the nodes of the graph that represent the 
 The `aggregator` object is a dictionary with string keys that refer to particular abstract types: TimeStruct, Market, Resource, Node, Grid, Connection. The key points to a vector of instances of concrete types that are subtypes of these abstract types. This dictionary holds all the information about the system.
 
 ### Keeping track of the energy
-In general, each component has a dictionary power that reprsent the power flowing **from** the component. Each key is a component that is connected to an output from component, and the value is a vector of VariableRef that. Currently the `node` component is the only component that has multiple outputs, but the dictionary structure is used to maintain some unity in implementation and for flexibility in future versions that might require additional flexibility.
+In general, each component has a dictionary `power` that reprsent the power flowing **from** the component. Each key in the dictionary is the id of a component that is connected to an output from the component, and the value is a vector of VariableRef that. Currently the `node` component is the only component that has multiple outputs, but the dictionary structure is used to maintain some unity in implementation and for flexibility in future versions that might require additional flexibility.
 
 ## Components
 
 ### Connections
-Between components. Groups store internally the connected resources and balancing markets. 
+Simplify determines which components are connected, i.e. can exchange energy. For balancing markets, the Group object defines which resources are connected to the different markets. 
 
 ### Markets
 Concrete market subtypes must implment at least the following fields: 
 
-* type - type of market, ie the concrete type
-* power - Dict(Integer->Vector(VariableRef)) the power flowing to or from the market
-* price - the cost of energy
-* resource - the resource (component) the market is connected to (note this is different from source in other componets which is the input of the component. Resource can be both input and output.)
-* sign : 1 if the market is a source of energy, (-1) if the market is a sink of energy.
-* id - A unique identifier.
+* `type` - type of market, ie the concrete type
+* `power` - the power flowing to or from the market (`Dict(Integer->Vector(VariableRef))`)
+* `price` - the cost of energy
+* `resource` - the resource (component) the market is connected to (note this is different from source in other componets which is the input of the component. Resource can be both input and output depending on wether energy is bought or sold in the market.)
+* `sign` : 1 if the market is a source of energy, (-1) if the market is a sink of energy.
+* `id` - A unique identifier.
 
 The framework assumes that a market is only connected to a single component.
 
