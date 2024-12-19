@@ -33,15 +33,20 @@ end
 @testset begin
     println("\n Running function tests...\n")
 
-    # parse_data()
+    # Testing parse_data function
+
+    # Vector input
     a = [1,2,3]
     @test a == parse_data(a)
     b = [4,5,6]
     @test a != parse_data(b)
+    
+    # Input as a filename string
     filepath = joinpath(@__DIR__, "test-systems", "sample-data1.txt")
     data = parse_data(filepath)
     @test typeof(data) <: Vector{<:Number}
     @test size(data) == (3,)
+    @test data ≈ [1.0, 2.0, 3.0] atol = 1e-6/length(data)
 
     # Wrong dimensions in input file
     filepath = joinpath(@__DIR__, "test-systems", "sample-data2.txt")

@@ -131,10 +131,14 @@ end
 
 The string data argument represents a file where the data is stored. The function
 reads the data and returns an appropriate string based on the data.
+
+The file must contain a single columen of numbers.
+
+DelimitedFiles.readdlm is used to read the data.
 """
 function parse_data(datafile::String)
     filepath = joinpath(@__DIR__, datafile)
-    data = open(readdlm, filepath)
+    data = open(readdlm, filepath) # Apply readdlm (from DelimitedFiles) to filepath
     
     if size(data)[2] != 1
         throw(DimensionMismatch("More than one column in file. Input data must be a single vector."))
