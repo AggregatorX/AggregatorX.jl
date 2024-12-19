@@ -142,7 +142,8 @@ The file must contain a single columen of numbers.
 DelimitedFiles.readdlm is used to read the data.
 """
 function parse_data(datafile::String)
-    filepath = joinpath(@__DIR__, datafile)
+    #filepath = joinpath(@__DIR__, datafile)
+    filepath = joinpath(DATADIR, datafile)
     data = open(readdlm, filepath) # Apply readdlm (from DelimitedFiles) to filepath
     
     if size(data)[2] != 1

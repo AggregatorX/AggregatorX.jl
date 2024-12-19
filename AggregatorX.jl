@@ -25,6 +25,12 @@ export get_component, all_ids
 export parse_data, build_connection, build_typetable, build_aggregatorx_object
 export set_optimization_variables, set_optimization_constraints, set_objective, get_objective_term
 
+# Global variables
+
+DATADIR = pwd() # directory where data files needed in the system description are stored
+
+export DATADIR
+
 include("AggregatorXComponents.jl")
 include("AggregatorXConstructors.jl")
 include("AggregatorXMethods.jl")
