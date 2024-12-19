@@ -322,8 +322,10 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
     power = Dict(resource => Vector{VariableRef}())
 
     class = get_class(m)
+
+    price = parse_data(m["price"])
     
-    return SimpleDAMarket(power, m["price"], resource, m["sign"], class,  id)
+    return SimpleDAMarket(power, price, resource, m["sign"], class,  id)
 end
 
 # - FFRProfil -
