@@ -160,14 +160,20 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
             source =  c.source
         end
     end
-
-    if typeof(l["load"]) <: Vector{}
-        load = l["load"]
-    elseif typeof(l["load"]) <: Real
-        load = ones(N) .* l["load"]
-    elseif isa(l["load"], String)
-        # read from file
+    
+    if length(l["load"]) == 1
+        load = parse_data(l["load"], N)
+    else
+        load = parse_data(l["load"])
     end
+
+    #if typeof(l["load"]) <: Vector{}
+    #    load = l["load"]
+    #elseif typeof(l["load"]) <: Real
+    #    load = ones(N) .* l["load"]
+    #elseif isa(l["load"], String)
+    #    # read from file
+    #end
 
     return FixedLoad(source, load, id)
 end

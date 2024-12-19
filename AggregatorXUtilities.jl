@@ -99,6 +99,11 @@ The parse data function dispatches on various data types and returns a vector
 which represent some parameter data for the system. This is the trivial function
 if the vector is already defined in the JSON file.
 """
+
+function parse_data(data::Real, N::Integer)
+    return ones(N) .* data
+end
+
 function parse_data(data::Vector{<:Number})
     return data
 end
