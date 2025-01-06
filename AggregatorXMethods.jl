@@ -331,7 +331,11 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
 end
 
 function set_optimization_constraints(model::Model, gen::Generation, aggregator::Dict{String, Any})
-    
+
+    for k in keys(gen.power)
+        @constraint(model, gen.power[k] .<= gen.pmax, base_name = "pmax-generation-" * string(gen.id))
+        @constraint(model, gen.power[k] .>= gen.pmin, base_name = "pmin-generation-" * string(gen.id))
+    end
 end
 
 function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
