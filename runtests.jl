@@ -325,6 +325,16 @@ end
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 16.25 atol = 1e-6
+
+    # Generation test
+    # The system has a generation component that generates power [1,2,3]. A fixed
+    # load requires power [5,5,5], An energy market supplies remaining power with
+    # cost [1,2,3]. The required power from the market will be [2,3,4] resulting
+    # in a total cost 1*2 + 2*3 + 3*4 = 2+6+12 = 20
+    filepath = joinpath(@__DIR__, "test-systems", "generation-test2.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ -20 atol = 1e-6
 end;
 
 @testset begin
