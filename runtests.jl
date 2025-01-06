@@ -217,6 +217,14 @@ end
         gen = Generation(power, pmax, pmin, id)
         isa(gen, Generation)
     end
+    # Generation - Constructor
+    @test begin
+        filepath = joinpath(@__DIR__, "test-systems", "generation-test.json")
+        sys, aggregator = buildaggregator(filepath)
+        gen = aggregator["Resource"][1]
+        isa(gen, Generation)
+    end
+
 
 end
 

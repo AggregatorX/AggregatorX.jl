@@ -147,6 +147,19 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
      class, b["id"])
 end
 
+# - Generation -
+function build_aggregatorx_object(gt::Type{Generation}, g::Dict{String, Any}, aggregator::Dict{String,Any})
+    N = aggregator["TimeStruct"].periods
+    
+    id = g["id"]
+    pmax = g["pmax"]
+    pmin = g["pmin"]
+
+    power = Dict{Integer, Vector{VariableRef}}()
+
+    return Generation(power, pmax, pmin, id)
+end
+
 # FixedLoad
 function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
     

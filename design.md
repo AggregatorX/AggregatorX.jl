@@ -151,8 +151,8 @@ An important feature of AggregatorX is that new components can be added to repre
     * Implement the new struct/type in `AggregatorXComponents`.
     * Add type to the export list of the package and run the test.
 * Add constructor for the new type
-    * Write a test that creates the object. For this you need a system description that includes the new component.. The test should then call `buildaggregator()` using the system description.
-    * Write a method in `AggregatorXComponents` that returns the initalized object (make sure it will be called from buildaggregator - check calling signature) and test it.
+    * Write a test that creates the object. For this you need a system description that includes the new component. The test should then call `buildaggregator()` using the system description.
+    * Write a method in `AggregatorXConstructors` that returns the initalized object (make sure it will be called from buildaggregator - check calling signature) and test it.
 * Add methods to set variables, constraints and objective terms.
     * Make a test for each method. The type of test will depend on the particular component and method content.
     * Implement method and test it.
