@@ -11,7 +11,7 @@ export optimizeaggregator
 export FFRGroup # Groups
 export IndexedTimeStruct # TimeStructs
 export StandardNode
-export SimpleCharger, SimpleBattery,MegaCharger # Resources
+export SimpleCharger, SimpleBattery, MegaCharger, Generation # Resources
 export LinearTariff # Grids
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN # Markets
 export MinAverageLoad, MinLoad, FixedLoad, VariableLoad # Loads 

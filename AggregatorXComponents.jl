@@ -71,6 +71,14 @@ mutable struct SimpleBattery <: Resource
     id::Integer
 end
 
+# - Generation -
+mutable struct Generation <: Resource
+    power::Dict{Integer, Vector{VariableRef}}
+    pmax::Vector{Real}
+    pmin::Vector{Real}
+    id::Integer
+end
+
 # ----------
 # - Loads -
 # ----------

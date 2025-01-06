@@ -207,6 +207,17 @@ end
         model = optimizeaggregator(aggregator, optimizer)
         isa(model, Model)
     end
+
+    # Generation - component
+    @test begin
+        power = Dict{Integer, Vector{AffExpr}}(2 => Vector{AffExpr}(undef, 3))
+        pmax = [1,2,3]
+        pmin = [0,0,1]
+        id = 1
+        gen = Generation(power, pmax, pmin, id)
+        isa(gen, Generation)
+    end
+
 end
 
 @testset begin
