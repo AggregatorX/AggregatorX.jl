@@ -490,11 +490,11 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
 
     # FFR markets have no activation component so this just ensures that the resources
     # does not contribute activation to this group
-    for id in group.resources
-        r = get_component(id,aggregator)
-        @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
-        @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
-    end
+    #for id in group.resources
+    #    r = get_component(id,aggregator)
+    #    @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+    #    @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+    #end
     
 
 end
