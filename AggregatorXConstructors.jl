@@ -150,12 +150,18 @@ end
 # - Generation -
 function build_aggregatorx_object(gt::Type{Generation}, g::Dict{String, Any}, aggregator::Dict{String,Any})
     N = aggregator["TimeStruct"].periods
+    connections = aggregator["Connection"]
     
     id = g["id"]
     pmax = g["pmax"]
     pmin = g["pmin"]
 
     power = Dict{Integer, Vector{VariableRef}}()
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{VariableRef}(undef,N)
+        end
+    end
 
     return Generation(power, pmax, pmin, id)
 end

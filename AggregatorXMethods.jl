@@ -85,6 +85,14 @@ function set_optimization_variables(model::Model, charger::SimpleCharger,
     end
 end
 
+function set_optimization_variables(model::Model, gen::Generation, timestruct::TimeStruct)
+    N = timestruct.periods
+
+    for k in keys(gen.power)
+        gen.power[k] = @variable(model, [1:N], base_name = "p-Generation-" * string(gen.id))
+    end
+end
+
 function set_optimization_variables(model::Model, load::FixedLoad, timestruct::TimeStruct)
     # No variables need
 end
@@ -320,6 +328,10 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     # non-zero. The program should throw a warning if this occurs and this should be considered
     # a case that the software does not handle or an indication of the possibility of A
     # modelling error.
+end
+
+function set_optimization_constraints(model::Model, gen::Generation, aggregator::Dict{String, Any})
+    
 end
 
 function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})

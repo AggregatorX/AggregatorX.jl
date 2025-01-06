@@ -224,8 +224,14 @@ end
         gen = aggregator["Resource"][1]
         isa(gen, Generation)
     end
-
-
+    # Generation - variables
+    @test begin
+        filepath = joinpath(@__DIR__, "test-systems", "generation-test.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        gen = aggregator["Resource"][1] # 1 is vector index not id
+        isa(gen.power[1], Vector{VariableRef}) # 1 is node id here
+    end
 end
 
 @testset begin
