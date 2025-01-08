@@ -138,8 +138,9 @@ function set_optimization_variables(model::Model, m::SimpleDAMarket, timestruct:
 end
 
 function set_optimization_variables(model::Model, m::FFRProfil, timestruct::TimeStruct)
-    N = timestruct.periods
-    m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-capacity-FFRProfil-" * string(m.id))
+    #N = timestruct.periods
+    m.up_capacity_common = @variable(model, lower_bound= 0.0, base_name = "up-capacity-FFRProfil-" * string(m.id) )
+    #m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-capacity-FFRProfil-" * string(m.id))
 end
 
 function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruct)
@@ -405,6 +406,7 @@ end
 function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     # Minimum bid
     # capacity same for all time steps
+    m.up_capacity .= m.up_capacity_common
 end
 
 function set_optimization_constraints(model::Model, m::FCRN, aggregator)
@@ -486,12 +488,14 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
 
     # Activation 
     # FFR markets have no activation component so this just ensures that the resources
-    # does not contribute activation to this group
-    #for id in group.resources
-    #    r = get_component(id,aggregator)
-    #    @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
-    #    @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
-    #end
+    # does not contribute activation to this group. Without this the resources could
+    # freely set the value of their activation parameter, and e.g. down-activate and
+    # freely get energy from 'nowhere'.
+    for id in group.resources
+        r = get_component(id,aggregator)
+        @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+        @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+    end
 end
 
 function set_optimization_constraints(model::Model, group::FCRGroup, aggregator::Dict{String, Any})

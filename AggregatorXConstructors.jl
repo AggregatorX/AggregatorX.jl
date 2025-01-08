@@ -355,14 +355,15 @@ end
 
 # - FFRProfil -
 function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggregator::Dict{String,Any})
-    
+
     N = aggregator["TimeStruct"].periods
     #N = length(m["armed"])
     price = ones(N) * m["price"]
 
-    up_capacity = Vector{VariableRef}()
+    up_capacity_common = nothing
+    up_capacity = init_expr_array(N)
 
-    return FFRProfil(up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
+    return FFRProfil(up_capacity_common, up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
 end
 
 # - FCRN

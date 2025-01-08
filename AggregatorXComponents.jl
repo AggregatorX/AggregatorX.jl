@@ -166,7 +166,8 @@ mutable struct SimpleDAMarket <: Market
 end
 
 mutable struct FFRProfil <: Market
-    up_capacity::Vector{VariableRef} # Reserved capacity.
+    up_capacity_common::Union{VariableRef, Nothing} # Nothing to allow uninitalized during construction
+    up_capacity::Vector{AffExpr} # Reserved capacity.
     price::Vector{AbstractFloat}
     armed::Vector{Bool} # Time steps where FFR is armed.
     sign::Integer

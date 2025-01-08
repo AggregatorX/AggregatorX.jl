@@ -338,7 +338,8 @@ end
 end;
 
 @testset begin
-
+    println("\n Running group tests...")
+    
     # Simple FFR market
     # DA price [1,1]
     # Simple market price [1,0.5]
@@ -348,9 +349,16 @@ end;
     # Second timestep, keep battery, charger full power
     # -1 buy power, +2 from ffr (curtail charger, discharge battery) +0.5 market = +1.5
     # Sum is +2.5
-    println("\n Running group tests...")
     filepath = joinpath(@__DIR__, "test-systems", "ffr1.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 2.5 atol = 1e-6
-end;
+
+    # Simple FFR market
+    # Same as above but change max power in charger to 2
+    # Sum is +4
+    filepath = joinpath(@__DIR__, "test-systems", "ffr4.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 4.0 atol = 1e-6
+end
