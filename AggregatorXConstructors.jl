@@ -357,13 +357,21 @@ end
 function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggregator::Dict{String,Any})
 
     N = aggregator["TimeStruct"].periods
-    #N = length(m["armed"])
+
     price = ones(N) * m["price"]
+
+    if haskey(m, "minimum_bid")
+        minimum_bid = m["minimum_bid"]
+    else
+        minimum_bid = Inf
+    end
+
+    participating = nothing
 
     up_capacity_common = nothing
     up_capacity = init_expr_array(N)
 
-    return FFRProfil(up_capacity_common, up_capacity, price, m["armed"], m["sign"], m["class"],  m["id"])
+    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, m["armed"], m["sign"], m["class"],  m["id"])
 end
 
 # - FCRN

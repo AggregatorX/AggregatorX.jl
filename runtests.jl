@@ -361,4 +361,13 @@ end;
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 4.0 atol = 1e-6
+
+    # Simple FFR market
+    # Similar to above but with minimum bid for FFR set to 10 (excludes FFR)
+    # DA price is set to (1,1) and market price to (1,2)
+    # Max power in step 2 gives max revenue 0 + 2 = 2 
+    filepath = joinpath(@__DIR__, "test-systems", "ffr5.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 2 atol = 1e-6
 end

@@ -28,6 +28,7 @@ export set_optimization_variables, set_optimization_constraints, set_objective, 
 # Global variables
 
 DATADIR = pwd() # directory where data files needed in the system description are stored
+LARGE_NUMBER = 20 # for use in working with binary variables. Will depend on size of numbers in problem
 
 export DATADIR
 

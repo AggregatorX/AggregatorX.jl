@@ -169,6 +169,8 @@ mutable struct FFRProfil <: Market
     up_capacity_common::Union{VariableRef, Nothing} # Nothing to allow uninitalized during construction
     up_capacity::Vector{AffExpr} # Reserved capacity.
     price::Vector{AbstractFloat}
+    minimum_bid::AbstractFloat
+    participating::Union{VariableRef, Nothing}
     armed::Vector{Bool} # Time steps where FFR is armed.
     sign::Integer
     class::String

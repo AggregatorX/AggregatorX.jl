@@ -140,6 +140,10 @@ end
 function set_optimization_variables(model::Model, m::FFRProfil, timestruct::TimeStruct)
     #N = timestruct.periods
     m.up_capacity_common = @variable(model, lower_bound= 0.0, base_name = "up-capacity-FFRProfil-" * string(m.id) )
+    if !isinf(m.minimum_bid)
+        m.participating = @variable(model, binary = true)
+        print("Warning: binary variable defined in FFRProfil")
+    end
     #m.up_capacity = @variable(model, [1:N], lower_bound = 0.0, base_name = "up-capacity-FFRProfil-" * string(m.id))
 end
 
@@ -405,6 +409,11 @@ end
 
 function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     # Minimum bid
+    if !isinf(m.minimum_bid )
+        @constraint(model, m.up_capacity_common >= m.participating * m.minimum_bid)
+        @constraint(model, m.up_capacity_common <= LARGE_NUMBER * m.participating)
+    end
+
     # capacity same for all time steps
     m.up_capacity .= m.up_capacity_common
 end
