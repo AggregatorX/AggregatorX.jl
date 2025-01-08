@@ -408,7 +408,6 @@ function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
 end
 
 function set_optimization_constraints(model::Model, m::FCRN, aggregator)
-    
     # Symmetric market
     @constraint(model, m.up_capacity .== m.down_capacity, base_name = "fcrn-symmetric-" * string(m.id))
 
@@ -426,7 +425,6 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
     # Link activation to sold capacity and frequency deviation
     @constraint(model, m.up_activation .== m.up_capacity .* df_up ./ dfmax )
     @constraint(model, m.down_activation .== m.down_capacity .* df_down ./ dfmax )
-
 end
 
 ## Nodes
@@ -487,7 +485,6 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
     @constraint(model, group.up_capacity >= sum_sold_capacity,  base_name = "up-sold-FFRGroup-" * string(group.id))
 
     # Activation 
-
     # FFR markets have no activation component so this just ensures that the resources
     # does not contribute activation to this group
     #for id in group.resources
@@ -495,8 +492,6 @@ function set_optimization_constraints(model::Model, group::FFRGroup, aggregator:
     #    @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
     #    @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
     #end
-    
-
 end
 
 function set_optimization_constraints(model::Model, group::FCRGroup, aggregator::Dict{String, Any})
