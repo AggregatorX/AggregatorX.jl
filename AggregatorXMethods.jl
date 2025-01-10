@@ -415,7 +415,7 @@ function set_optimization_constraints(model::Model, m::FFRProfil, aggregator)
     end
 
     # capacity same for all time steps
-    m.up_capacity .= m.up_capacity_common
+    m.up_capacity .= m.up_capacity_common .* m.armed
 end
 
 function set_optimization_constraints(model::Model, m::FCRN, aggregator)
