@@ -335,6 +335,13 @@ end
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ -20 atol = 1e-6
+
+    # Generation test
+    # Redo above but reading gen data from a file
+    filepath = joinpath(@__DIR__, "test-systems", "generation-test3.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ -20 atol = 1e-6
 end;
 
 @testset begin
