@@ -153,8 +153,8 @@ function build_aggregatorx_object(gt::Type{Generation}, g::Dict{String, Any}, ag
     connections = aggregator["Connection"]
     
     id = g["id"]
-    pmax = g["pmax"]
-    pmin = g["pmin"]
+    pmax = parse_data(g["pmax"])
+    pmin = parse_data(g["pmin"])
 
     power = Dict{Integer, Vector{VariableRef}}()
     for c in connections
