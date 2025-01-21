@@ -141,6 +141,8 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
                 down_activation[g.id] = Vector{VariableRef}(undef, N)
                 up_capacity[g.id] = Vector{VariableRef}(undef, N)
                 down_capacity[g.id] = Vector{VariableRef}(undef, N)
+                up_energy_reserve[g.id] = Vector{AffExpr}(undef, N)
+                down_energy_reserve[g.id] = Vector{AffExpr}(undef, N)
             end
         end
     end
