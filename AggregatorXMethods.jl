@@ -42,6 +42,17 @@ function set_optimization_variables(model::Model, battery::SimpleBattery,
         battery.down_activation[k] = @variable(model, [1:N], lower_bound = 0.0,
         base_name = "down-activation-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
     end
+
+    # Energy reserve
+    for k in keys(battery.up_energy_reserve)
+        battery.up_energy_reserve[k] = @variable(model, [1:N], lower_bound = 0.0,
+        base_name = "up-energy-reserve-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
+    end
+
+    for k in keys(battery.down_energy_reserve)
+        battery.down_energy_reserve[k] = @variable(model, [1:N], lower_bound = 0.0,
+        base_name = "down-energy-reserve-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
+    end
     
 end
 
@@ -329,6 +340,17 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
         @constraint(model, r.state_of_charge - net_power - total_up_capacity .>= 0.0, base_name ="capacity-min-soc-SimpleBattery-" * string(id))
     end
 
+    # Energy reserve
+    if (!(isempty(r.up_energy_reserve)))
+        total_up_energy_reserve = init_expr_array(N)
+        total_down_energy_reserve = init_expr_array(N)
+        for k in keys(r.up_energy_reserve)
+            total_up_energy_reserve = total_up_energy_reserve + r.up_energy_reserve[k]
+            total_down_energy_reserve = total_down_energy_reserve + r.down_energy_reserve[k]
+        end
+        @constraint(model, r.state_of_charge >= total_up_energy_reserve, base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
+        @constraint(model, r.capacity .- r.state_of_charge >= total_down_energy_reserve, base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
+    end
     # We have implicitly assumed here that power_out and power_in are not simultaneously
     # non-zero. The program should throw a warning if this occurs and this should be considered
     # a case that the software does not handle or an indication of the possibility of A
