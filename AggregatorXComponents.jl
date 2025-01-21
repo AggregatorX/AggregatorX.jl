@@ -63,6 +63,8 @@ mutable struct SimpleBattery <: Resource
     down_capacity::Dict{Integer, Vector{VariableRef}}
     up_activation::Dict{Integer, Vector{VariableRef}}
     down_activation::Dict{Integer, Vector{VariableRef}}
+    up_energy_reserve::Dict{Integer, Vector{VariableRef}}
+    down_energy_reserve::Dict{Integer, Vector{VariableRef}}
     capacity::AbstractFloat
     initial_charge::AbstractFloat
     max_charge::AbstractFloat

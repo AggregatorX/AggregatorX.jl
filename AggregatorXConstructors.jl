@@ -129,6 +129,9 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
     up_activation = Dict{Integer, Vector{VariableRef}}()
     down_activation = Dict{Integer, Vector{VariableRef}}()
 
+    up_energy_reserve = Dict{Integer, Vector{VariableRef}}()
+    down_energy_reserve = Dict{Integer, Vector{VariableRef}}()
+
     if haskey(aggregator, "Group")
         groups = aggregator["Group"]        
         for g in groups
@@ -143,7 +146,7 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
     end
 
     return SimpleBattery(power, sources, state_of_charge, up_capacity, 
-    down_capacity, up_activation, down_activation, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
+    down_capacity, up_activation, down_activation, up_energy_reserve, down_energy_reserve, b["capacity"], b["initial_charge"], b["max_charge"], b["max_discharge"],
      class, b["id"])
 end
 

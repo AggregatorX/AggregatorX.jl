@@ -28,6 +28,9 @@ println("\n Running component tests... \n ")
     node = StandardNode(power, sources, id)
     @test isa(node, StandardNode)
     @test node.id == 1
+
+    @test hasfield(SimpleBattery, :up_energy_reserve)
+    @test hasfield(SimpleBattery, :down_energy_reserve)
 end
 
 @testset begin
