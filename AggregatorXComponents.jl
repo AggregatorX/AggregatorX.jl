@@ -145,6 +145,15 @@ mutable struct FCRGroup <: Group
     id::Integer
 end
 
+mutable struct FCReGroup <: Group
+    up_capacity::Vector{AffExpr}
+    down_capacity::Vector{AffExpr}
+    up_energy_reserve::Vector{AffExpr}
+    down_energy_reserve::Vector{AffExpr}
+    resources::Set{Int} # ids of resources in the group.
+    markets::Set{Int} # ids of markets connected to the group.
+    id::Integer
+end
 # ------------
 # - Markets -
 # ------------
@@ -191,6 +200,21 @@ mutable struct FCRN <: Market
     dfmax::AbstractFloat # Maximum frequency deviation in Hz.
     sign::Integer
     class::String
+    id::Integer
+end
+
+mutable struct FCRNe <: Market
+    capacity_sold::Vector{VariableRef}
+    up_capacity::Vector{AffExpr}
+    down_capacity::Vector{AffExpr}
+    up_capacity_sold::Vector{AffExpr}
+    down_capacity_sold::Vector{AffExpr}
+    up_energy_reserve::Vector{AffExpr}
+    down_energy_reserve::Vector{AffExpr}
+    energy_endurance::Real
+    capacity_factor::Real
+    price::Vector{Real}
+    sign::Integer
     id::Integer
 end
 

@@ -31,6 +31,14 @@ println("\n Running component tests... \n ")
 
     @test hasfield(SimpleBattery, :up_energy_reserve)
     @test hasfield(SimpleBattery, :down_energy_reserve)
+
+    @test hasfield(FCReGroup, :up_energy_reserve)
+    @test hasfield(FCReGroup, :down_energy_reserve)
+
+    # FCRe
+    @test hasfield(FCRNe, :capacity_sold)
+    @test hasfield(FCRNe, :up_capacity_sold)
+    @test hasfield(FCRNe, :up_energy_reserve)
 end
 
 @testset begin
@@ -92,8 +100,25 @@ end
 
 @testset begin
     println("\n Running component tests...\n")
+    
 
-    # FCRN
+    # FCReGroup
+    filepath = joinpath(@__DIR__, "test-systems", "fcre1.json")
+    sys,aggregator = buildaggregator(filepath)
+    groups = aggregator["Group"]
+    for g in groups
+        @test typeof(g) == FCReGroup
+        @test typeof(g.up_capacity) == Vector{AffExpr}
+        @test typeof(g.up_energy_reserve) == Vector{AffExpr}
+        @test typeof(g.resources) == Set{Int}
+    end
+    # Optimization
+    model = optimizeaggregator(aggregator, optimizer)
+    group = get_component(4, aggregator)
+    @test hasfield(typeof(group), :up_energy_reserve)
+    @test typeof(group.up_energy_reserve) == Vector{AffExpr}
+
+    # FCRN - market
     # Defintion
     @test hasfield(FCRN, :up_activation)
     @test hasfield(FCRN, :down_activation)

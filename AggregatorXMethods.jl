@@ -186,7 +186,9 @@ function set_optimization_variables(model::Model, group::FCRGroup, timestruct::T
     #group.down_activation = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "FCRgroup-down-activation-" * string(group.id))
 end
 
-
+function set_optimization_variables(model::Model, group::FCReGroup, timestruct::TimeStruct)
+    # Only intermediate variables used for this group
+end
 """
     set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)
 
@@ -587,6 +589,65 @@ function set_optimization_constraints(model::Model, group::FCRGroup, aggregator:
     @constraint(model,total_down_activation_markets == total_down_activation_resource, base_name = "down-activation-balance-FCRGroup" * string(group.id))
 
 end
+
+function set_optimization_constraints(model::Model, group::FCReGroup, aggregator::Dict{String, Any})
+    N = aggregator["TimeStruct"].periods
+
+    # Reserved capacity 
+
+    # Group capacity is is capacity of sum of capacity of individual resources
+    total_up_capacity_available = init_expr_array(N)
+    total_down_capacity_available = init_expr_array(N)
+
+    for id in group.resources
+        r = get_component(id, aggregator)
+        total_up_capacity_available = total_up_capacity_available + r.up_capacity[group.id]
+        total_down_capacity_available = total_down_capacity_available + r.down_capacity[group.id]
+    end
+
+    group.up_capacity = total_up_capacity_available
+    group.down_capacity = total_down_capacity_available
+
+    # Capacity sold to markets is limited by available capacity
+    total_up_capacity_reserved = init_expr_array(N)
+    total_down_capacity_reserved = init_expr_array(N)
+
+    for id in group.markets
+        m = get_component(id, aggregator)
+        total_up_capacity_reserved = total_up_capacity_reserved + m.up_capacity
+        total_down_capacity_reserved = total_down_capacity_reserved + m.down_capacity
+    end
+
+    @constraint(model, total_up_capacity_reserved <= group.up_capacity, base_name = "up-capacity-limit-FCReGrup" * string(group.id))
+    @constraint(model, total_down_capacity_reserved <= group.down_capacity, base_name = "down-capacity-limit-FCReGrup" * string(group.id))
+
+    # Energy reserves
+
+    # Total energy reserves available in the connected resources
+    total_up_energy_reserve = init_expr_array(N)
+    total_down_energy_reserve = init_expr_array(N)
+    for id in group.resources
+        r = get_component(id,aggregator)
+        total_up_energy_reserve = total_up_energy_reserve + r.up_energy_reserve[group.id]
+        total_down_energy_reserve = total_down_energy_reserve + r.down_energy_reserve[group.id]
+    end
+    group.up_energy_reserve = total_up_energy_reserve
+    group.down_energy_reserve = total_down_energy_reserve
+
+    # Total energy reserve required from markets
+    total_up_energy_reserve_markets = init_expr_array(N)
+    total_down_energy_reserve_markets = init_expr_array(N)
+    for id in group.markets
+        m = get_component(id,aggregator)
+        total_up_energy_reserve_markets = total_up_energy_reserve_markets + m.up_energy_reserve
+        total_down_energy_reserve_markets = total_down_energy_reserve_markets + m.down_energy_reserve
+    end
+
+    # Available energy reserve must be greater or equal to what is required from markets
+    @constraint(model,total_up_energy_reserve_markets <= total_up_energy_reserve, base_name = "up-energy_reserve-balance-FCReGroup" * string(group.id))
+    @constraint(model,total_down_energy_reserve_markets <= total_down_energy_reserve, base_name = "down-energy-reserve-balance-FCReGroup" * string(group.id))
+end
+
 # Objective functions contributions
 
 function set_objective(model::Model, aggregator::Dict{String, Any})

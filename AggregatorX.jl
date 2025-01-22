@@ -8,12 +8,12 @@ export buildaggregator
 export optimizeaggregator
 
 # export all concrete types
-export FFRGroup # Groups
+export FFRGroup, FCReGroup, FCRGroup # Groups
 export IndexedTimeStruct # TimeStructs
 export StandardNode
 export SimpleCharger, SimpleBattery, MegaCharger, Generation # Resources
 export LinearTariff # Grids
-export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN # Markets
+export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN, FCRNe # Markets
 export MinAverageLoad, MinLoad, FixedLoad, VariableLoad # Loads 
 export Connection # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException
