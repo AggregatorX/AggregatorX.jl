@@ -413,7 +413,6 @@ function build_aggregatorx_object(t::Type{FCRNe}, m::Dict{String, Any},
 
     return FCRNe(capacity_sold, up_capacity, down_capacity, up_capacity_sold, down_capacity_sold,
     up_energy_reserve, down_energy_reserve, energy_endurance, capacity_factor, price, sign, id)
-
 end
 
 # -----------

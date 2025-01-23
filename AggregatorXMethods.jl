@@ -468,7 +468,17 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
 end
 
 function set_optimization_constraints(model::Model, m::FCRNe, aggregator)
+    N = aggregator["TimeStruct"].periods
+    
+    # Intermediate variables
+    m.up_capacity_sold    = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
+    m.down_capacity_sold  = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
+    m.up_energy_reserve   = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i])
+    m.down_energy_reserve = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i])
 
+    # Constraints
+    # - no constraints -
+    
 end
 
 ## Nodes
@@ -705,7 +715,8 @@ function get_objective_term(m::FCRN)
 end
 
 function get_objective_term(m::FCRNe)
-    return 0
+    zterm = sum(m.price .* m.capacity_sold .* (-m.sign))
+    return zterm
 end
 
 function get_objective_term(g::LinearTariff)
