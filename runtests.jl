@@ -124,7 +124,7 @@ end
     m = get_component(5, aggregator)
     @test typeof(m) == FCRNe
     model = optimizeaggregator(aggregator, optimizer)
-
+    
     # FCRN - market
     # Defintion
     @test hasfield(FCRN, :up_activation)

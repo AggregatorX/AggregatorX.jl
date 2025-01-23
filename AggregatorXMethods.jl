@@ -167,7 +167,8 @@ function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruc
 end
 
 function set_optimization_variables(model::Model, m::FCRNe, timestruct::TimeStruct)
-   
+    N = timestruct.periods
+    m.capacity_sold = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRNe-capacity-" * string(m.id))
 end
 
 ## Nodes
