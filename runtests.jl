@@ -123,6 +123,7 @@ end
     sys,aggregator = buildaggregator(filepath)
     m = get_component(5, aggregator)
     @test typeof(m) == FCRNe
+    model = optimizeaggregator(aggregator, optimizer)
 
     # FCRN - market
     # Defintion

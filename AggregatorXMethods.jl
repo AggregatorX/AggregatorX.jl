@@ -166,6 +166,10 @@ function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruc
     m.down_activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRN-down-activation-" * string(m.id))
 end
 
+function set_optimization_variables(model::Model, m::FCRNe, timestruct::TimeStruct)
+   
+end
+
 ## Nodes
 function set_optimization_variables(model::Model, node::StandardNode, timestruct::TimeStruct)
     N = timestruct.periods
@@ -462,6 +466,10 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
     @constraint(model, m.down_activation .== m.down_capacity .* df_down ./ dfmax )
 end
 
+function set_optimization_constraints(model::Model, m::FCRNe, aggregator)
+
+end
+
 ## Nodes
 function set_optimization_constraints(model::Model, node::StandardNode, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
@@ -693,6 +701,10 @@ function get_objective_term(m::FCRN)
     down_activation = sum(m.down_activation .* m.price_down_activation .* (-m.sign))
     zterm = capacity + up_activation - down_activation
     return zterm
+end
+
+function get_objective_term(m::FCRNe)
+    return 0
 end
 
 function get_objective_term(g::LinearTariff)
