@@ -483,12 +483,12 @@ end
 
 ## Nodes
 function set_optimization_constraints(model::Model, node::StandardNode, aggregator::Dict{String, Any})
-    N = aggregator["TimeStruct"].periods
+    N  = aggregator["TimeStruct"].periods
     id = node.id
 
     power_out = init_expr_array(N)
     net_power = init_expr_array(N)
-    power_in = init_expr_array(N)
+    power_in  = init_expr_array(N)
 
     for target in keys(node.power)        
         power_out = power_out + node.power[target]
