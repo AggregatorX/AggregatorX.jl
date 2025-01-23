@@ -118,6 +118,12 @@ end
     @test hasfield(typeof(group), :up_energy_reserve)
     @test typeof(group.up_energy_reserve) == Vector{AffExpr}
 
+    # FCRe market
+    filepath = joinpath(@__DIR__, "test-systems", "fcre2.json")
+    sys,aggregator = buildaggregator(filepath)
+    m = get_component(5, aggregator)
+    @test typeof(m) == FCRNe
+
     # FCRN - market
     # Defintion
     @test hasfield(FCRN, :up_activation)

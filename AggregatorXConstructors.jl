@@ -392,6 +392,30 @@ function build_aggregatorx_object(t::Type{FCRN}, m::Dict{String, Any}, aggregato
 
 end
 
+# - FCRNe
+function build_aggregatorx_object(t::Type{FCRNe}, m::Dict{String, Any}, 
+    aggregator::Dict{String,Any})
+
+    energy_endurance = m["energy_endurance"]
+    capacity_factor = m["capacity_factor"]
+    price = parse_data(m["price"])
+    sign = m["sign"]
+    id = m["id"]
+
+    capacity_sold = Vector{VariableRef}()
+
+    up_capacity = Vector{AffExpr}()
+    down_capacity = Vector{AffExpr}()
+    up_capacity_sold = Vector{AffExpr}()
+    down_capacity_sold = Vector{AffExpr}()
+    up_energy_reserve = Vector{AffExpr}()
+    down_energy_reserve = Vector{AffExpr}()
+
+    return FCRNe(capacity_sold, up_capacity, down_capacity, up_capacity_sold, down_capacity_sold,
+    up_energy_reserve, down_energy_reserve, energy_endurance, capacity_factor, price, sign, id)
+
+end
+
 # -----------
 # - Groups -
 #------------
