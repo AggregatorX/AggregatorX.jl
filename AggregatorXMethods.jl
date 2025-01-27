@@ -169,6 +169,16 @@ end
 function set_optimization_variables(model::Model, m::FCRNe, timestruct::TimeStruct)
     N = timestruct.periods
     m.capacity_sold = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRNe-capacity-" * string(m.id))
+
+    # Intermediate variables
+    # Symmetric market
+    m.up_capacity_sold    = @expression(model, [i = 1:N], m.capacity_sold[i]) # Used in objective function
+    m.down_capacity_sold  = @expression(model, [i = 1:N], m.capacity_sold[i])
+    # Variables passed to group
+    m.up_capacity    = @expression(model, [i = 1:N], m.capacity_factor  .* m.up_capacity_sold[i])
+    m.down_capacity  = @expression(model, [i = 1:N], m.capacity_factor  .* m.down_capacity_sold[i])
+    m.up_energy_reserve   = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i])
+    m.down_energy_reserve = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i])
 end
 
 ## Nodes
@@ -334,7 +344,7 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     end
 
     # Capacity for up/down regulation. Flow constrained
-    if !(isempty(r.up_capacity))
+    if !(isempty(r.up_capacity)) # Empty if not part of group
         @constraint(model, total_up_capacity <= r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery-" * string(id))
     end
     if !(isempty(r.down_capacity))
@@ -470,11 +480,7 @@ end
 function set_optimization_constraints(model::Model, m::FCRNe, aggregator)
     N = aggregator["TimeStruct"].periods
     
-    # Intermediate variables
-    m.up_capacity_sold    = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
-    m.down_capacity_sold  = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
-    m.up_energy_reserve   = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i])
-    m.down_energy_reserve = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i])
+    
 
     # Constraints
     # - no constraints -
@@ -632,13 +638,24 @@ function set_optimization_constraints(model::Model, group::FCReGroup, aggregator
     total_down_capacity_reserved = init_expr_array(N)
 
     for id in group.markets
-        m = get_component(id, aggregator)
+        m = get_component(id, aggregator)    
         total_up_capacity_reserved = total_up_capacity_reserved + m.up_capacity
         total_down_capacity_reserved = total_down_capacity_reserved + m.down_capacity
     end
+    
+    @constraint(model, total_up_capacity_reserved <= group.up_capacity, base_name = "up-capacity-limit-FCReGroup" * string(group.id))
+    @constraint(model, total_down_capacity_reserved <= group.down_capacity, base_name = "down-capacity-limit-FCReGroup" * string(group.id))
 
-    @constraint(model, total_up_capacity_reserved <= group.up_capacity, base_name = "up-capacity-limit-FCReGrup" * string(group.id))
-    @constraint(model, total_down_capacity_reserved <= group.down_capacity, base_name = "down-capacity-limit-FCReGrup" * string(group.id))
+     # Activation 
+    # FFR markets have no activation component so this just ensures that the resources
+    # does not contribute activation to this group. Without this the resources could
+    # freely set the value of their activation parameter, and e.g. down-activate and
+    # freely get energy from 'nowhere'.
+    for id in group.resources
+        r = get_component(id,aggregator)
+        @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+        @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FFRGroup" * string(group.id))
+    end
 
     # Energy reserves
 
