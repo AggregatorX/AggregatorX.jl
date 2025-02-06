@@ -404,11 +404,11 @@ function build_aggregatorx_object(t::Type{FCRNe}, m::Dict{String, Any},
 
     capacity_sold = Vector{VariableRef}()
 
-    up_capacity = Vector{AffExpr}()
-    down_capacity = Vector{AffExpr}()
-    up_capacity_sold = Vector{AffExpr}()
-    down_capacity_sold = Vector{AffExpr}()
-    up_energy_reserve = Vector{AffExpr}()
+    up_capacity         = Vector{AffExpr}()
+    down_capacity       = Vector{AffExpr}()
+    up_capacity_sold    = Vector{AffExpr}()
+    down_capacity_sold  = Vector{AffExpr}()
+    up_energy_reserve   = Vector{AffExpr}()
     down_energy_reserve = Vector{AffExpr}()
 
     return FCRNe(capacity_sold, up_capacity, down_capacity, up_capacity_sold, down_capacity_sold,
