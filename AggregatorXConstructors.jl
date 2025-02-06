@@ -465,6 +465,8 @@ function  build_aggregatorx_object(gt::Type{FCReGroup}, g::Dict{String, Any})
     down_capacity = Vector{AffExpr}()
     up_energy_reserve = Vector{AffExpr}()    
     down_energy_reserve = Vector{AffExpr}()
+    up_energy_reserve_factor = 1 # default
+    down_energy_reserve_factor = 1 # defualt
     
     markets = Set{Int}()    
     mlist = g["markets"]
@@ -479,5 +481,6 @@ function  build_aggregatorx_object(gt::Type{FCReGroup}, g::Dict{String, Any})
     end
 
     return FCReGroup(up_capacity, down_capacity, up_energy_reserve, down_energy_reserve,
+    up_energy_reserve_factor, down_energy_reserve_factor,
         resources, markets, g["id"])
 end

@@ -150,6 +150,8 @@ mutable struct FCReGroup <: Group
     down_capacity::Vector{AffExpr}
     up_energy_reserve::Vector{AffExpr}
     down_energy_reserve::Vector{AffExpr}
+    up_energy_reserve_factor::Number
+    down_energy_reserve_factor::Number
     resources::Set{Int} # ids of resources in the group.
     markets::Set{Int} # ids of markets connected to the group.
     id::Integer

@@ -331,7 +331,7 @@ end
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ 8.5 atol = 1e-6
-
+ 
     # FCRN capacity
     # High FCR capacity price, no activation.
     # DA price [1,1]
@@ -350,7 +350,8 @@ end
     filepath = joinpath(@__DIR__, "test-systems", "fcr3.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
-    @test objective_value(model) ≈ 19.5 atol = 1e-6
+    @test objective_value(model) ≈ 29.5 atol = 1e-6
+    # 19.5 before FFR fix
 
     #FCR activation test.
     # This system is to complex to easily 'see' what the solution should be and
@@ -360,7 +361,8 @@ end
     filepath = joinpath(@__DIR__, "test-systems", "fcr-activation.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
-    @test objective_value(model) ≈ 16.25 atol = 1e-6
+    @test objective_value(model) ≈ 24.75 atol = 1e-6
+    # 16.25 before FFR fix
 
     # Generation test
     # The system has a generation component that generates power [1,2,3]. A fixed
@@ -395,7 +397,8 @@ end;
     filepath = joinpath(@__DIR__, "test-systems", "ffr1.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
-    @test objective_value(model) ≈ 2.5 atol = 1e-6
+    @test objective_value(model) ≈ 3.5 atol = 1e-6
+    # 2.5 before FFR fix
 
     # Simple FFR market
     # Same as above but change max power in charger to 2
@@ -403,7 +406,8 @@ end;
     filepath = joinpath(@__DIR__, "test-systems", "ffr4.json")
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
-    @test objective_value(model) ≈ 4.0 atol = 1e-6
+    @test objective_value(model) ≈ 5.0 atol = 1e-6
+    # 4.0 before FFR fix
 
     # Simple FFR market
     # Similar to above but with minimum bid for FFR set to 10 (excludes FFR)

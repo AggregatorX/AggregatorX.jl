@@ -352,10 +352,10 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     end
 
     # Capacity for up/down regulation. SoC constrained
-    if ( !(isempty(r.up_capacity)) & !(isempty(r.down_capacity)) )
-        @constraint(model, r.state_of_charge - net_power + total_down_capacity .<= r.capacity, base_name ="capacity-max-soc-SimpleBattery-" * string(id))
-        @constraint(model, r.state_of_charge - net_power - total_up_capacity .>= 0.0, base_name ="capacity-min-soc-SimpleBattery-" * string(id))
-    end
+    #if ( !(isempty(r.up_capacity)) & !(isempty(r.down_capacity)) )
+    #    @constraint(model, r.state_of_charge - net_power + total_down_capacity .<= r.capacity, base_name ="capacity-max-soc-SimpleBattery-" * string(id))
+    #    @constraint(model, r.state_of_charge - net_power - total_up_capacity .>= 0.0, base_name ="capacity-min-soc-SimpleBattery-" * string(id))
+    #end
 
     # Energy reserve
     if (!(isempty(r.up_energy_reserve)))
