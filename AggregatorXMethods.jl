@@ -186,6 +186,18 @@ function set_optimization_variables(model::Model, m::FCRNe, timestruct::TimeStru
     m.down_energy_reserve = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i]) # -"-
 end
 
+function set_optimization_variables(model, m::FCRD_Up_LER, timestruct::TimeStruct)
+    N = timestruct.periods
+
+    # - Variables -
+
+    m.capacity_sold = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRNe-capacity-" * string(m.id))
+
+    # Variables passed to group
+    m.up_capacity    = @expression(model, [i = 1:N], m.capacity_sold[i])
+    m.down_capacity  = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
+end
+
 ## Nodes
 function set_optimization_variables(model::Model, node::StandardNode, timestruct::TimeStruct)
     N = timestruct.periods
@@ -209,6 +221,7 @@ end
 function set_optimization_variables(model::Model, group::FCReGroup, timestruct::TimeStruct)
     # Only intermediate variables used for this group
 end
+
 """
     set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)
 
@@ -483,9 +496,11 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
 end
 
 function set_optimization_constraints(model::Model, m::FCRNe, aggregator)
+    # - no constraints needed-
+end
 
-    # - no constraints -
-    
+function set_optimization_constraints(model::Model, m::FCRD_Up_LER, aggregator)
+    # - no constraints needed-
 end
 
 ## Nodes
@@ -677,7 +692,7 @@ function set_optimization_constraints(model::Model, group::FCReGroup, aggregator
         base_name = "down-energy-reserve-FCReGroup-" * string(group.id) * "r" * string(id)
         @constraint(model, r.down_energy_reserve[group.id] >= energy_endurance * r.down_capacity[group.id], base_name = base_name)
     end
-
+    #=
     # Total energy reserves available in the connected resources
     total_up_energy_reserve = init_expr_array(N)
     total_down_energy_reserve = init_expr_array(N)
@@ -701,6 +716,7 @@ function set_optimization_constraints(model::Model, group::FCReGroup, aggregator
     # Available energy reserve must be greater or equal to what is required from markets
     @constraint(model,total_up_energy_reserve_markets <= total_up_energy_reserve, base_name = "up-energy_reserve-balance-FCReGroup" * string(group.id))
     @constraint(model,total_down_energy_reserve_markets <= total_down_energy_reserve, base_name = "down-energy-reserve-balance-FCReGroup" * string(group.id))
+    =#
 end
 
 # Objective functions contributions
@@ -751,6 +767,11 @@ function get_objective_term(m::FCRN)
 end
 
 function get_objective_term(m::FCRNe)
+    zterm = sum(m.price .* m.capacity_sold .* (-m.sign))
+    return zterm
+end
+
+function get_objective_term(m::FCRD_Up_LER)
     zterm = sum(m.price .* m.capacity_sold .* (-m.sign))
     return zterm
 end

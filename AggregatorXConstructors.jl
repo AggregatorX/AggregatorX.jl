@@ -415,6 +415,17 @@ function build_aggregatorx_object(t::Type{FCRNe}, m::Dict{String, Any},
     up_energy_reserve, down_energy_reserve, energy_endurance, capacity_factor, price, sign, id)
 end
 
+function build_aggregatorx_object(t::Type{FCRD_Up_LER}, m::Dict{String, Any}, aggregator::Dict{String,Any})
+    
+    energy_endurance = m["energy_endurance"]
+    capacity_factor = m["capacity_factor"]
+    price = parse_data(m["price"])
+    sign = m["sign"]
+    id = m["id"]
+    
+    return FCRD_Up_LER(energy_endurance, capacity_factor, price, sign, id)
+end
+
 # -----------
 # - Groups -
 #------------

@@ -39,6 +39,12 @@ println("\n Running component tests... \n ")
     @test hasfield(FCRNe, :capacity_sold)
     @test hasfield(FCRNe, :up_capacity_sold)
     @test hasfield(FCRNe, :up_energy_reserve)
+
+    # FCRD_Up_LER
+    @test hasfield(FCRD_Up_LER, :capacity_sold)
+    @test hasfield(FCRD_Up_LER, :up_capacity)
+
+
 end
 
 @testset begin
@@ -101,6 +107,14 @@ end
 @testset begin
     println("\n Running component tests...\n")
     
+    filepath = joinpath(@__DIR__, "test-systems", "fcrd-ler1.json")
+    sys,aggregator = buildaggregator(filepath)
+    @test typeof(get_component(5, aggregator)) == FCRD_Up_LER
+    m = get_component(5, aggregator)
+    @test m.capacity_factor ≈ 0.2 atol = 1e-6
+
+    model = optimizeaggregator(aggregator, optimizer)
+    @test is_solved_and_feasible(model)
 
     # FCReGroup
     filepath = joinpath(@__DIR__, "test-systems", "fcre1.json")
@@ -380,6 +394,24 @@ end
     sys, aggregator = buildaggregator(filepath)
     model = optimizeaggregator(aggregator, optimizer)
     @test objective_value(model) ≈ -20 atol = 1e-6
+
+    # FCRe market with given energy endurance and capacity factor
+    filepath = joinpath(@__DIR__, "test-systems", "fcre3.json")
+    sys, aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 12 atol = 1e-6
+
+    # FCRD_Up_LER
+    # The battery is charged up to 0.33 which is the energy req for providing
+    # FCR capacity of 1 which is max discharge rate. Charing more for higher FCR 
+    # Will make the battery full so this is only done towards the end of tha analysis
+    # period. Unclear why there is a gradual buildup of charging towards the end
+    filepath = joinpath(@__DIR__, "test-systems", "fcrd-ler2.json")
+    sys,aggregator = buildaggregator(filepath)
+    model = optimizeaggregator(aggregator, optimizer)
+    @test objective_value(model) ≈ 55.66 atol = 0.01
+
+    
 end;
 
 @testset begin

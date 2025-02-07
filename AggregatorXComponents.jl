@@ -14,6 +14,10 @@ abstract type Grid <: Component end
 
 abstract type Market <: Component end
 
+abstract type FCRMarket <: Market end
+
+abstract type FCR_LERMarket <: FCRMarket end
+
 abstract type Resource <: Component end
 
 abstract type Load <: Resource end
@@ -219,6 +223,23 @@ mutable struct FCRNe <: Market
     sign::Integer
     id::Integer
 end
+
+mutable struct FCRD_Up_LER <: FCR_LERMarket
+    capacity_sold       ::Vector{VariableRef}
+    up_capacity         ::Vector{AffExpr}
+    down_capacity       ::Vector{AffExpr}
+    #up_energy_reserve   ::Vector{AffExpr}
+    #down_energy_reserve ::Vector{AffExpr}
+    energy_endurance    ::Real
+    capacity_factor     ::Real
+    price               ::Vector{Real}
+    sign                ::Integer
+    id                  ::Integer
+end
+
+# Outer constructor
+FCRD_Up_LER(energy_endurance, capacity_factor, price, sign, id) = 
+FCRD_Up_LER(Vector{VariableRef}(), Vector{AffExpr}(), Vector{AffExpr}(), energy_endurance, capacity_factor, price, sign, id )
 
 # ----------------
 # - Connections -
