@@ -376,7 +376,9 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggr
     up_capacity_common = nothing
     up_capacity = init_expr_array(N)
 
-    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, m["armed"], m["sign"], m["class"],  m["id"])
+    armed = parse_data(m["armed"])
+
+    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, armed, m["sign"], m["class"],  m["id"])
 end
 
 # - FCRN
