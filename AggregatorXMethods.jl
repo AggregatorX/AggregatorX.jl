@@ -403,7 +403,10 @@ end
 function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
     source = get_component(l.source, aggregator)
-    @constraint(model, source.power[l.id][1:N] == l.load[1:N], base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id))
+
+    base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
+    c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
+    setindex!(l.constraint, c, "energy conservation")
 end
 
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
