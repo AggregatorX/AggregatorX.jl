@@ -378,7 +378,10 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggr
 
     armed = parse_data(m["armed"])
 
-    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, armed, m["sign"], m["class"],  m["id"])
+    constraints = Dict{String, Vector{ConstraintRef}}()
+    scalar_constraints = Dict{String, ConstraintRef}()
+
+    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, armed, constraints, scalar_constraints, m["sign"], m["class"],  m["id"])
 end
 
 # - FCRN

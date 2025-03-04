@@ -189,6 +189,8 @@ mutable struct FFRProfil <: Market
     minimum_bid::AbstractFloat
     participating::Union{VariableRef, Nothing}
     armed::Vector{Bool} # Time steps where FFR is armed.
+    constraint::Dict{String, Vector{ConstraintRef}}
+    scalar_constraint::Dict{String, ConstraintRef}
     sign::Integer
     class::String
     id::Integer
