@@ -103,6 +103,8 @@ end
 struct FixedLoad <: Load
     source::Integer
     load::Vector{Real}
+    constraint::Dict{String, Vector{ConstraintRef}}
+    scalar_constraint::Dict{String, ConstraintRef}
     id::Integer
 end
 

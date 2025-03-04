@@ -200,7 +200,9 @@ end
         load = [1,2,3]
         id = 1
         source = 2
-        fixedload = FixedLoad(source, load, id)
+        constraint          = Dict{String, Vector{ConstraintRef}}()
+        scalar_constraint   = Dict{String, ConstraintRef}()
+        fixedload = FixedLoad(source, load, constraint, scalar_constraint, id)
         isa(fixedload, FixedLoad)
     end
     @test begin

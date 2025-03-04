@@ -191,15 +191,10 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
         load = parse_data(l["load"])
     end
 
-    #if typeof(l["load"]) <: Vector{}
-    #    load = l["load"]
-    #elseif typeof(l["load"]) <: Real
-    #    load = ones(N) .* l["load"]
-    #elseif isa(l["load"], String)
-    #    # read from file
-    #end
+    constraint          = Dict{String, Vector{ConstraintRef}}()
+    scalar_constraint   = Dict{String, ConstraintRef}()
 
-    return FixedLoad(source, load, id)
+    return FixedLoad(source, load, constraint, scalar_constraint, id)
 end
 
 # VariableLoad
