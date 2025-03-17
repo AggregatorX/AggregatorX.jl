@@ -14,7 +14,7 @@ export StandardNode
 export SimpleCharger, SimpleBattery, MegaCharger, Generation # Resources
 export LinearTariff # Grids
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN, FCRNe, FCRMarket, FCR_LERMarket, FCRD_Up_LER # Markets
-export MinAverageLoad, MinLoad, FixedLoad, VariableLoad # Loads 
+export MinAverageLoad, MinLoad, FixedLoad, VariableLoad, ThermalLoad # Loads 
 export Connection # Connections
 export IncompleteSystemException, DuplicateIdException, MissingIdException
 

@@ -116,6 +116,25 @@ struct VariableLoad <: Load
     id::Integer
 end
 
+struct ThermalLoad <: Load
+    power              ::Vector{AffExpr}
+    load               ::Vector{Real}
+    up_capacity        ::Dict{Integer, Vector{VariableRef}}
+    down_capacity      ::Dict{Integer, Vector{VariableRef}}
+    up_activation      ::Dict{Integer, Vector{VariableRef}}
+    down_activation    ::Dict{Integer, Vector{VariableRef}}
+    up_energy_reserve  ::Dict{Integer, Vector{VariableRef}}
+    down_energy_reserve::Dict{Integer, Vector{VariableRef}}
+    temperature        ::Vector{Real}
+    max_temperature    ::Real
+    min_temperature    ::Real
+    ambient_temperature::Vector{Real}
+    heat_capacity      ::Real
+    heat_loss_factor   ::Real
+    max_power          ::Real
+    id                 ::Integer
+end
+
 # ----------
 # - Grids -
 # ----------

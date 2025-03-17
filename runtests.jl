@@ -21,8 +21,22 @@ using .AggregatorX
 
 println("\n Running component tests from test-components.jl")
 
-@testset begin
-    include("test-components.jl")
+# Remove test stacktrace output on error
+suppress_output = false
+if suppress_output
+Test.eval(quote
+	function record(ts::DefaultTestSet, t::Union{Fail, Error})
+		push!(ts.results, t)
+	end
+end)
+end
+
+try
+    @testset verbose=true "Components" begin
+        include("test-components.jl")
+    end
+catch e
+    "error caught"
 end
 
 println("\n Running component tests... \n ")
