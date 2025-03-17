@@ -19,6 +19,12 @@ end
 
 using .AggregatorX
 
+println("\n Running component tests from test-components.jl")
+
+@testset begin
+    include("test-components.jl")
+end
+
 println("\n Running component tests... \n ")
 
 @testset begin # Component tests
