@@ -174,6 +174,20 @@ function validate_system_description(sys)
     end
 
     # Validate each type 
+    resources = sys["Resource"]
+    for r in resources
+        if !haskey(r, "type")
+            println("A resource is missing type description")
+            println(r)
+            throw(IncompleteSystemException)
+        end
+        resource_type = TYPETABLE[r["type"]]        
+        #validate_component(resource_type,r ,  sys["TimeStruct"])
+    end
+end
+
+function validate_component(t::ThermalLoad, r::Dict, ts::Dict)
+
 end
 
 function all_components(aggregator)

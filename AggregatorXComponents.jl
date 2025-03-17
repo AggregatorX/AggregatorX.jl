@@ -116,7 +116,7 @@ struct VariableLoad <: Load
     id::Integer
 end
 
-struct ThermalLoad <: Load
+mutable struct ThermalLoad <: Load
     power              ::Vector{AffExpr}
     load               ::Vector{Real}
     up_capacity        ::Dict{Integer, Vector{VariableRef}}

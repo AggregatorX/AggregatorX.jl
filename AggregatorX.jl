@@ -42,4 +42,6 @@ include("AggregatorXExceptions.jl")
 include("BuildAggregator.jl")
 include("OptimizeAggregator.jl")
 
+TYPETABLE = build_typetable()
+
 end

@@ -7,6 +7,7 @@
     end
 
     if !failed
+        # Field names
         field_names = fieldnames(ThermalLoad)
         @test field_names == (
             :power,
@@ -26,6 +27,40 @@
             :max_power,
             :id
         )
+
+        # Field types
+        field_types = [fieldtype(ThermalLoad, i) for i in 1:length(field_names)]
+        @test field_types == [
+            Vector{AffExpr},
+            Vector{Real},
+            Dict{Integer, Vector{VariableRef}},
+            Dict{Integer, Vector{VariableRef}},
+            Dict{Integer, Vector{VariableRef}},
+            Dict{Integer, Vector{VariableRef}},
+            Dict{Integer, Vector{VariableRef}},
+            Dict{Integer, Vector{VariableRef}},
+            Vector{Real},
+            Real,
+            Real,
+            Vector{Real},
+            Real,
+            Real,
+            Real,
+            Integer
+        ]
+
+        # Default constructr
+        va = Vector{AffExpr}()
+        vr = Vector{Real}()
+        d = Dict{Integer, Vector{VariableRef}}()
+        r = 1.1
+        i = 1.0
+        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vr, r, r, vr, r, r, r, i)
+        @test isa(thermalload, ThermalLoad)
+
+        # Access and modification
+        thermalload.id = 2
+        @test thermalload.id == 2
     else
         println("Test of definition of thermal load failed, skipping remainin tests")
     end
