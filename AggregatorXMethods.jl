@@ -128,6 +128,11 @@ function set_optimization_variables(model::Model, load::MinLoad, timestruct::Tim
     # No variables needed
 end
 
+function set_optimization_variables(model::Model, load::ThermalLoad, timestruct::TimeStruct)
+    N = timestruct.periods
+    indexset = 1:N
+end
+
 ## Grids
 function set_optimization_variables(model, g::LinearTariff, timestruct::TimeStruct)
     N = timestruct.periods

@@ -9,7 +9,7 @@ export optimizeaggregator
 
 # export all concrete types
 export FFRGroup, FCReGroup, FCRGroup # Groups
-export IndexedTimeStruct # TimeStructs
+export IndexedTimeStruct, TimeStruct # TimeStructs
 export StandardNode
 export SimpleCharger, SimpleBattery, MegaCharger, Generation # Resources
 export LinearTariff # Grids

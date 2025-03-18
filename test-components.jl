@@ -1,7 +1,7 @@
 @testset verbose = true "Thermal load" begin
     failed = false
 
-    @testset  "Thermal load defined" begin
+    @testset "Thermal load defined" begin
         t = @test @isdefined(ThermalLoad);
         failed = isa(t,Test.Fail) ? true : false
     end
@@ -81,4 +81,35 @@
         println("Test of definition of thermal load failed, skipping remainin tests")
     end
 
+    @testset "ThermalLoad optimization model" begin
+        
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test1.json")
+        sys, aggregator = buildaggregator(filepath)
+        thermalload = get_component(3, aggregator)
+        timestruct = aggregator["TimeStruct"]
+
+        # Setting optimization Variables
+        # Check function with signature exists
+        exists = try
+            set_optimization_variables
+        catch e
+            e
+        end
+        @test !isa(exists, UndefVarError)
+
+        model = Model();
+        
+        if !isa(exists, UndefVarError)
+            call = try
+                set_optimization_variables(model, thermalload, timestruct)
+            catch e
+                e
+            end
+            @test !(call isa MethodError)
+        end
+    
+    end
+    # Setting optimization constratints
+
+    # Setting objective function
 end
