@@ -16,7 +16,7 @@ export LinearTariff # Grids
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN, FCRNe, FCRMarket, FCR_LERMarket, FCRD_Up_LER # Markets
 export MinAverageLoad, MinLoad, FixedLoad, VariableLoad, ThermalLoad # Loads 
 export Connection # Connections
-export IncompleteSystemException, DuplicateIdException, MissingIdException
+export IncompleteSystemException, DuplicateIdException, MissingIdException, MismatchedSystemException
 
 # export utilitites
 export get_component, all_ids

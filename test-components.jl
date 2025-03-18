@@ -19,6 +19,7 @@
             :up_energy_reserve,
             :down_energy_reserve,
             :temperature,
+            :inital_temperature,
             :max_temperature,
             :min_temperature,
             :ambient_temperature,
@@ -39,7 +40,8 @@
             Dict{Integer, Vector{VariableRef}},
             Dict{Integer, Vector{VariableRef}},
             Dict{Integer, Vector{VariableRef}},
-            Vector{Real},
+            Vector{AffExpr},
+            Real,
             Real,
             Real,
             Vector{Real},
@@ -55,13 +57,28 @@
         d = Dict{Integer, Vector{VariableRef}}()
         r = 1.1
         i = 1.0
-        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vr, r, r, vr, r, r, r, i)
+        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vr, r, r, r, vr, r, r, r, i)
         @test isa(thermalload, ThermalLoad)
 
         # Access and modification
         thermalload.id = 2
         @test thermalload.id == 2
+
+        # AggregatorX constructor
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test1.json")
+        @test isa(buildaggregator(filepath)[2], Dict{String, Any})
+
+        # System spesification missing required key
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test2.json")
+        @test_throws IncompleteSystemException buildaggregator(filepath)
+
+        # Test simple system
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test1.json")
+        sys, aggregator = buildaggregator(filepath)
+        #model = optimizeaggregator(aggregator,optimizer)
+        #@test objective_value(model) == -2
     else
         println("Test of definition of thermal load failed, skipping remainin tests")
     end
+
 end

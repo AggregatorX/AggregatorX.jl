@@ -3,6 +3,9 @@
 struct IncompleteSystemException <: Exception
 end
 
+struct MismatchedSystemException <: Exception
+end
+
 struct DuplicateIdException <: Exception
 end
 

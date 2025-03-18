@@ -125,7 +125,8 @@ mutable struct ThermalLoad <: Load
     down_activation    ::Dict{Integer, Vector{VariableRef}}
     up_energy_reserve  ::Dict{Integer, Vector{VariableRef}}
     down_energy_reserve::Dict{Integer, Vector{VariableRef}}
-    temperature        ::Vector{Real}
+    temperature        ::Vector{AffExpr}
+    inital_temperature ::Real
     max_temperature    ::Real
     min_temperature    ::Real
     ambient_temperature::Vector{Real}

@@ -245,6 +245,41 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     return VariableLoad(power, sources, lower_bound, upper_bound, id)
 end
 
+function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
+    N = aggregator["TimeStruct"].periods
+
+    power = Vector{AffExpr}()
+    load = parse_data(l["load"])
+    if length(load) != N
+        throw(MismatchedSystemException)
+    end
+    
+    up_capacity         = Dict{Integer, Vector{VariableRef}}()
+    down_capacity       = Dict{Integer, Vector{VariableRef}}()
+    up_activation       = Dict{Integer, Vector{VariableRef}}()
+    down_activation     = Dict{Integer, Vector{VariableRef}}()
+    up_energy_reserve   = Dict{Integer, Vector{VariableRef}}()
+    down_energy_reserve = Dict{Integer, Vector{VariableRef}}()
+    temperature         = Vector{AffExpr}()
+
+    inital_temperature      = l["inital_temperature"]
+    max_temperature         = l["max_temperature"]
+    min_temperature         = l["min_temperature"]
+    ambient_temperature     = parse_data(l["ambient_temperature"], N)
+
+    heat_capacity       = l["heat_capacity"]
+    heat_loss_factor    = l["heat_loss_factor"]
+    max_power           = l["max_power"]
+
+    id = l["id"]
+
+    return ThermalLoad(power, load, up_capacity, down_capacity, up_activation, 
+        down_activation, up_energy_reserve, down_energy_reserve, temperature,
+        inital_temperature, max_temperature, min_temperature, ambient_temperature, 
+        heat_capacity, heat_loss_factor, max_power, id
+        )
+end
+
 # - MinLoad - !Not tested!
 function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
 
