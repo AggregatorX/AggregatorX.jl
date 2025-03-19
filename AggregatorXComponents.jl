@@ -133,6 +133,8 @@ mutable struct ThermalLoad <: Load
     heat_capacity      ::Real
     heat_loss_factor   ::Real
     max_power          ::Real
+    constraints        ::Vector{Any}
+    source             ::Integer
     id                 ::Integer
 end
 

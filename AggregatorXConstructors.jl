@@ -247,6 +247,7 @@ end
 
 function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
     N = aggregator["TimeStruct"].periods
+    connections = aggregator["Connection"]
 
     power = Vector{AffExpr}()
     load = parse_data(l["load"])
@@ -271,12 +272,28 @@ function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, a
     heat_loss_factor    = l["heat_loss_factor"]
     max_power           = l["max_power"]
 
+    constraints = Vector{Any}()
     id = l["id"]
+    source = getsource(id,connections)
+
+    if haskey(aggregator, "Group")
+        groups = aggregator["Group"]        
+        for g in groups
+            if id in g.resources # For each group add an entry in det capacity and activation dictionaries                 
+                up_activation[g.id] = Vector{VariableRef}(undef, N)
+                down_activation[g.id] = Vector{VariableRef}(undef, N)
+                up_capacity[g.id] = Vector{VariableRef}(undef, N)
+                down_capacity[g.id] = Vector{VariableRef}(undef, N)
+                up_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
+                down_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
+            end
+        end
+    end
 
     return ThermalLoad(power, load, up_capacity, down_capacity, up_activation, 
         down_activation, up_energy_reserve, down_energy_reserve, temperature,
         inital_temperature, max_temperature, min_temperature, ambient_temperature, 
-        heat_capacity, heat_loss_factor, max_power, id
+        heat_capacity, heat_loss_factor, max_power, constraints, source, id
         )
 end
 

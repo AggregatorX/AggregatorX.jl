@@ -209,3 +209,13 @@ function all_components(aggregator)
         union(aggregator["Resource"], aggregator["Market"], aggregator["Node"])
     end
 end
+
+function getsource(id, connections)
+    source = 0
+    for c in connections
+        if c.sink == id
+            source =  c.source
+        end
+    end
+    return source
+end

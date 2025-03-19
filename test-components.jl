@@ -1,7 +1,7 @@
-@testset verbose = true "Thermal load" begin
+@testset verbose = true "ThermalLoad" begin
     failed = false
 
-    @testset "Thermal load defined" begin
+    @testset "ThermalLoad definition" begin
         t = @test @isdefined(ThermalLoad);
         failed = isa(t,Test.Fail) ? true : false
     end
@@ -26,6 +26,8 @@
             :heat_capacity,
             :heat_loss_factor,
             :max_power,
+            :constraints,
+            :source,
             :id
         )
 
@@ -48,6 +50,8 @@
             Real,
             Real,
             Real,
+            Vector{Any},
+            Integer,
             Integer
         ]
 
@@ -57,7 +61,7 @@
         d = Dict{Integer, Vector{VariableRef}}()
         r = 1.1
         i = 1.0
-        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vr, r, r, r, vr, r, r, r, i)
+        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vr, r, r, r, vr, r, r, r, vr, i, i)
         @test isa(thermalload, ThermalLoad)
 
         # Access and modification
@@ -69,7 +73,7 @@
         @test isa(buildaggregator(filepath)[2], Dict{String, Any})
 
         # System spesification missing required key
-        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test2.json")
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test-missing.json")
         @test_throws IncompleteSystemException buildaggregator(filepath)
 
         # Test simple system
@@ -81,33 +85,40 @@
         println("Test of definition of thermal load failed, skipping remainin tests")
     end
 
-    @testset "ThermalLoad optimization model" begin
+    @testset "ThermalLoad optimization setup" begin
         
         filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test1.json")
         sys, aggregator = buildaggregator(filepath)
         thermalload = get_component(3, aggregator)
         timestruct = aggregator["TimeStruct"]
-
-        # Setting optimization Variables
-        # Check function with signature exists
-        exists = try
-            set_optimization_variables
+        
+        model = Model()
+        # Test if variable setter exists
+        call = try
+            set_optimization_variables(model, thermalload, timestruct)
         catch e
             e
         end
-        @test !isa(exists, UndefVarError)
+        @test !(call isa MethodError)              
+        @test call
 
-        model = Model();
-        
-        if !isa(exists, UndefVarError)
-            call = try
-                set_optimization_variables(model, thermalload, timestruct)
-            catch e
-                e
-            end
-            @test !(call isa MethodError)
+        # Test initialization of variables
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test-group.json")
+        sys, aggregator = buildaggregator(filepath)
+        thermalload = get_component(3, aggregator)
+        set_optimization_variables(model, thermalload, timestruct)
+
+        @test variable_by_name(model, "up_capacity-ThermalLoad-3[1]") == thermalload.up_capacity[4][1]
+        @test thermalload.power[1] == 0.0
+
+        # Test if constraint setter exists
+        call = try
+            set_optimization_constraints(model, thermalload, aggregator)
+        catch e
+            e
         end
-    
+        @test !(call isa MethodError) 
+        
     end
     # Setting optimization constratints
 
