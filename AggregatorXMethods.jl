@@ -457,16 +457,17 @@ end
 
 function set_optimization_constraints(model::Model, load::ThermalLoad, aggregator::Dict{String, Any})
     # Shorthand
-    N = aggregator["TimeStruct"].periods
-    id = load.id
-    T = load.temperature
-    C = load.heat_capacity
-    H = load.heat_loss_factor
-    Ta =load.ambient_temperature
-    Pout = load.load
-    aup = init_expr_array(N)
+    N     = aggregator["TimeStruct"].periods
+    id    = load.id
+    T     = load.temperature
+    C     = load.heat_capacity
+    H     = load.heat_loss_factor
+    Ta    =load.ambient_temperature
+    Pout  = load.load
+    aup   = init_expr_array(N)
     adown = init_expr_array(N)
 
+    # Total activation
     for k in keys(load.up_activation)
         aup     = aup + load.up_activation[k]
         adown   = adown + load.down_activation[k]
