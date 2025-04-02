@@ -10,8 +10,6 @@ abstract type Component <: AggregatorXAny end
 
 abstract type Group <: AggregatorXAny end
 
-abstract type Grid <: Component end
-
 abstract type Market <: Component end
 
 abstract type FCRMarket <: Market end
@@ -19,6 +17,8 @@ abstract type FCRMarket <: Market end
 abstract type FCR_LERMarket <: FCRMarket end
 
 abstract type Resource <: Component end
+
+abstract type Grid <: Resource end
 
 abstract type Load <: Resource end
 
