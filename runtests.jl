@@ -257,6 +257,13 @@ end
         model = optimizeaggregator(aggregator, optimizer)
         isa(model, Model)
     end
+    # Testing parsing price data with single value
+    @test begin
+        filepath = joinpath(@__DIR__, "test-systems", "lineartariff-test2.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        isa(model, Model)
+    end
 
     # Generation - component
     @test begin

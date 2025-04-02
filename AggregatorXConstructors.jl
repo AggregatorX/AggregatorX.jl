@@ -293,7 +293,13 @@ function build_aggregatorx_object(gt::Type{LinearTariff}, g::Dict{String, Any}, 
         end
     end
 
-    price = g["price"]
+    #price = parse_data(g["price"])
+
+    if length(g["price"]) == 1
+        price = parse_data(g["price"], N)
+    else
+        price = parse_data(g["price"])
+    end
 
     upper_bound = g["upper_bound"]
 
