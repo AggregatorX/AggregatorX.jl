@@ -13,7 +13,7 @@ end
 
 # Load AggregatorX
 if !loaded # Errors occur if module is loaded multiple times
-    include("./AggregatorX.jl")
+    include("../AggregatorX.jl")
     using .AggregatorX
 end
 
