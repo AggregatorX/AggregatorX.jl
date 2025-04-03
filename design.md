@@ -75,6 +75,12 @@ This friendly file solves whatever problems you might have:D. Just kidding, it i
 
 # Software design
 
+## Location of system description and data files
+
+AggregatorX needs some data to work with. The system that you wish to analyse is stored in a  `*.json file`. This is assumed to be located in the working directory of the current Julia instance. However the global variable `SYSTEMDIR` might be set using the function setsystemdir(directory) where directory is relative to julia working directory
+
+The system description might load parameters from other filese rather than hardcoding them directly. The location of these files might changed by changing the global variable DATADIR using setdatadir(directory) where the directory is releativ to SYSTEMDIR, ie. wd + systemdir + directory.
+
 ## The AggregatorX type hierarchy
 
 The AggregatorX software defines a set of new abstract and concrete types (The concrete types are akin to classes in other OO languages. Abstract types cannot be instantiated, but can be used for dispatching on functions). All the information about the system under analysis is stored in instances of these types.

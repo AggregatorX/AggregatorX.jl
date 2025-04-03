@@ -128,6 +128,29 @@ function set_optimization_variables(model::Model, load::MinLoad, timestruct::Tim
     # No variables needed
 end
 
+function set_optimization_variables(model::Model, load::ThermalLoad, timestruct::TimeStruct)
+    N = timestruct.periods
+    T = 1:N
+    varsuffix = "-ThermalLoad-" * string(load.id)
+
+    # Initalize AffExpr
+    load.temperature = init_expr_array(N)
+    load.power       = init_expr_array(N)
+
+    for k in keys(load.up_capacity) # group key same for all balancing variables
+        load.up_capacity[k]        = @variable(model, [T], lower_bound = 0.0, base_name = "up_capacity" * varsuffix)
+        load.down_capacity[k]      = @variable(model, [T], lower_bound = 0.0, base_name = "down_capacity" * varsuffix)
+        load.up_activation[k]      = @variable(model, [T], lower_bound = 0.0, base_name = "up_activation" * varsuffix)
+        load.down_activation[k]    = @variable(model, [T], lower_bound = 0.0, base_name = "down_activation" * varsuffix)
+        load.up_energy_reserve[k]  = @variable(model, [T], lower_bound = 0.0, base_name = "up_energy_reserve" * varsuffix)
+        load.down_energy_reserve[k]= @variable(model, [T], lower_bound = 0.0, base_name = "down_energy_reserve" * varsuffix)
+    end
+
+    # variable for power flowing to this load is set in attached node
+
+    return true
+end
+
 ## Grids
 function set_optimization_variables(model, g::LinearTariff, timestruct::TimeStruct)
     N = timestruct.periods
@@ -403,7 +426,10 @@ end
 function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
     source = get_component(l.source, aggregator)
-    @constraint(model, source.power[l.id][1:N] == l.load[1:N], base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id))
+
+    base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
+    c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
+    setindex!(l.constraint, c, "energy conservation")
 end
 
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
@@ -427,6 +453,41 @@ end
 function set_optimization_constraints(model::Model, l::MinLoad, aggregator::Dict{String, Any})
     source = get_component(l.source, aggregator)
     @constraint(model, source.power[l.id] .>= l.pmin, base_name = "MinLoad-" * string(l.id))
+end
+
+function set_optimization_constraints(model::Model, load::ThermalLoad, aggregator::Dict{String, Any})
+    # Shorthand
+    N     = aggregator["TimeStruct"].periods
+    id    = load.id
+    T     = load.temperature
+    C     = load.heat_capacity
+    H     = load.heat_loss_factor
+    Ta    =load.ambient_temperature
+    Pout  = load.load
+    aup   = init_expr_array(N)
+    adown = init_expr_array(N)
+
+    # Total activation
+    for k in keys(load.up_activation)
+        aup     = aup + load.up_activation[k]
+        adown   = adown + load.down_activation[k]
+    end
+
+    # Power inflow
+    Pin = load.power = get_component(load.source, aggregator).power[id]
+
+    # Inital value
+    T[1] = load.inital_temperature
+
+    # Energy conservation
+    c = @constraint(model, [t = 1:N-1], T[t+1] == T[t] + C*(Pin[t] - Pout[t] - aup[t] + adown[t]) - H *(T[t]-Ta[t]) )
+    push!(load.constraints, c)
+
+    # Max power
+    c = @constraint(model, [t = 1:N], Pin[t] <= load.max_power)
+
+    # Maximum and minimum temperature
+
 end
 
 #=

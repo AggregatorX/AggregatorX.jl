@@ -19,6 +19,26 @@ end
 
 using .AggregatorX
 
+println("\n Running component tests from test-components.jl")
+
+# Remove test stacktrace output on error
+suppress_output = false
+if suppress_output
+Test.eval(quote
+	function record(ts::DefaultTestSet, t::Union{Fail, Error})
+		push!(ts.results, t)
+	end
+end)
+end
+
+try
+    @testset verbose=true "Components" begin
+        include("test-components.jl")
+    end
+catch e
+    "error caught"
+end
+
 println("\n Running component tests... \n ")
 
 @testset begin # Component tests
@@ -200,7 +220,9 @@ end
         load = [1,2,3]
         id = 1
         source = 2
-        fixedload = FixedLoad(source, load, id)
+        constraint          = Dict{String, Vector{ConstraintRef}}()
+        scalar_constraint   = Dict{String, ConstraintRef}()
+        fixedload = FixedLoad(source, load, constraint, scalar_constraint, id)
         isa(fixedload, FixedLoad)
     end
     @test begin

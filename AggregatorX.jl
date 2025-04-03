@@ -9,14 +9,14 @@ export optimizeaggregator
 
 # export all concrete types
 export FFRGroup, FCReGroup, FCRGroup # Groups
-export IndexedTimeStruct # TimeStructs
+export IndexedTimeStruct, TimeStruct # TimeStructs
 export StandardNode
 export SimpleCharger, SimpleBattery, MegaCharger, Generation # Resources
 export LinearTariff # Grids
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN, FCRNe, FCRMarket, FCR_LERMarket, FCRD_Up_LER # Markets
-export MinAverageLoad, MinLoad, FixedLoad, VariableLoad # Loads 
+export MinAverageLoad, MinLoad, FixedLoad, VariableLoad, ThermalLoad # Loads 
 export Connection # Connections
-export IncompleteSystemException, DuplicateIdException, MissingIdException
+export IncompleteSystemException, DuplicateIdException, MissingIdException, MismatchedSystemException
 
 # export utilitites
 export get_component, all_ids
@@ -41,5 +41,7 @@ include("AggregatorXExceptions.jl")
 
 include("BuildAggregator.jl")
 include("OptimizeAggregator.jl")
+
+TYPETABLE = build_typetable()
 
 end

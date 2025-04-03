@@ -103,6 +103,8 @@ end
 struct FixedLoad <: Load
     source::Integer
     load::Vector{Real}
+    constraint::Dict{String, Vector{ConstraintRef}}
+    scalar_constraint::Dict{String, ConstraintRef}
     id::Integer
 end
 
@@ -112,6 +114,28 @@ struct VariableLoad <: Load
     lower_bound::Vector{Real}
     upper_bound::Vector{Real}
     id::Integer
+end
+
+mutable struct ThermalLoad <: Load
+    power              ::Vector{AffExpr}
+    load               ::Vector{Real}
+    up_capacity        ::Dict{Integer, Vector{VariableRef}}
+    down_capacity      ::Dict{Integer, Vector{VariableRef}}
+    up_activation      ::Dict{Integer, Vector{VariableRef}}
+    down_activation    ::Dict{Integer, Vector{VariableRef}}
+    up_energy_reserve  ::Dict{Integer, Vector{VariableRef}}
+    down_energy_reserve::Dict{Integer, Vector{VariableRef}}
+    temperature        ::Vector{AffExpr}
+    inital_temperature ::Real
+    max_temperature    ::Real
+    min_temperature    ::Real
+    ambient_temperature::Vector{Real}
+    heat_capacity      ::Real
+    heat_loss_factor   ::Real
+    max_power          ::Real
+    constraints        ::Vector{Any}
+    source             ::Integer
+    id                 ::Integer
 end
 
 # ----------
@@ -189,6 +213,8 @@ mutable struct FFRProfil <: Market
     minimum_bid::AbstractFloat
     participating::Union{VariableRef, Nothing}
     armed::Vector{Bool} # Time steps where FFR is armed.
+    constraint::Dict{String, Vector{ConstraintRef}}
+    scalar_constraint::Dict{String, ConstraintRef}
     sign::Integer
     class::String
     id::Integer

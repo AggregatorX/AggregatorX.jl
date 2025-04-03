@@ -169,11 +169,37 @@ function validate_system_description(sys)
     for k in required
         if !(k in syskeys)
             println("Mandatory key " * string(k) * " not found in system description")
-            throw(IncompleteSystemException)
+            throw(IncompleteSystemException())
         end
     end
 
     # Validate each type 
+    resources = sys["Resource"]
+    for r in resources
+        if !haskey(r, "type")
+            println("A resource is missing type description")
+            println(r)
+            throw(IncompleteSystemException)
+        end
+        resource_type = TYPETABLE[r["type"]]
+        if resource_type == ThermalLoad   
+            validate_component(resource_type, r ,  sys["TimeStruct"])
+        end
+    end
+end
+
+function validate_component(t::typeof(ThermalLoad), r::Dict, ts::Dict)
+    k = keys(r)
+    required_keys = [
+        "load", "inital_temperature", "min_temperature", "max_temperature",
+        "ambient_temperature", "heat_capacity", "heat_loss_factor", "max_power"
+        ]
+    for rk in required_keys
+        if !(rk ∈ k)
+            println("Mandatory key " * rk * "missing from ThermalLoad definition")
+            throw(IncompleteSystemException())
+        end
+    end
 end
 
 function all_components(aggregator)
@@ -182,4 +208,14 @@ function all_components(aggregator)
     else
         union(aggregator["Resource"], aggregator["Market"], aggregator["Node"])
     end
+end
+
+function getsource(id, connections)
+    source = 0
+    for c in connections
+        if c.sink == id
+            source =  c.source
+        end
+    end
+    return source
 end

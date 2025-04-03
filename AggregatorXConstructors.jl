@@ -191,15 +191,10 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
         load = parse_data(l["load"])
     end
 
-    #if typeof(l["load"]) <: Vector{}
-    #    load = l["load"]
-    #elseif typeof(l["load"]) <: Real
-    #    load = ones(N) .* l["load"]
-    #elseif isa(l["load"], String)
-    #    # read from file
-    #end
+    constraint          = Dict{String, Vector{ConstraintRef}}()
+    scalar_constraint   = Dict{String, ConstraintRef}()
 
-    return FixedLoad(source, load, id)
+    return FixedLoad(source, load, constraint, scalar_constraint, id)
 end
 
 # VariableLoad
@@ -248,6 +243,58 @@ function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, ag
     end
 
     return VariableLoad(power, sources, lower_bound, upper_bound, id)
+end
+
+function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
+    N = aggregator["TimeStruct"].periods
+    connections = aggregator["Connection"]
+
+    power = Vector{AffExpr}()
+    load = parse_data(l["load"])
+    if length(load) != N
+        throw(MismatchedSystemException)
+    end
+    
+    up_capacity         = Dict{Integer, Vector{VariableRef}}()
+    down_capacity       = Dict{Integer, Vector{VariableRef}}()
+    up_activation       = Dict{Integer, Vector{VariableRef}}()
+    down_activation     = Dict{Integer, Vector{VariableRef}}()
+    up_energy_reserve   = Dict{Integer, Vector{VariableRef}}()
+    down_energy_reserve = Dict{Integer, Vector{VariableRef}}()
+    temperature         = Vector{AffExpr}()
+
+    inital_temperature      = l["inital_temperature"]
+    max_temperature         = l["max_temperature"]
+    min_temperature         = l["min_temperature"]
+    ambient_temperature     = parse_data(l["ambient_temperature"], N)
+
+    heat_capacity       = l["heat_capacity"]
+    heat_loss_factor    = l["heat_loss_factor"]
+    max_power           = l["max_power"]
+
+    constraints = Vector{Any}()
+    id = l["id"]
+    source = getsource(id,connections)
+
+    if haskey(aggregator, "Group")
+        groups = aggregator["Group"]        
+        for g in groups
+            if id in g.resources # For each group add an entry in det capacity and activation dictionaries                 
+                up_activation[g.id] = Vector{VariableRef}(undef, N)
+                down_activation[g.id] = Vector{VariableRef}(undef, N)
+                up_capacity[g.id] = Vector{VariableRef}(undef, N)
+                down_capacity[g.id] = Vector{VariableRef}(undef, N)
+                up_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
+                down_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
+            end
+        end
+    end
+
+    return ThermalLoad(power, load, up_capacity, down_capacity, up_activation, 
+        down_activation, up_energy_reserve, down_energy_reserve, temperature,
+        inital_temperature, max_temperature, min_temperature, ambient_temperature, 
+        heat_capacity, heat_loss_factor, max_power, constraints, source, id
+        )
 end
 
 # - MinLoad - !Not tested!
@@ -390,7 +437,10 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggr
 
     armed = parse_data(m["armed"])
 
-    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, armed, m["sign"], m["class"],  m["id"])
+    constraints = Dict{String, Vector{ConstraintRef}}()
+    scalar_constraints = Dict{String, ConstraintRef}()
+
+    return FFRProfil(up_capacity_common, up_capacity, price, minimum_bid, participating, armed, constraints, scalar_constraints, m["sign"], m["class"],  m["id"])
 end
 
 # - FCRN
