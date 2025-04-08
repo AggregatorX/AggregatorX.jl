@@ -153,6 +153,19 @@ function parse_data(datafile::String)
     return data[:,1]
 end
 
+function parse_data(datafile::String, aggregator::Dict{String, Any})
+    #datadir = aggregator["datadir"]
+    #filepath = joinpath(datadir, datafile)
+
+    data = open(readdlm, filepath) # Apply readdlm (from DelimitedFiles) to filepath
+    
+    if size(data)[2] != 1
+        throw(DimensionMismatch("More than one column in file. Input data must be a single vector."))
+    end
+
+    return data[:,1]
+end
+
 function get_class(c::Dict{String, Any})
     if haskey(c, "class")
         class = c["class"]

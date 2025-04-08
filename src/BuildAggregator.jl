@@ -5,6 +5,12 @@ Instantiates aggregatorx objects from json descrption
 """
 function buildaggregator(systemdescription::String)
 
+    # if isdir(systemdescription)
+    # sysdir = dirname()
+    # datadir = joinpath(sysdir, "data")
+    # else sysdir = pwd()
+    # print("Working system directory set to " * sysdir)
+
     io = open(systemdescription, "r")
     sys = JSON.parse(io)
 
@@ -22,6 +28,9 @@ function buildaggregator(systemdescription::String)
     parts = ("TimeStruct", "Connection", "Group",  "Market", "Resource", "Node", "Grid" ) 
     
     aggregator = Dict{String, Any}() # One entry for each type of part
+
+    # aggregator["sysdir"] = sysdir
+    # aggregator["datadir"] = datadir
     
     for p in parts
         if p == "TimeStruct"
