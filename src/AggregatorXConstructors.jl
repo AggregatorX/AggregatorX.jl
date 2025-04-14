@@ -185,11 +185,13 @@ function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggr
         end
     end
     
-    if length(l["load"]) == 1
-        load = parse_data(l["load"], N)
-    else
-        load = parse_data(l["load"])
-    end
+    load = parse_data(l["load"], aggregator)
+    
+    #if length(l["load"]) == 1
+    #    load = parse_data(l["load"], N)
+    #else
+    #    load = parse_data(l["load"])
+    #end
 
     constraint          = Dict{String, Vector{ConstraintRef}}()
     scalar_constraint   = Dict{String, ConstraintRef}()
@@ -266,7 +268,8 @@ function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, a
     inital_temperature      = l["inital_temperature"]
     max_temperature         = l["max_temperature"]
     min_temperature         = l["min_temperature"]
-    ambient_temperature     = parse_data(l["ambient_temperature"], N)
+    #ambient_temperature     = parse_data(l["ambient_temperature"], N)
+    ambient_temperature     = parse_data(l["ambient_temperature"], aggregator)
 
     heat_capacity       = l["heat_capacity"]
     heat_loss_factor    = l["heat_loss_factor"]
@@ -313,7 +316,6 @@ function build_aggregatorx_object(lt::Type{MinLoad}, l::Dict{String, Any}, aggre
     source == -1 ? "Warning: Source not found when building MinLoad (id=" * string(id) * ")" :
 
     return MinLoad(pmin, source, id)
-
 end
 
 # - MinAverageLoad - !Not tested!
@@ -342,19 +344,22 @@ function build_aggregatorx_object(gt::Type{LinearTariff}, g::Dict{String, Any}, 
 
     #price = parse_data(g["price"])
 
-    if length(g["price"]) == 1
-        price = parse_data(g["price"], N)
-    else
-        price = parse_data(g["price"])
-    end
+    price = parse_data(g["price"], aggregator)
+
+    #if length(g["price"]) == 1
+    #    price = parse_data(g["price"], N)
+    #else
+    #    price = parse_data(g["price"])
+    #end
 
     #upper_bound = g["upper_bound"]
+    upper_bound = parse_data(g["upper_bound"], aggregator)
 
-    if length(g["upper_bound"]) == 1
-        upper_bound = parse_data(g["upper_bound"], N)
-    else
-        upper_bound = parse_data(g["upper_bound"])
-    end
+    #if length(g["upper_bound"]) == 1
+    #    upper_bound = parse_data(g["upper_bound"], N)
+    #else
+    #    upper_bound = parse_data(g["upper_bound"])
+    #end
 
     return LinearTariff(power, sources, price, upper_bound, id)
 end
@@ -388,7 +393,8 @@ function build_aggregatorx_object(mt::Type{SimpleMarket}, m::Dict{String, Any}, 
 
     power = Dict(resource => Vector{VariableRef}())
 
-    price = parse_data(m["price"])
+    #price = parse_data(m["price"])
+    price = parse_data(m["price"],aggregator)
 
     class = get_class(m)
 
@@ -412,7 +418,8 @@ function build_aggregatorx_object(t::Type{SimpleDAMarket}, m::Dict{String, Any},
 
     class = get_class(m)
 
-    price = parse_data(m["price"])
+    #price = parse_data(m["price"])
+    price = parse_data(m["price"],aggregator)
     
     return SimpleDAMarket(power, price, resource, m["sign"], class,  id)
 end
@@ -435,7 +442,8 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggr
     up_capacity_common = nothing
     up_capacity = init_expr_array(N)
 
-    armed = parse_data(m["armed"])
+    #armed = parse_data(m["armed"])
+    armed = parse_data(m["armed"],aggregator)
 
     constraints = Dict{String, Vector{ConstraintRef}}()
     scalar_constraints = Dict{String, ConstraintRef}()
@@ -462,7 +470,8 @@ function build_aggregatorx_object(t::Type{FCRNe}, m::Dict{String, Any},
 
     energy_endurance = m["energy_endurance"]
     capacity_factor = m["capacity_factor"]
-    price = parse_data(m["price"])
+    #price = parse_data(m["price"])
+    price = parse_data(m["price"],aggregator)
     sign = m["sign"]
     id = m["id"]
 
@@ -483,7 +492,8 @@ function build_aggregatorx_object(t::Type{FCRD_Up_LER}, m::Dict{String, Any}, ag
     
     energy_endurance = m["energy_endurance"]
     capacity_factor = m["capacity_factor"]
-    price = parse_data(m["price"])
+    #price = parse_data(m["price"])
+    price = parse_data(m["price"],aggregator)
     sign = m["sign"]
     id = m["id"]
     
