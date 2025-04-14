@@ -2,7 +2,10 @@ using Test
 using JuMP
 using HiGHS
 import JSON
+
 optimizer = HiGHS.Optimizer
+
+cd(joinpath(@__DIR__, "test-systems")) # Set working directory (system path) to where system files are stored.
 
 loaded = false
 for n in names(Main)    

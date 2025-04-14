@@ -29,8 +29,15 @@ function buildaggregator(systemdescription::String)
     
     aggregator = Dict{String, Any}() # One entry for each type of part
 
-    # aggregator["sysdir"] = sysdir
-    # aggregator["datadir"] = datadir
+    if !haskey(aggregator, "SYSDIR")
+        aggregator["SYSDIR"] = pwd()
+        #println("Warning, system directory implicitly set to: " * aggregator["SYSDIR"] )
+    end
+    if !haskey( aggregator, "DATADIR")
+        aggregator["DATADIR"] = joinpath(aggregator["SYSDIR"], "data")
+        #println("Warning, data directory implicitly set to: " * aggregator["DATADIR"] )
+    end
+    
     
     for p in parts
         if p == "TimeStruct"

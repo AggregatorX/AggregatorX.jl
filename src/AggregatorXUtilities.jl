@@ -61,7 +61,7 @@ end
 function get_component(id ,aggregator)
     #component = union(aggregator["Resource"], aggregator["Market"])
     for (k,v) in aggregator
-        if k == "TimeStruct" || k == "Connection"
+        if k == "TimeStruct" || k == "Connection" || k == "DATADIR" || k == "SYSDIR" # Seems complicated. Better to check if has id field
             continue
         end
         for c in v
@@ -93,12 +93,41 @@ end
 """
     parse_data(data::Vector{AbstractFloat})
 
-return data
+return Vector{Real}
+
+The parse_data() function is used to handle various input formats for component parameters
+that expect an array of numbers (it is not used for parameters ).
+
+The following behaviors are handled:
+
+A single number     -> is expanded to a array of appropriate length with constant values.
+An array of numbers -> is returned as is.
+An absolute path    -> return data at this location as a vector 
+A string            -> assume filename, combine with datadir to get data at this location
+
+The canononical way to use it is the parse_data(data::Any, aggregator::Dict{String, Any}) method.
 
 The parse data function dispatches on various data types and returns a vector
 which represent some parameter data for the system. This is the trivial function
 if the vector is already defined in the JSON file.
 """
+
+function parse_data(data::Any, aggregator::Dict{String, Any})
+    if isa(data, String)
+        if isabspath(data) # data is located at absolute path
+            return parse_data(data)
+        else # data is located in a file in the DATADIR
+            filepath = joinpath(aggregator["DATADIR"], data)
+            return parse_data(filepath)
+        end
+    else # Numeric data
+        if length(data) == 1
+            return parse_data(data, aggregator["TimeStruct"].periods)
+        else
+            parse_data(data)
+        end
+    end
+end
 
 function parse_data(data::Real, N::Integer)
     return ones(N) .* data
@@ -142,9 +171,19 @@ The file must contain a single columen of numbers.
 DelimitedFiles.readdlm is used to read the data.
 """
 function parse_data(datafile::String)
+    if isabspath(datafile)
+        data = open(readdlm, datafile) # Apply readdlm (from DelimitedFiles) to filepath
+    else # depreceated to get here directly, constructors should call parse_data(data, aggregator)
+        filepath = joinpath(pwd(), datafile)
+        print("Warning: Deprecated parsing function. Assuming data directory to be: " * pwd() * "\n") 
+        if isfile(filepath)
+            data = open(readdlm, filepath)
+        else
+            error("File " * filepath * ", not found")
+        end
+    end
     #filepath = joinpath(@__DIR__, datafile)
-    filepath = joinpath(DATADIR, datafile)
-    data = open(readdlm, filepath) # Apply readdlm (from DelimitedFiles) to filepath
+    #filepath = joinpath(DATADIR, datafile)
     
     if size(data)[2] != 1
         throw(DimensionMismatch("More than one column in file. Input data must be a single vector."))
@@ -152,7 +191,7 @@ function parse_data(datafile::String)
 
     return data[:,1]
 end
-
+#=
 function parse_data(datafile::String, aggregator::Dict{String, Any})
     #datadir = aggregator["datadir"]
     #filepath = joinpath(datadir, datafile)
@@ -165,6 +204,8 @@ function parse_data(datafile::String, aggregator::Dict{String, Any})
 
     return data[:,1]
 end
+=#
+# ----
 
 function get_class(c::Dict{String, Any})
     if haskey(c, "class")
