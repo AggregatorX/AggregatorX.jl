@@ -121,10 +121,10 @@ function parse_data(data::Any, aggregator::Dict{String, Any})
             return parse_data(filepath)
         end
     else # Numeric data
-        if length(data) == 1
+        if isa(data, Real) # expand single value to constant vector.
             return parse_data(data, aggregator["TimeStruct"].periods)
         else
-            parse_data(data)
+            return parse_data(data)
         end
     end
 end

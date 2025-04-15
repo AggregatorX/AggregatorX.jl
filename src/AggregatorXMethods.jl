@@ -492,6 +492,9 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
     c2 = @constraint(model, [t = 1:N], T[t] >= load.min_temperature)
     push!(load.constraints, c1, c2)
 
+    # Maximum and minimum also at last time step
+    c1 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) <= load.max_temperature)
+    c2 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) >= load.min_temperature)
 end
 
 #=
