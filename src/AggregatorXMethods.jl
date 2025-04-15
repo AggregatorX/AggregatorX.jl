@@ -462,7 +462,7 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
     T     = load.temperature
     C     = load.heat_capacity
     H     = load.heat_loss_factor
-    Ta    =load.ambient_temperature
+    Ta    = load.ambient_temperature
     Pout  = load.load
     aup   = init_expr_array(N)
     adown = init_expr_array(N)
@@ -485,8 +485,12 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
 
     # Max power
     c = @constraint(model, [t = 1:N], Pin[t] <= load.max_power)
+    push!(load.constraints, c)
 
     # Maximum and minimum temperature
+    c1 = @constraint(model, [t = 1:N], T[t] <= load.max_temperature)
+    c2 = @constraint(model, [t = 1:N], T[t] >= load.min_temperature)
+    push!(load.constraints, c1, c2)
 
 end
 
