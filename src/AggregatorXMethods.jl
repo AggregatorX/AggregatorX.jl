@@ -478,23 +478,25 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
 
     # Inital value
     T[1] = load.inital_temperature
-
+    print(typeof(T))
+    print(T)
     # Energy conservation
-    c = @constraint(model, [t = 1:N-1], T[t+1] == T[t] + C*(Pin[t] - Pout[t] - aup[t] + adown[t]) - H *(T[t]-Ta[t]) )
+    c = @constraint(model, [t = 1:N-1], T[t+1] == T[t] + C*(Pin[t] - Pout[t] - aup[t] + adown[t]) - H *(T[t]-Ta[t]), base_name = "Energy conservation" )
     push!(load.constraints, c)
 
     # Max power
-    c = @constraint(model, [t = 1:N], Pin[t] <= load.max_power)
+    c = @constraint(model, [t = 1:N], Pin[t] <= load.max_power, base_name = "Max power")
     push!(load.constraints, c)
 
     # Maximum and minimum temperature
-    c1 = @constraint(model, [t = 1:N], T[t] <= load.max_temperature)
-    c2 = @constraint(model, [t = 1:N], T[t] >= load.min_temperature)
+    c1 = @constraint(model, [t = 1:N], T[t] <= load.max_temperature, base_name = "Max T")
+    c2 = @constraint(model, [t = 1:N], T[t] >= load.min_temperature, base_name = "Min T")
     push!(load.constraints, c1, c2)
 
     # Maximum and minimum also at last time step
-    c1 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) <= load.max_temperature)
-    c2 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) >= load.min_temperature)
+    c1 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) <= load.max_temperature, base_name = "Max T end")
+    c2 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) >= load.min_temperature, base_name = "Min T end")
+    push!(load.constraints, c1,c2)
 end
 
 #=

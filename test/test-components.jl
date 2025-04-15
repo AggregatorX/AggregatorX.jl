@@ -118,9 +118,20 @@
             e
         end
         @test !(call isa MethodError) 
-        
-    end
-    # Setting optimization constratints
 
-    # Setting objective function
+    end
+
+    @testset "Thermal load optimization" begin
+        # Single timestep
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test-2.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test objective_value(model) ≈ -1 atol=1e-6
+
+        # Two timesteps
+        filepath = joinpath(@__DIR__, "test-systems", "thermal-load-test-3.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test objective_value(model) ≈ -3 atol=1e-6
+    end
 end
