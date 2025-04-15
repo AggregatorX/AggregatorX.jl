@@ -133,8 +133,9 @@ function set_optimization_variables(model::Model, load::ThermalLoad, timestruct:
     T = 1:N
     varsuffix = "-ThermalLoad-" * string(load.id)
 
+    load.temperature = @variable(model, [T], lower_bound = 0.0, base_name = "temperature" * varsuffix)
+
     # Initalize AffExpr
-    load.temperature = init_expr_array(N)
     load.power       = init_expr_array(N)
 
     for k in keys(load.up_capacity) # group key same for all balancing variables
@@ -477,9 +478,8 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
     Pin = load.power = get_component(load.source, aggregator).power[id]
 
     # Inital value
-    T[1] = load.inital_temperature
-    print(typeof(T))
-    print(T)
+    c = @constraint(model, T[1] == load.inital_temperature, base_name = "Inital value" )  
+    
     # Energy conservation
     c = @constraint(model, [t = 1:N-1], T[t+1] == T[t] + C*(Pin[t] - Pout[t] - aup[t] + adown[t]) - H *(T[t]-Ta[t]), base_name = "Energy conservation" )
     push!(load.constraints, c)

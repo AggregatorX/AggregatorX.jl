@@ -252,7 +252,8 @@ function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, a
     connections = aggregator["Connection"]
 
     power = Vector{AffExpr}()
-    load = parse_data(l["load"])
+    
+    load = parse_data(l["load"])    
     if length(load) != N
         throw(MismatchedSystemException)
     end
@@ -263,12 +264,12 @@ function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, a
     down_activation     = Dict{Integer, Vector{VariableRef}}()
     up_energy_reserve   = Dict{Integer, Vector{VariableRef}}()
     down_energy_reserve = Dict{Integer, Vector{VariableRef}}()
-    temperature         = Vector{AffExpr}()
+    
+    temperature         = Vector{VariableRef}(undef,N)
 
     inital_temperature      = l["inital_temperature"]
     max_temperature         = l["max_temperature"]
     min_temperature         = l["min_temperature"]
-    #ambient_temperature     = parse_data(l["ambient_temperature"], N)
     ambient_temperature     = parse_data(l["ambient_temperature"], aggregator)
 
     heat_capacity       = l["heat_capacity"]

@@ -42,7 +42,7 @@
             Dict{Integer, Vector{VariableRef}},
             Dict{Integer, Vector{VariableRef}},
             Dict{Integer, Vector{VariableRef}},
-            Vector{AffExpr},
+            Vector{VariableRef},
             Real,
             Real,
             Real,
@@ -58,10 +58,11 @@
         # Default constructr
         va = Vector{AffExpr}()
         vr = Vector{Real}()
+        vvr = Vector{VariableRef}()
         d = Dict{Integer, Vector{VariableRef}}()
         r = 1.1
         i = 1.0
-        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vr, r, r, r, vr, r, r, r, vr, i, i)
+        thermalload = ThermalLoad(va,vr, d, d, d, d, d, d, vvr, r, r, r, vr, r, r, r, vr, i, i)
         @test isa(thermalload, ThermalLoad)
 
         # Access and modification
