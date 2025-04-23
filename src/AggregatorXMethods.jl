@@ -463,7 +463,7 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
     T     = load.temperature
     C     = load.heat_capacity
     H     = load.heat_loss_factor
-    Ta    = load.ambient_temperature
+    Ta = load.ambient_temperature
     Pout  = load.load
     aup   = init_expr_array(N)
     adown = init_expr_array(N)
