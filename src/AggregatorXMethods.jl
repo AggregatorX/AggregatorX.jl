@@ -11,9 +11,11 @@ function set_optimization_variables(model::Model, battery::SimpleBattery,
     
     N = timestruct.periods
 
+    index_set = get_index_set(timestruct)
+
     # Output power
     for k in keys(battery.power)
-        battery.power[k] = @variable(model, [1:N], lower_bound = 0.0,
+        battery.power[k] = @variable(model, [index_set], lower_bound = 0.0,
             base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k))
     end
     
@@ -426,10 +428,13 @@ end
 
 function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
     N = aggregator["TimeStruct"].periods
+    
     source = get_component(l.source, aggregator)
 
     base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
+
     c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
+
     setindex!(l.constraint, c, "energy conservation")
 end
 

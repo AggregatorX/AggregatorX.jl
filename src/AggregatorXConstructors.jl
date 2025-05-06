@@ -5,6 +5,17 @@ function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String,
     return IndexedTimeStruct(ts["periods"])
 end
 
+function build_aggregatorx_object(tst::Type{StochasticTimeStruct}, ts::Dict{String, Any})
+    # dict format checker
+    # dict value checker : sum proabilities = 1
+    
+    scenarios   = ts["scenarios"]
+    probability = ts["probability"]
+    periods     = ts["periods"]
+
+    return(StochasticTimeStruct(scenarios, probability, periods))
+end
+
 # ----------------
 # - Connections - 
 #-----------------

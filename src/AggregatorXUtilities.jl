@@ -273,3 +273,14 @@ function getsource(id, connections)
     end
     return source
 end
+
+function get_index_set(timestruct :: IndexedTimeStruct)
+    N = timestruct.periods
+    return 1:N
+end
+
+function get_index_set(timestruct :: StochasticTimeStruct)
+    N = timestruct.periods
+    S = timestruct.scenarios
+    return (1:N, S)
+end

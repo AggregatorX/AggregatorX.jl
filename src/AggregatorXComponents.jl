@@ -35,6 +35,12 @@ struct IndexedTimeStruct <: TimeStruct
     periods::Int # The number of time steps
 end
 
+struct StochasticTimeStruct <: TimeStruct
+    scenarios   :: Vector{Any}
+    probability :: Vector{Real}
+    periods     :: Int
+end
+
 # -------------
 # - Components
 # -------------
