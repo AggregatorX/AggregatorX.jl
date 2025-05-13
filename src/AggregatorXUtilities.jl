@@ -284,3 +284,16 @@ function get_index_set(timestruct :: StochasticTimeStruct)
     S = timestruct.scenarios
     return (1:N, S)
 end
+
+function set_variables_full_set(model::Model, ts::IndexedTimeStruct, base_name = "", lower_bound = 0.0)
+     return @variable(model, [1:ts.periods], lower_bound = lower_bound, base_name = base_name)
+end
+
+function set_variables_full_set(model::Model, ts::StochasticTimeStruct, base_name = "", lower_bound = 0.0)
+     return @variable(model, [1:ts.periods, ts.scenarios], lower_bound = lower_bound, base_name = base_name)
+end
+
+# Called for both indexed and stochastic time struct
+function set_variables_first_stage(model::Model, ts::TimeStruct, base_name = "", lower_bound = 0.0)
+    return @variable(model, [1:ts.periods], lower_bound = lower_bound, base_name = base_name)
+end

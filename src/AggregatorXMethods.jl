@@ -11,12 +11,18 @@ function set_optimization_variables(model::Model, battery::SimpleBattery,
     
     N = timestruct.periods
 
-    index_set = get_index_set(timestruct)
+    #=
+    # Output power
+    for k in keys(battery.power)
+        battery.power[k] = @variable(model, [1:N], lower_bound = 0.0,
+            base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k))
+    end
+    =#
 
     # Output power
     for k in keys(battery.power)
-        battery.power[k] = @variable(model, [index_set], lower_bound = 0.0,
-            base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k))
+        base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k)
+        battery.power[k] = set_variables_full_set(model, timestruct, base_name)
     end
     
     # State of charge
