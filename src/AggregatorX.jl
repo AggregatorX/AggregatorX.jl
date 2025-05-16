@@ -34,7 +34,9 @@ export DATADIR
 
 include("AggregatorXComponents.jl")
 include("AggregatorXConstructors.jl")
+include("AggregatorXSlicing.jl")
 include("AggregatorXMethods.jl")
+include("components/simplebattery.jl")
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXExceptions.jl")
