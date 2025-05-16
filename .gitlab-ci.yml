@@ -7,4 +7,9 @@ pages:
   stage: deploy
   script:
     - apt-get update && apt-get install -y git
-    - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));'
+    - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate()'
+    - julia --project=docs/ -e docs/make.jl
+    - mv docs/build public
+  artifacts:
+    paths:
+      - public
