@@ -6,4 +6,5 @@ pages:
   image: julia:1
   stage: deploy
   script:
-    - apt-get update
+    - apt-get update && apt-get install -y git
+    - julia -e 'using Pkg; Pkg.clone(pwd()); Pkg.build("AggregatorX");'
