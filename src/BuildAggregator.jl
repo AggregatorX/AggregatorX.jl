@@ -29,13 +29,28 @@ function buildaggregator(systemdescription::String)
     
     aggregator = Dict{String, Any}() # One entry for each type of part
 
-    if !haskey(aggregator, "SYSDIR")
+    if !haskey(sys, "SYSDIR")
         aggregator["SYSDIR"] = pwd()
         #println("Warning, system directory implicitly set to: " * aggregator["SYSDIR"] )
+    else
+        sysdir = sys["SYSDIR"]
+        if isabspath(sysdir)
+            aggregator["SYSDIR"] = sys["SYSDIR"]
+        else
+            aggregator["SYSDIR"] = joinpath(pwd(), aggregator["SYSDIR"])
+        end
     end
-    if !haskey( aggregator, "DATADIR")
+
+    if !haskey(sys, "DATADIR")
         aggregator["DATADIR"] = joinpath(aggregator["SYSDIR"], "data")
         #println("Warning, data directory implicitly set to: " * aggregator["DATADIR"] )
+    else
+        datadir = sys["DATADIR"]
+        if isabspath(datadir)
+            aggregator["DATADIR"] = sys["DATADIR"]
+        else
+            aggregator["DATADIR"] = joinpath(aggregator["SYSDIR"], "data")
+        end
     end
     
     
