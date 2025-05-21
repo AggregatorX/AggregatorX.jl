@@ -50,7 +50,7 @@ end
 function set_constraint_upper_bound_last(model::Model, ts::StochasticTimeStruct, varref, delta, bound, base_name = "")
     N = ts.periods
     S = ts.scenarios
-    @constraint(model, s = [S], varref[N,s] + delta[N,s] <= bound, base_name = base_name)
+    @constraint(model, [s = S], varref[N,s] + delta[N,s] <= bound, base_name = base_name)
 end
 
 # Lower bound
@@ -66,5 +66,5 @@ end
 function set_constraint_lower_bound_last(model::Model, ts::StochasticTimeStruct, varref, delta, bound = 0.0, base_name = "")
     N = ts.periods
     S = ts.scenarios
-    @constraint(model, s = [S], varref[N,s] + delta[N,s] >= bound, base_name = base_name)
+    @constraint(model, [s in S], varref[N,s] + delta[N,s] >= bound, base_name = base_name)
 end
