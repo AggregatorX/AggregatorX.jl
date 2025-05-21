@@ -68,6 +68,7 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     net_power = init_expr_array(N)
     net_power = power_out - power_in # Net outflow is defined as positive
 
+    # Activation
     total_up_activation = init_expr_array(N)
     for k in keys(r.up_activation)
         total_up_activation = total_up_activation + r.up_activation[k]
@@ -81,26 +82,33 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     net_activation = init_expr_array(N)
     net_activation = total_up_activation - total_down_activation # Positive for net power out, that is, up-regulation
 
-    # Constraints
+    # Total flow
+    delta = init_expr_array(N)
+    delta = delta - (net_power + net_activation) # net outflow is positive
+
+    # - Constraints -
 
     # Inital value
     base_name = "soc-init-SimpleBattery" * string(id)
     set_constraint_initial_value(model, ts, r.state_of_charge, r.initial_charge, base_name)
     
-
     # Energy conserved: Change in state of charge equal net power flow
     base_name = "soc-SimpleBattery-" * string(id)
-    delta = init_expr_array(N)
-    delta = delta - (net_power + net_activation) # net outflow is positive
     set_constraint_temporal_evolution(model, ts , r.state_of_charge, delta, base_name)
     
     # max charge
-    @constraint(model, r.state_of_charge .<= r.capacity, base_name ="max-soc-SimpleBattery" * string(id))
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.capacity, base_name ="max-soc_last-SimpleBattery" * string(id)) # last time step
+    base_name ="max-soc-SimpleBattery" * string(id)
+    set_constraint_upper_bound(model, ts, r.state_of_charge, r.capacity, base_name)
+
+    base_name ="max-soc_last-SimpleBattery" * string(id) # ... last time step
+    c = set_constraint_upper_bound_last(model, ts, r.state_of_charge, delta, r.capacity, base_name)
 
     # min charge
-    @constraint(model, r.state_of_charge .>= 0.0, base_name ="min-soc-SimpleBattery" * string(id))
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] >= 0.0, base_name ="min-soc-last-SimpleBattery" * string(id)) # last time step
+    base_name ="max-soc-SimpleBattery" * string(id)
+    set_constraint_lower_bound(model, ts, r.state_of_charge, 0.0, base_name)
+
+    base_name ="min-soc-last-SimpleBattery" * string(id) # ... last time step
+    set_constraint_lower_bound_last(model, ts, r.state_of_charge, delta, 0.0, base_name)
 
     # charge/discharge rates
     @constraint(model, power_out + total_up_activation .<= r.max_discharge, base_name ="max-discharging-SimpleBattery" * string(id))

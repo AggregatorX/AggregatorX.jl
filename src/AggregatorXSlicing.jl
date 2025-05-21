@@ -27,12 +27,44 @@ end
 # Temporal evolution
 function set_constraint_temporal_evolution(model::Model, ts::IndexedTimeStruct, varref, delta,  base_name = "", lower_bound = 0.0)
     N = ts.periods
-    @constraint(model, varref[2:N] == varref[1:N-1] + delta[1:N-1] )
+    @constraint(model, varref[2:N] == varref[1:N-1] + delta[1:N-1], base_name = base_name )
 end
 
-# Temporal evolution
 function set_constraint_temporal_evolution(model::Model, ts::StochasticTimeStruct, varref, delta,  base_name = "", lower_bound = 0.0)
     N = ts.periods
     S = ts.scenarios
-    @constraint(model, varref[2:N, S] == varref[1:N-1, S] + delta[1:N-1, S] )
+    @constraint(model, varref[2:N, S] == varref[1:N-1, S] + delta[1:N-1, S], base_name = base_name )
+end
+
+# Upper bound
+function set_constraint_upper_bound(model::Model, ts::TimeStruct, varref, bound, base_name = "")
+    @constraint(model, varref .<= bound, base_name = base_name)
+end
+
+# ...last time step
+function set_constraint_upper_bound_last(model::Model, ts::IndexedTimeStruct, varref, delta, bound, base_name = "")
+    N = ts.periods
+    @constraint(model, varref[N] + delta[N] <= bound, base_name = base_name)
+end
+
+function set_constraint_upper_bound_last(model::Model, ts::StochasticTimeStruct, varref, delta, bound, base_name = "")
+    N = ts.periods
+    S = ts.scenarios
+    @constraint(model, s = [S], varref[N,s] + delta[N,s] <= bound, base_name = base_name)
+end
+
+# Lower bound
+function set_constraint_lower_bound(model::Model, ts::TimeStruct, varref, bound = 0.0, base_name = "")
+    @constraint(model, varref .>= bound, base_name = base_name)
+end
+
+# ... last time step
+function set_constraint_lower_bound_last(model::Model, ts::IndexedTimeStruct, varref, delta, bound = 0.0, base_name = "")
+    N = ts.periods
+    @constraint(model, varref[N] + delta[N] >= bound, base_name = base_name)
+end
+function set_constraint_lower_bound_last(model::Model, ts::StochasticTimeStruct, varref, delta, bound = 0.0, base_name = "")
+    N = ts.periods
+    S = ts.scenarios
+    @constraint(model, s = [S], varref[N,s] + delta[N,s] >= bound, base_name = base_name)
 end
