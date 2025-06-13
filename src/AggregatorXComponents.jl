@@ -47,7 +47,7 @@ end
 
 # - Node -
 mutable struct StandardNode <: Node
-    power::Dict{Integer, Vector{VariableRef}}
+    power::Dict{Integer, AbstractArray{VariableRef}}
     sources::Vector{Integer}
     id::Integer
 end
@@ -66,21 +66,21 @@ end
 
 # - SimpleBattery -
 mutable struct SimpleBattery <: Resource
-    power::Dict{Integer, Vector{VariableRef}}
-    sources::Vector{Integer}
-    state_of_charge::Vector{VariableRef}
-    up_capacity::Dict{Integer, Vector{VariableRef}}
-    down_capacity::Dict{Integer, Vector{VariableRef}}
-    up_activation::Dict{Integer, Vector{VariableRef}}
-    down_activation::Dict{Integer, Vector{VariableRef}}
-    up_energy_reserve::Dict{Integer, Vector{VariableRef}}
-    down_energy_reserve::Dict{Integer, Vector{VariableRef}}
-    capacity::AbstractFloat
+    power::             Dict{Integer, AbstractArray{VariableRef}}
+    sources::           Vector{Integer}
+    state_of_charge::   AbstractArray{VariableRef}
+    up_capacity::       Dict{Integer, AbstractArray{VariableRef}}
+    down_capacity::     Dict{Integer, AbstractArray{VariableRef}}
+    up_activation::     Dict{Integer, AbstractArray{VariableRef}}
+    down_activation::   Dict{Integer, AbstractArray{VariableRef}}
+    up_energy_reserve:: Dict{Integer, AbstractArray{VariableRef}}
+    down_energy_reserve::Dict{Integer, AbstractArray{VariableRef}}
+    capacity::      AbstractFloat
     initial_charge::AbstractFloat
-    max_charge::AbstractFloat
-    max_discharge::AbstractFloat
-    class::String
-    id::Integer
+    max_charge::    AbstractFloat
+    max_discharge:: AbstractFloat
+    class::         String
+    id::            Integer
 end
 
 # - Generation -
@@ -109,7 +109,7 @@ end
 struct FixedLoad <: Load
     source::Integer
     load::Vector{Real}
-    constraint::Dict{String, Vector{ConstraintRef}}
+    constraint::Dict{String, AbstractArray} #AbstractArray{ConstraintRef} not working
     scalar_constraint::Dict{String, ConstraintRef}
     id::Integer
 end

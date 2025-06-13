@@ -50,6 +50,22 @@ function idx_to_id(aggregator, categories)
     return id_map
 end
 
+function init_expr_array_full(ts::StochasticTimeStruct)
+    z = Containers.DenseAxisArray{AffExpr}(undef, 1:ts.periods, ts.scenarios)
+    for i in eachindex(z)
+        z.data[i] = 0.0
+    end
+    return z
+end
+
+function init_expr_array_full(ts::IndexedTimeStruct)
+    z = Vector{AffExpr}(undef, ts.periods)
+    for i in eachindex(z)
+        z[i] = 0.0
+    end
+    return z
+end
+
 function init_expr_array(N)
     z = Vector{AffExpr}(undef, N)
     for i in eachindex(z)
@@ -272,4 +288,67 @@ function getsource(id, connections)
         end
     end
     return source
+end
+
+function sum_out(r::Component, field::Symbol, ts::IndexedTimeStruct)
+    sum = init_expr_array_full(ts)
+    f = getproperty(r,field)
+    for target in keys(f)
+        sum = sum + f[target]
+    end 
+    return sum
+end
+
+# Assume DenseAxisArray
+function sum_out(r::Component, field::Symbol, ts::StochasticTimeStruct)
+    sum = init_expr_array_full(ts)
+    f = getproperty(r,field)
+    for target in keys(f)
+        sum.data .= sum.data .+ f[target].data
+    end 
+    return sum
+end
+
+function sum_in(r::Component, field::Symbol, ts::IndexedTimeStruct, aggregator)
+    sum = init_expr_array_full(ts)
+    for s in all_components(aggregator)
+        if s.id in r.sources
+            sum = sum + getproperty(s,field)[r.id]
+        end
+    end
+    return sum
+end
+
+function sum_in(r::Component, field::Symbol, ts::StochasticTimeStruct, aggregator)
+    sum = init_expr_array_full(ts)
+    for s in all_components(aggregator)
+        if s.id in r.sources
+            println(typeof(getproperty(s, field)[r.id]))
+            if typeof(getproperty(s, field)[r.id]) == Vector{VariableRef} # input is first stage variable
+                println("true")
+                for scenario in ts.scenarios
+                    sum[:,scenario] = sum[:,scenario] + getproperty(s,field)[r.id]
+                end
+            else # input is second stage variable
+                sum.data .= sum.data .+ getproperty(s,field)[r.id].data
+            end
+        end
+    end
+    return sum
+end
+
+function sum_expr(ts::IndexedTimeStruct, expr...)
+    sum = init_expr_array_full(ts)
+    for e in expr
+        sum = sum + e
+    end
+    return sum
+end
+
+function sum_expr(ts::StochasticTimeStruct, expr...)
+    sum = init_expr_array_full(ts)
+    for e in expr
+        sum.data .= sum.data .+ e.data
+    end
+    return sum
 end

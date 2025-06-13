@@ -173,13 +173,7 @@ function set_optimization_variables(model, m::FCRD_Up_LER, timestruct::TimeStruc
     m.down_capacity  = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
 end
 
-## Nodes
-function set_optimization_variables(model::Model, node::StandardNode, timestruct::TimeStruct)
-    N = timestruct.periods
-    for k in keys(node.power)
-        node.power[k] = @variable(model, [1:N], lower_bound = 0.0, base_name = "p-StandardNode-" * string(node.id) * "-" * string(k))
-    end
-end
+
 
 ## Groups
 function set_optimization_variables(model::Model, group::FFRGroup, timestruct::TimeStruct)
@@ -295,8 +289,9 @@ function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Di
     base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
 
     c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
-
-    setindex!(l.constraint, c, "energy conservation")
+    println(isa(c,AbstractArray))
+    l.constraint["energy_conservation"] = c
+    #setindex!(l.constraint, c, "energy conservation")
 end
 
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
@@ -439,29 +434,7 @@ function set_optimization_constraints(model::Model, m::FCRD_Up_LER, aggregator)
     # - no constraints needed-
 end
 
-## Nodes
-function set_optimization_constraints(model::Model, node::StandardNode, aggregator::Dict{String, Any})
-    N  = aggregator["TimeStruct"].periods
-    id = node.id
 
-    power_out = init_expr_array(N)
-    net_power = init_expr_array(N)
-    power_in  = init_expr_array(N)
-
-    for target in keys(node.power)        
-        power_out = power_out + node.power[target]
-    end 
-        
-    for r in all_components(aggregator) # Resources, markets, nodes, grids
-        if r.id in node.sources
-            power_in = power_in + r.power[id]
-        end
-    end
-
-    net_power = power_out-power_in # Energy conserved
-    
-    @constraint(model, net_power == 0, base_name = "pnet-Standardode-" * string(id))
-end
 
 # Groups
 

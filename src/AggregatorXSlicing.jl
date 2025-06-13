@@ -5,7 +5,8 @@ function set_variables_full_set(model::Model, ts::IndexedTimeStruct, base_name =
 end
 
 function set_variables_full_set(model::Model, ts::StochasticTimeStruct, base_name = "", lower_bound = 0.0)
-     return @variable(model, [1:ts.periods, ts.scenarios], lower_bound = lower_bound, base_name = base_name)
+    x = @variable(model, [1:ts.periods, ts.scenarios], lower_bound = lower_bound, base_name = base_name)
+    return x 
 end
 
 # Called for both indexed and stochastic time struct
@@ -21,7 +22,7 @@ function set_constraint_initial_value(model::Model, ts::IndexedTimeStruct, varre
 end
 
 function set_constraint_initial_value(model::Model, ts::StochasticTimeStruct, varref, init_val, base_name = "", lower_bound = 0.0)
-    @constraint(model, varref[1, ts.scenarios] == init_val, base_name=base_name)
+    @constraint(model, varref[1, ts.scenarios] .== init_val, base_name=base_name)
 end
 
 # Temporal evolution
@@ -33,7 +34,7 @@ end
 function set_constraint_temporal_evolution(model::Model, ts::StochasticTimeStruct, varref, delta,  base_name = "", lower_bound = 0.0)
     N = ts.periods
     S = ts.scenarios
-    @constraint(model, varref[2:N, S] == varref[1:N-1, S] + delta[1:N-1, S], base_name = base_name )
+    @constraint(model, [t=1:N-1, s in S], varref[t+1, s] == varref[t, s] + delta[t, s], base_name = base_name )
 end
 
 # Upper bound

@@ -57,7 +57,7 @@ function build_aggregatorx_object(nt::Type{StandardNode}, n::Dict{String, Any}, 
     connections = aggregator["Connection"]
     id = n["id"]
 
-    power = Dict{Integer, Vector{VariableRef}}()
+    power = Dict{Integer, AbstractArray{VariableRef}}()
     sources = Vector{Int}(undef,0)
     for c in connections
         if c.source == id
@@ -122,7 +122,7 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
     class = get_class(b)
 
     # Find all connected components
-    power = Dict{Integer, Vector{VariableRef}}()
+    power = Dict{Integer, AbstractArray{VariableRef}}()
     sources = Vector{Int}(undef,0)
     for c in connections
         if c.source == id
@@ -134,26 +134,26 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
 
     state_of_charge = Vector{VariableRef}()
 
-    up_capacity = Dict{Integer, Vector{VariableRef}}()
-    down_capacity = Dict{Integer, Vector{VariableRef}}()
+    up_capacity = Dict{Integer, AbstractArray{VariableRef}}()
+    down_capacity = Dict{Integer, AbstractArray{VariableRef}}()
 
-    up_activation = Dict{Integer, Vector{VariableRef}}()
-    down_activation = Dict{Integer, Vector{VariableRef}}()
+    up_activation = Dict{Integer, AbstractArray{VariableRef}}()
+    down_activation = Dict{Integer, AbstractArray{VariableRef}}()
 
-    up_energy_reserve = Dict{Integer, Vector{VariableRef}}()
-    down_energy_reserve = Dict{Integer, Vector{VariableRef}}()
+    up_energy_reserve = Dict{Integer, AbstractArray{VariableRef}}()
+    down_energy_reserve = Dict{Integer, AbstractArray{VariableRef}}()
 
     if haskey(aggregator, "Group")
         groups = aggregator["Group"]        
         for g in groups
             if id in g.resources
                 # For each group add an entry in det capacity and activation dicts    
-                up_activation[g.id] = Vector{VariableRef}(undef, N)
-                down_activation[g.id] = Vector{VariableRef}(undef, N)
-                up_capacity[g.id] = Vector{VariableRef}(undef, N)
-                down_capacity[g.id] = Vector{VariableRef}(undef, N)
-                up_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
-                down_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
+                up_activation[g.id] = Vector{VariableRef}()
+                down_activation[g.id] = Vector{VariableRef}()
+                up_capacity[g.id] = Vector{VariableRef}()
+                down_capacity[g.id] = Vector{VariableRef}()
+                up_energy_reserve[g.id] = Vector{VariableRef}()
+                down_energy_reserve[g.id] = Vector{VariableRef}()
             end
         end
     end

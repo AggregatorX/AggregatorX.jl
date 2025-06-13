@@ -209,14 +209,14 @@ end
     up = @test hasfield(SimpleBattery, :up_activation)
     @test hasfield(SimpleBattery, :down_activation)
     sb = get_component(2,aggregator)
-    @test typeof(sb.up_activation) == Dict{Integer, Vector{VariableRef}}
-    @test typeof(sb.down_activation) == Dict{Integer, Vector{VariableRef}}
+    @test typeof(sb.up_activation) == Dict{Integer, AbstractArray{VariableRef}}
+    @test typeof(sb.down_activation) == Dict{Integer, AbstractArray{VariableRef}}
 
     @test typeof(sc.up_activation[7]) == Vector{VariableRef}
     @test typeof(sc.down_activation[7]) == Vector{VariableRef}
 
-    @test typeof(sb.up_activation[7]) == Vector{VariableRef}
-    @test typeof(sb.down_activation[7]) == Vector{VariableRef}
+    @test typeof(sb.up_activation[7]) <: AbstractArray{VariableRef}
+    @test typeof(sb.down_activation[7]) <: AbstractArray{VariableRef}
 
     # Fixed Load
     @test begin

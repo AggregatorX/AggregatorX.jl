@@ -37,6 +37,7 @@ include("AggregatorXConstructors.jl")
 include("AggregatorXSlicing.jl")
 include("AggregatorXMethods.jl")
 include("components/simplebattery.jl")
+include("components/node.jl")
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXExceptions.jl")

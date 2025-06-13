@@ -10,7 +10,7 @@ function set_optimization_variables(model::Model, battery::SimpleBattery,
     # State of charge
     base_name = "soc-SimpleBattery-" * string(battery.id)
     battery.state_of_charge =set_variables_full_set(model, timestruct, base_name)
-    
+   
     # Capacity    
     for k in keys(battery.up_capacity)
         base_name = "up-capacity-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
@@ -52,39 +52,48 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     id = r.id
     
     # Convenience variables
-    power_out = init_expr_array(N)
-    for target in keys(r.power)
-        power_out = power_out + r.power[target]
-    end 
-    
-    power_in = init_expr_array(N)
-    sources = r.sources
-    for r in all_components(aggregator) # union(aggregator["Resource"], aggregator["Market"])
-        if r.id in sources
-            power_in = power_in + r.power[id]
-        end
-    end
 
-    net_power = init_expr_array(N)
-    net_power = power_out - power_in # Net outflow is defined as positive
+    #power_out = init_expr_array(N)
+    #for target in keys(r.power)
+    #    power_out = power_out + r.power[target]
+    #end 
+    power_out = sum_out(r, :power, ts)
+    
+    power_in = sum_in(r, :power, ts, aggregator)
+    #power_in = init_expr_array(N)
+    #sources = r.sources
+    #for r in all_components(aggregator)
+    #    if r.id in sources
+    #        power_in = power_in + r.power[id]
+    #    end
+    #end
+
+    #net_power = init_expr_array(N)
+    #net_power = power_out - power_in # Net outflow is defined as positive
+    net_power = sum_expr(ts, power_out, -power_in)
 
     # Activation
-    total_up_activation = init_expr_array(N)
-    for k in keys(r.up_activation)
-        total_up_activation = total_up_activation + r.up_activation[k]
-    end
+    #total_up_activation = init_expr_array(N)
+    #for k in keys(r.up_activation)
+    #    total_up_activation = total_up_activation + r.up_activation[k]
+    #end
+    total_up_activation = sum_out(r, :up_activation, ts)
 
-    total_down_activation = init_expr_array(N)
-    for k in keys(r.down_activation)
-        total_down_activation = total_down_activation + r.down_activation[k]
-    end
+    #total_down_activation = init_expr_array(N)
+    #for k in keys(r.down_activation)
+    #    total_down_activation = total_down_activation + r.down_activation[k]
+    #end
+    total_down_activation = sum_out(r, :down_activation, ts)
 
-    net_activation = init_expr_array(N)
-    net_activation = total_up_activation - total_down_activation # Positive for net power out, that is, up-regulation
+    #net_activation = init_expr_array(N)
+    #net_activation = total_up_activation - total_down_activation # Positive for net power out, that is, up-regulation
+    net_activation = sum_expr(ts, total_up_activation, -total_down_activation)
+
 
     # Total flow
-    delta = init_expr_array(N)
-    delta = delta - (net_power + net_activation) # net outflow is positive
+    #delta = init_expr_array(N)
+    #delta = delta - (net_power + net_activation) # net outflow is positive
+    delta = sum_expr(ts, -net_power, -net_activation)
 
     # - Constraints -
 
@@ -111,8 +120,16 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     set_constraint_lower_bound_last(model, ts, r.state_of_charge, delta, 0.0, base_name)
 
     # charge/discharge rates
-    @constraint(model, power_out + total_up_activation .<= r.max_discharge, base_name ="max-discharging-SimpleBattery" * string(id))
-    @constraint(model, power_in + total_down_activation .<= r.max_charge, base_name ="max-charging-SimpleBattery" * string(id))
+    
+    #@constraint(model, power_out + total_up_activation .<= r.max_discharge, base_name ="max-discharging-SimpleBattery" * string(id))
+    base_name = "max-discharging-SimpleBattery" * string(id)
+    total_out = sum_expr(ts, power_out, total_up_activation)
+    set_constraint_upper_bound(model, ts, total_out, r.max_discharge, base_name)
+
+    #@constraint(model, power_in + total_down_activation .<= r.max_charge, base_name ="max-charging-SimpleBattery" * string(id))
+    base_name = "max-charging-SimpleBattery" * string(id)
+    total_in = sum_expr(ts, power_in, total_down_activation)
+    set_constraint_upper_bound(model, ts, total_in, r.max_charge, base_name)
 
     total_up_capacity = init_expr_array(N)
     for k in keys(r.up_capacity)
