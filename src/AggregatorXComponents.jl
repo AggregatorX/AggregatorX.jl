@@ -108,7 +108,7 @@ end
 
 struct FixedLoad <: Load
     source::Integer
-    load::Vector{Real}
+    load::AbstractArray
     constraint::Dict{String, AbstractArray} #AbstractArray{ConstraintRef} not working
     scalar_constraint::Dict{String, ConstraintRef}
     id::Integer

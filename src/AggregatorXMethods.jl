@@ -287,8 +287,9 @@ function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Di
     source = get_component(l.source, aggregator)
 
     base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
-
-    c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
+    
+    #c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
+    c = set_constraint_equality(model, aggregator["TimeStruct"], source.power[l.id], l.load, base_name)
     println(isa(c,AbstractArray))
     l.constraint["energy_conservation"] = c
     #setindex!(l.constraint, c, "energy conservation")

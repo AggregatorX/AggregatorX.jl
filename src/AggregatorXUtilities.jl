@@ -128,7 +128,7 @@ which represent some parameter data for the system. This is the trivial function
 if the vector is already defined in the JSON file.
 """
 
-function parse_data(data::Any, aggregator::Dict{String, Any})
+function parse_data(data::Any, aggregator::Dict{String, Any}) # These should be dispatched...
     if isa(data, String)
         if isabspath(data) # data is located at absolute path
             return parse_data(data)
@@ -143,6 +143,10 @@ function parse_data(data::Any, aggregator::Dict{String, Any})
             return parse_data(data)
         end
     end
+end
+
+function parse_data(data::Dict{String,Any}, aggregator::Dict{String,Any})
+    return parse_data(data, aggregator["TimeStruct"])
 end
 
 function parse_data(data::Real, N::Integer)
@@ -164,6 +168,22 @@ function parse_data(data::Vector{Any})
         throw(TypeError)
     end
     return data
+end
+"""
+If stochastic parameter store in DenseAxisArray
+"""
+function parse_data(data::Dict{String,Any},ts::StochasticTimeStruct)
+    S = ts.scenarios
+    T = 1:ts.periods
+    param = Containers.DenseAxisArray{Number}(undef, T, S)
+    println(T)
+    println(typeof(param))
+    for s in S
+        for t in T
+            param[t,s] = data[s][t]
+        end
+    end
+    return param
 end
 
 # for vector of numbers
