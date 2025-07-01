@@ -55,10 +55,6 @@ function set_optimization_variables(model::Model, gen::Generation, timestruct::T
     end
 end
 
-function set_optimization_variables(model::Model, load::FixedLoad, timestruct::TimeStruct)
-    # No variables need
-end
-
 function set_optimization_variables(model::Model, load::VariableLoad, timestruct::TimeStruct)
     N = timestruct.periods
 
@@ -279,20 +275,6 @@ function set_optimization_constraints(model::Model, gen::Generation, aggregator:
         @constraint(model, gen.power[k] .<= gen.pmax, base_name = "pmax-generation-" * string(gen.id))
         @constraint(model, gen.power[k] .>= gen.pmin, base_name = "pmin-generation-" * string(gen.id))
     end
-end
-
-function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
-    N = aggregator["TimeStruct"].periods
-    
-    source = get_component(l.source, aggregator)
-
-    base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
-    
-    #c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
-    c = set_constraint_equality(model, aggregator["TimeStruct"], source.power[l.id], l.load, base_name)
-    println(isa(c,AbstractArray))
-    l.constraint["energy_conservation"] = c
-    #setindex!(l.constraint, c, "energy conservation")
 end
 
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
