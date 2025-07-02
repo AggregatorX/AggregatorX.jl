@@ -40,6 +40,7 @@ include("AggregatorXMethods.jl")
 include("components/simplebattery.jl")
 include("components/node.jl")
 include("components/FixedLoad.jl")
+include("components/Generator.jl")
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXExceptions.jl")

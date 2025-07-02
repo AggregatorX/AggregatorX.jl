@@ -81,3 +81,4 @@ function set_constraint_equality(model::Model, ts::StochasticTimeStruct, varref,
     S = ts.scenarios
     c = @constraint(model, [t in 1:N, s ∈ S], varref[t,s] == val[t,s], base_name = base_name)
 end
+# Dispatch on varref and val being first or second stage and created appropriate methods.

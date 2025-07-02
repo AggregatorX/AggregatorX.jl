@@ -163,52 +163,9 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
      class, b["id"])
 end
 
-# - Generation -
-function build_aggregatorx_object(gt::Type{Generation}, g::Dict{String, Any}, aggregator::Dict{String,Any})
-    N = aggregator["TimeStruct"].periods
-    connections = aggregator["Connection"]
-    
-    id = g["id"]
-    pmax = parse_data(g["pmax"],aggregator)
-    pmin = parse_data(g["pmin"],aggregator)
 
-    power = Dict{Integer, Vector{VariableRef}}()
-    for c in connections
-        if c.source == id
-            power[c.sink] = Vector{VariableRef}(undef,N)
-        end
-    end
 
-    return Generation(power, pmax, pmin, id)
-end
 
-# FixedLoad
-function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
-    
-    connections = aggregator["Connection"]
-    id = l["id"]
-    N = aggregator["TimeStruct"].periods
-    
-    source = 0
-    for c in connections
-        if c.sink == id
-            source =  c.source
-        end
-    end
-    
-    load = parse_data(l["load"], aggregator)
-    
-    #if length(l["load"]) == 1
-    #    load = parse_data(l["load"], N)
-    #else
-    #    load = parse_data(l["load"])
-    #end
-
-    constraint          = Dict{String, Vector{ConstraintRef}}()
-    scalar_constraint   = Dict{String, ConstraintRef}()
-
-    return FixedLoad(source, load, constraint, scalar_constraint, id)
-end
 
 # VariableLoad
 function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, aggregator::Dict{String, Any})

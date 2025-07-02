@@ -293,10 +293,11 @@ end
     # Generation - component
     @test begin
         power = Dict{Integer, Vector{AffExpr}}(2 => Vector{AffExpr}(undef, 3))
+        cost = [1,2,3]
         pmax = [1,2,3]
         pmin = [0,0,1]
         id = 1
-        gen = Generation(power, pmax, pmin, id)
+        gen = Generation(power, cost, pmax, pmin, id)
         isa(gen, Generation)
     end
     # Generation - Constructor

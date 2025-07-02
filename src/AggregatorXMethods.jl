@@ -47,13 +47,7 @@ function set_optimization_variables(model::Model, charger::SimpleCharger,
     end
 end
 
-function set_optimization_variables(model::Model, gen::Generation, timestruct::TimeStruct)
-    N = timestruct.periods
 
-    for k in keys(gen.power)
-        gen.power[k] = @variable(model, [1:N], base_name = "p-Generation-" * string(gen.id))
-    end
-end
 
 function set_optimization_variables(model::Model, load::VariableLoad, timestruct::TimeStruct)
     N = timestruct.periods
@@ -265,16 +259,6 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
         @constraint(model, total_up_capacity == power_out, base_name = "max-up-capacity-SimpleCharger-" * string(charger.id) )
     end
     # Should perhaps have a connection between direct linkt between available capacity and maximum acitvation
-end
-
-
-
-function set_optimization_constraints(model::Model, gen::Generation, aggregator::Dict{String, Any})
-
-    for k in keys(gen.power)
-        @constraint(model, gen.power[k] .<= gen.pmax, base_name = "pmax-generation-" * string(gen.id))
-        @constraint(model, gen.power[k] .>= gen.pmin, base_name = "pmin-generation-" * string(gen.id))
-    end
 end
 
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
@@ -630,6 +614,13 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
             zterm = get_objective_term(g)
             z = z + zterm
         end
+    end
+
+    # Better to loop over all components that define an objective term...:
+
+    ts = aggregator["TimeStruct"]
+    for r in aggregator["Resource"]
+        applicable(get_objective_term, r, ts) ? z = z + get_objective_term(r,ts) : 0
     end
 
     return z
