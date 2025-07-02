@@ -54,3 +54,31 @@ function get_objective_term(g::Generation, ts::IndexedTimeStruct)
     end
     return zterm
 end
+
+function get_objective_term(g::Generation, ts::StochasticTimeStruct)
+    zterm = AffExpr(0)
+    
+    for k in keys(g.power)
+        
+        p = g.power[k]
+
+        # Expand cost vector if necessary
+        if isa(g.cost, Vector{<:Number}) # same for each scenario
+            c = ones(size(p))
+            for (i,s) in enumerate(ts.scenarios)
+                c[:,i] = g.cost
+            end
+        else
+            c = g.cost # specified for each scenario
+        end
+
+        # Expand probability vector
+        prob = ones(size(p))
+        for i in 1:ts.periods
+            prob[i,:] = ts.probability
+        end
+
+        zterm = add_to_expression!(zterm, -sum(p.*c.*prob))
+    end
+    return zterm
+end

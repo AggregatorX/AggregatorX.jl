@@ -84,7 +84,7 @@ mutable struct SimpleBattery <: Resource
 end
 
 mutable struct Generation <: Resource
-    power   ::Dict{Integer, Vector{VariableRef}}
+    power   ::Dict{Integer, AbstractArray{VariableRef}}
     cost    ::Vector{Real}  
     pmax    ::Vector{Real}
     pmin    ::Vector{Real}

@@ -81,4 +81,10 @@ function set_constraint_equality(model::Model, ts::StochasticTimeStruct, varref,
     S = ts.scenarios
     c = @constraint(model, [t in 1:N, s ∈ S], varref[t,s] == val[t,s], base_name = base_name)
 end
-# Dispatch on varref and val being first or second stage and created appropriate methods.
+
+# If value same for all scenarios (first stage paramater)
+function set_constraint_equality(model::Model, ts::StochasticTimeStruct, varref, val::Vector{Any}, base_name = "")
+    N = ts.periods
+    S = ts.scenarios
+    c = @constraint(model, [t in 1:N, s ∈ S], varref[t,s] == val[t], base_name = base_name)
+end
