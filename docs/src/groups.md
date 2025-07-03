@@ -1,10 +1,20 @@
 # Groups
 
-This pages describes conceptually how groups work and how they interact with *markets* and *resources*
+This pages describes conceptually how *groups* work and how they interact with *markets* and *resources*
 
-The essence of the group is that they aggregate the flexibility of the resources and share this flexibillity among the markets attached to the group. At the same they ensure that requirements from the markets are met (requirements from the resources are handled by the resources)
+The essence of the group is that they aggregate the flexibility of the resources contained in the group and share this flexibillity among the markets attached to the group. At the same they ensure that requirements from the markets are met (requirements from the resources are handled by the resources)
 
-Each group may define variables for *capacity*, *activation*, *energy_reserve*, both for up-regulation and down-regulation as needed. During construction these are generated as empty containers of VariableRef (TODO: also support other timestructures). We will refer to these as *balancing variables*.
+Each group struct may define variables for *capacity*, *activation*, *energy_reserve*, both for up-regulation and down-regulation as needed. We will refer to these collectively as *balancing variables*. These variables represent the total balancing quantity provided by the resources in the group. E.g. for capacity ``r`` for a given group ``g``
+
+```math
+r_{gt} = \sum_{i\in R_g} r_{igt}
+```
+
+Since the value is tied to balancing variables attached to the resources, they are not strictly free decision variables, but rather secondary (convenience) expressions.
+
+During construction these are generated as empty containers (at the moment only Vector{VariableRef}). The container type depends on the timestructure. The constructors calls different methods to initalize containers depending on the timestructure (not yet implemnted). 
+
+The balancing variables for the groups represent the full stochastic timestructure if that is used. Resources may be first or second stage and resources which are first stage must then be spread acrosss the full set of the balancing structures. Similarly for markets.
 
 Similiarly resources may define variables for *capacity*, *activation*, *energy_reserve*. These are similiary generated as empty containers during construction (TODO: support other timestructures).
 
