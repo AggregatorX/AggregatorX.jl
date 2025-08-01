@@ -343,9 +343,9 @@ function sum_in(r::Component, field::Symbol, ts::StochasticTimeStruct, aggregato
     sum = init_expr_array_full(ts)
     for s in all_components(aggregator)
         if s.id in r.sources
-            println(typeof(getproperty(s, field)[r.id]))
+            #println(typeof(getproperty(s, field)[r.id]))
             if typeof(getproperty(s, field)[r.id]) == Vector{VariableRef} # input is first stage variable
-                println("true")
+                #println("true")
                 for scenario in ts.scenarios
                     sum[:,scenario] = sum[:,scenario] + getproperty(s,field)[r.id]
                 end
