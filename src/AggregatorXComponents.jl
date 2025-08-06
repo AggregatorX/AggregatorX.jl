@@ -31,7 +31,7 @@ abstract type Node <: Component end
 # -------------------
 
 # IndexedTimeStruct has no relation to absolute time, it is simply an index.
-struct IndexedTimeStruct <: TimeStruct 
+mutable struct IndexedTimeStruct <: TimeStruct 
     periods::Int # The number of time steps
 end
 
@@ -95,18 +95,18 @@ end
 # - Loads -
 # ----------
 
-struct MinLoad <: Load # Depreceated, use VariableLoad with fixed lower_bound and no upper_bound (e.g. infinity)
+mutable struct MinLoad <: Load # Depreceated, use VariableLoad with fixed lower_bound and no upper_bound (e.g. infinity)
     pmin::Number
     source::Integer
     id::Integer
 end
 
-struct MinAverageLoad <: Load
+mutable struct MinAverageLoad <: Load
     pmin::Number # minimum average power
     id::Integer
 end
 
-struct FixedLoad <: Load
+mutable struct FixedLoad <: Load
     source::Integer
     load::AbstractArray
     constraint::Dict{String, AbstractArray} #AbstractArray{ConstraintRef} not working
@@ -114,7 +114,7 @@ struct FixedLoad <: Load
     id::Integer
 end
 
-struct VariableLoad <: Load
+mutable struct VariableLoad <: Load
     power::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
     lower_bound::Vector{Real}
@@ -148,7 +148,7 @@ end
 # - Grids -
 # ----------
 
-struct LinearTariff <: Grid
+mutable struct LinearTariff <: Grid
     power::Dict{Integer, Vector{VariableRef}}
     sources::Vector{Integer}
     price::Vector{Real}
@@ -194,7 +194,7 @@ end
 # - Markets -
 # ------------
 
-struct SimpleMarket <: Market
+mutable struct SimpleMarket <: Market
     power::Dict{Integer, Vector{VariableRef}}
     price:: Array{AbstractFloat}
     resource::Integer       
@@ -277,7 +277,7 @@ FCRD_Up_LER(Vector{VariableRef}(), Vector{AffExpr}(), Vector{AffExpr}(), energy_
 # - Connections -
 # ----------------
 
-struct Connection <: AbstractConnection
+mutable struct Connection <: AbstractConnection
     source::Integer
     sink::Integer
 end

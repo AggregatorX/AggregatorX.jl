@@ -398,7 +398,7 @@ function build_aggregatorx_object(t::Type{FFRProfil}, m::Dict{String, Any}, aggr
 
     N = aggregator["TimeStruct"].periods
 
-    price = ones(N) * m["price"]
+    price = parse_data(m["price"], aggregator)
 
     if haskey(m, "minimum_bid")
         minimum_bid = m["minimum_bid"]

@@ -1,0 +1,16 @@
+build-job:
+  stage: build
+  script:
+    - echo "Hello, $GITLAB_USER_LOGIN!"
+pages:
+  image: julia:1
+  stage: deploy
+  script:
+    - apt-get update && apt-get install -y git
+    - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));Pkg.instantiate()'
+    - julia --project=docs/ docs/make.jl
+    - mv docs/build public
+    - echo "Finished building"
+  artifacts:
+    paths:
+      - public
