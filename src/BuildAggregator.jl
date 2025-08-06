@@ -70,7 +70,15 @@ function buildaggregator(systemdescription::String)
                 groups = Set{typetable[p]}() # Initalize set to hold group objects
 
                 for g in sys[p]
-                    grouptype = typetable[g["class"]]
+                    if haskey(g,"type")
+                        grouptype = typetable[g["type"]]
+                    elseif haskey(g,"class") # obsolete
+                        grouptype = typetable[g["class"]]
+                        print("warning: determining group type by class is deprecated")
+                    else
+                        print("Group type not found")
+                    end
+
                     group = build_aggregatorx_object(grouptype, g, aggregator)
                     push!(groups, group)
                 end 
