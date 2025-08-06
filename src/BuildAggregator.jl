@@ -71,7 +71,7 @@ function buildaggregator(systemdescription::String)
 
                 for g in sys[p]
                     grouptype = typetable[g["class"]]
-                    group = build_aggregatorx_object(grouptype, g)
+                    group = build_aggregatorx_object(grouptype, g, aggregator)
                     push!(groups, group)
                 end 
 
