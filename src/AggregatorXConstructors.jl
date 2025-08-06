@@ -473,7 +473,7 @@ end
 # - Groups -
 #------------
 
-function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
+function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any}, aggregator::Dict{String,Any})
     up_capacity = Vector{AffExpr}()
 
     markets = Set{Int}()    
@@ -492,7 +492,7 @@ function build_aggregatorx_object(gt::Type{FFRGroup}, g::Dict{String, Any})
     return FFRGroup(up_capacity, resources, markets, g["class"], g["id"])
 end
 
-function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any})
+function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any}, aggregator::Dict{String,Any})
     up_capacity = Vector{AffExpr}()
     down_capacity = Vector{AffExpr}()
     up_activation = Vector{AffExpr}()    
@@ -514,7 +514,7 @@ function build_aggregatorx_object(gt::Type{FCRGroup}, g::Dict{String, Any})
     return FCRGroup(up_capacity,down_capacity, up_activation,down_activation, resources, markets, g["class"], g["id"])
 end
 
-function  build_aggregatorx_object(gt::Type{FCReGroup}, g::Dict{String, Any})
+function  build_aggregatorx_object(gt::Type{FCReGroup}, g::Dict{String, Any}, aggregator::Dict{String,Any})
     up_capacity = Vector{AffExpr}()
     down_capacity = Vector{AffExpr}()
     up_energy_reserve = Vector{AffExpr}()    
