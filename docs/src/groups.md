@@ -36,4 +36,40 @@ r^T_{st} = \sum r_{it} + \sum r_{ist} \quad \forall s \in S
 
 The relation between the balancing sold and balancing available must thus hold for all scenarios.
 
+A resource has a certain balancing capacity ``r_{it}`` which may be distributed accross the groups it is connected to ``G_i``. The capacity provided to the group is ``r_{igt}``. This last variable is defined as part of the resource.
+
+```math
+r_{it} \geq \sum_{g in G_i} r_{igt}
+```
+
+From the perspective of the group, it contains multiple resources ``R_g`` and the total capacity available to the group is
+
+```math
+r_{gt} = \sum_{i in R_g} r_{igt}
+```
+
+In a general stochastic setting the capacities from the resource may be both first and second stage variables. If second stage we get the relation
+
+```math
+r_{ist} \geq \sum_{g in G_i} r_{igst} \quad \forall s \in S
+```
+
+In a stochastic setting, from the perspective of the group, the group must be able to sum up both first and second stage variables. We thus get
+
+```math
+r_{gst} = \sum_{i in R_g} r_{igt} + r_{igst} \quad \forall s \in S
+```
+
+The capacity sold to markets may be both first ``r_{mt}`` and second stage ``r_{mst}`` variables. The total sold (x) by the group is thus
+
+```math
+r_{gst}^{x} = \sum_{m\in M_g} r_{mt} + r_{mst} \quad \forall s \in S
+```
+
+We thus get the constraint
+
+```math
+r_{gst}^{x} \leq r_{gst} \quad \forall s \in S
+```
+
 Problem: What if mix of first and second stage variables?
