@@ -3,13 +3,16 @@ function set_optimization_variables(model::Model, group::FCReGroup, timestruct::
 end
 
 function set_optimization_constraints(model::Model, group::FCReGroup, aggregator::Dict{String, Any})
+    ts = aggregator["TimeStruct"] 
     N = aggregator["TimeStruct"].periods
 
     # - Reserved capacity -
 
     # Group capacity is is capacity of sum of capacity of individual resources
-    total_up_capacity_available = init_expr_array(N)
-    total_down_capacity_available = init_expr_array(N)
+    #total_up_capacity_available = init_expr_array(N)
+    #total_down_capacity_available = init_expr_array(N)
+    total_up_capacity_available = init_expr_array_full(ts)
+    total_down_capacity_available = init_expr_array_full(ts)
 
     for id in group.resources
         r = get_component(id, aggregator)
