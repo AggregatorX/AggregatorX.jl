@@ -372,3 +372,12 @@ function sum_expr(ts::StochasticTimeStruct, expr...)
     end
     return sum
 end
+
+function sum_group_resources(group::Group, field::Symbol, ts::IndexedTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.resources
+        resource = get_component(id, aggregator)
+        total .+= getproperty(resource,field)[group.id]
+    end
+    return total
+end

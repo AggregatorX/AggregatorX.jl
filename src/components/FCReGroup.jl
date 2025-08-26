@@ -11,17 +11,20 @@ function set_optimization_constraints(model::Model, group::FCReGroup, aggregator
     # Group capacity is is capacity of sum of capacity of individual resources
     #total_up_capacity_available = init_expr_array(N)
     #total_down_capacity_available = init_expr_array(N)
-    total_up_capacity_available = init_expr_array_full(ts)
-    total_down_capacity_available = init_expr_array_full(ts)
+    #total_up_capacity_available = init_expr_array_full(ts)
+    #total_down_capacity_available = init_expr_array_full(ts)
 
     for id in group.resources
         r = get_component(id, aggregator)
-        total_up_capacity_available = total_up_capacity_available + r.up_capacity[group.id]
-        total_down_capacity_available = total_down_capacity_available + r.down_capacity[group.id]
+        #total_up_capacity_available = total_up_capacity_available + r.up_capacity[group.id]
+        #total_down_capacity_available = total_down_capacity_available + r.down_capacity[group.id]
     end
 
-    group.up_capacity = total_up_capacity_available
-    group.down_capacity = total_down_capacity_available
+    #group.up_capacity = total_up_capacity_available
+    #group.down_capacity = total_down_capacity_available
+
+    group.up_capacity = sum_group_resources(group, :up_capacity, ts, aggregator)
+    group.down_capacity = sum_group_resources(group, :down_capacity, ts, aggregator)
 
     # Capacity sold to markets is limited by available capacity
     total_up_capacity_reserved = init_expr_array(N)
