@@ -41,6 +41,7 @@ include("components/SimpleBattery.jl")
 include("components/StandardNode.jl")
 include("components/FixedLoad.jl")
 include("components/Generation.jl")
+include("components/FCRNe.jl")
 
 include("AggregatorXUtilities.jl")
 include("AggregatorXExceptions.jl")
