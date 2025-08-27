@@ -169,10 +169,14 @@ mutable struct FFRGroup <: Group
 end
 
 mutable struct FCRGroup <: Group
-    up_capacity::Vector{AffExpr}
-    down_capacity::Vector{AffExpr}
-    up_activation::Vector{AffExpr}
-    down_activation::Vector{AffExpr}
+    #up_capacity::Vector{AffExpr}
+    #down_capacity::Vector{AffExpr}
+    #up_activation::Vector{AffExpr}
+    #down_activation::Vector{AffExpr}
+    up_capacity::AbstractArray{AffExpr}
+    down_capacity::AbstractArray{AffExpr}
+    up_activation::AbstractArray{AffExpr}
+    down_activation::AbstractArray{AffExpr}
     resources::Set{Int} # ids of resources in the group.
     markets::Set{Int} # ids of markets connected to the group.
     class::String  
@@ -180,10 +184,14 @@ mutable struct FCRGroup <: Group
 end
 
 mutable struct FCReGroup <: Group
-    up_capacity::Vector{AffExpr}
-    down_capacity::Vector{AffExpr}
-    up_energy_reserve::Vector{AffExpr}
-    down_energy_reserve::Vector{AffExpr}
+    #up_capacity::Vector{AffExpr}
+    #down_capacity::Vector{AffExpr}
+    #up_energy_reserve::Vector{AffExpr}
+    #down_energy_reserve::Vector{AffExpr}
+    up_capacity::AbstractArray{AffExpr}
+    down_capacity::AbstractArray{AffExpr}
+    up_energy_reserve::AbstractArray{AffExpr}
+    down_energy_reserve::AbstractArray{AffExpr}
     up_energy_reserve_factor::Number
     down_energy_reserve_factor::Number
     resources::Set{Int} # ids of resources in the group.
@@ -242,13 +250,20 @@ mutable struct FCRN <: Market
 end
 
 mutable struct FCRNe <: Market
-    capacity_sold::Vector{VariableRef}
-    up_capacity::Vector{AffExpr}
-    down_capacity::Vector{AffExpr}
-    up_capacity_sold::Vector{AffExpr}
-    down_capacity_sold::Vector{AffExpr}
-    up_energy_reserve::Vector{AffExpr}
-    down_energy_reserve::Vector{AffExpr}
+    #capacity_sold::Vector{VariableRef}
+    #up_capacity::Vector{AffExpr}
+    #down_capacity::Vector{AffExpr}
+    #up_capacity_sold::Vector{AffExpr}
+    #down_capacity_sold::Vector{AffExpr}
+    #up_energy_reserve::Vector{AffExpr}
+    #down_energy_reserve::Vector{AffExpr}
+    capacity_sold::AbstractArray{VariableRef}
+    up_capacity::AbstractArray{AffExpr}
+    down_capacity::AbstractArray{AffExpr}
+    up_capacity_sold::AbstractArray{AffExpr}
+    down_capacity_sold::AbstractArray{AffExpr}
+    up_energy_reserve::AbstractArray{AffExpr}
+    down_energy_reserve::AbstractArray{AffExpr}
     energy_endurance::Real
     capacity_factor::Real
     price::Vector{Real}

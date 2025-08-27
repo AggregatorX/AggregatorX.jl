@@ -59,6 +59,10 @@ function set_constraint_lower_bound(model::Model, ts::TimeStruct, varref, bound 
     @constraint(model, varref .>= bound, base_name = base_name)
 end
 
+#function set_constraint_lower_bound(model::Model, ts::StochasticTimeStruct, varref, bound = 0.0, base_name = "")
+#    @constraint(model, [t ∈ ts.periods, s ∈ ts.scenarios], varref[t,s] >= bound, base_name = base_name)
+#end
+
 # ... last time step
 function set_constraint_lower_bound_last(model::Model, ts::IndexedTimeStruct, varref, delta, bound = 0.0, base_name = "")
     N = ts.periods
@@ -88,3 +92,4 @@ function set_constraint_equality(model::Model, ts::StochasticTimeStruct, varref,
     S = ts.scenarios
     c = @constraint(model, [t in 1:N, s ∈ S], varref[t,s] == val[t], base_name = base_name)
 end
+

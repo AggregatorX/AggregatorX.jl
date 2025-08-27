@@ -113,7 +113,7 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     c = set_constraint_upper_bound_last(model, ts, r.state_of_charge, delta, r.capacity, base_name)
 
     # min charge
-    base_name ="max-soc-SimpleBattery" * string(id)
+    base_name ="min-soc-SimpleBattery" * string(id)
     set_constraint_lower_bound(model, ts, r.state_of_charge, 0.0, base_name)
 
     base_name ="min-soc-last-SimpleBattery" * string(id) # ... last time step
@@ -131,22 +131,26 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     total_in = sum_expr(ts, power_in, total_down_activation)
     set_constraint_upper_bound(model, ts, total_in, r.max_charge, base_name)
 
-    total_up_capacity = init_expr_array(N)
-    for k in keys(r.up_capacity)
-        total_up_capacity = total_up_capacity + r.up_capacity[k]
-    end
+    #total_up_capacity = init_expr_array(N)
+    #for k in keys(r.up_capacity)
+    #    total_up_capacity = total_up_capacity + r.up_capacity[k]
+    #end
 
-    total_down_capacity = init_expr_array(N)
-    for k in keys(r.down_capacity)
-        total_down_capacity = total_down_capacity + r.down_capacity[k]
-    end
+    total_up_capacity = sum_out(r, :up_capacity, ts)
+
+    #total_down_capacity = init_expr_array(N)
+    #for k in keys(r.down_capacity)
+    #    total_down_capacity = total_down_capacity + r.down_capacity[k]
+    #end
+
+    total_down_capacity = sum_out(r, :down_capacity, ts)
 
     # Capacity for up/down regulation. Flow constrained
     if !(isempty(r.up_capacity)) # Empty if not part of group
-        @constraint(model, total_up_capacity <= r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery-" * string(id))
+        @constraint(model, total_up_capacity .<= r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery-" * string(id))
     end
     if !(isempty(r.down_capacity))
-        @constraint(model, total_down_capacity <= r.max_charge .- power_in .+ power_out, base_name="max-down-capacity-SimpleBattery-" * string(id) )
+        @constraint(model, total_down_capacity .<= r.max_charge .- power_in .+ power_out, base_name="max-down-capacity-SimpleBattery-" * string(id) )
     end
 
     # Capacity for up/down regulation. SoC constrained
@@ -157,14 +161,24 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
 
     # Energy reserve
     if (!(isempty(r.up_energy_reserve)))
-        total_up_energy_reserve = init_expr_array(N)
-        total_down_energy_reserve = init_expr_array(N)
-        for k in keys(r.up_energy_reserve)
-            total_up_energy_reserve = total_up_energy_reserve + r.up_energy_reserve[k]
-            total_down_energy_reserve = total_down_energy_reserve + r.down_energy_reserve[k]
+        #total_up_energy_reserve = init_expr_array(N)
+        #total_down_energy_reserve = init_expr_array(N)
+        #for k in keys(r.up_energy_reserve)
+        #    total_up_energy_reserve = total_up_energy_reserve + r.up_energy_reserve[k]
+        #    total_down_energy_reserve = total_down_energy_reserve + r.down_energy_reserve[k]
+        #end
+        total_up_energy_reserve = sum_out(r, :up_energy_reserve, ts)
+        total_down_energy_reserve = sum_out(r, :down_energy_reserve, ts)
+        
+        if isa(ts, IndexedTimeStruct)
+            @constraint(model, [i = 1:ts.periods], r.state_of_charge[i] >= total_up_energy_reserve[i], base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
+            #@constraint(model, r.state_of_charge .>= total_up_energy_reserve, base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
+            @constraint(model, [i = 1:ts.periods], r.capacity - r.state_of_charge[i] >= total_down_energy_reserve[i], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
+        elseif isa(ts, StochasticTimeStruct)
+            @constraint(model, [i = 1:ts.periods, j = ts.scenarios], r.state_of_charge[i,j] >= total_up_energy_reserve[i,j], base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
+            #@constraint(model, r.state_of_charge .>= total_up_energy_reserve, base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
+            @constraint(model, [i = 1:ts.periods, j = ts.scenarios], r.capacity - r.state_of_charge[i,j] >= total_down_energy_reserve[i,j], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
         end
-        @constraint(model, r.state_of_charge >= total_up_energy_reserve, base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
-        @constraint(model, r.capacity .- r.state_of_charge >= total_down_energy_reserve, base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
     end
     # We have implicitly assumed here that power_out and power_in are not simultaneously
     # non-zero. The program should throw a warning if this occurs and this should be considered

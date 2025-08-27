@@ -176,8 +176,7 @@ function parse_data(data::Dict{String,Any},ts::StochasticTimeStruct)
     S = ts.scenarios
     T = 1:ts.periods
     param = Containers.DenseAxisArray{Number}(undef, T, S)
-    println(T)
-    println(typeof(param))
+
     for s in S
         for t in T
             param[t,s] = data[s][t]
@@ -343,9 +342,7 @@ function sum_in(r::Component, field::Symbol, ts::StochasticTimeStruct, aggregato
     sum = init_expr_array_full(ts)
     for s in all_components(aggregator)
         if s.id in r.sources
-            #println(typeof(getproperty(s, field)[r.id]))
             if typeof(getproperty(s, field)[r.id]) == Vector{VariableRef} # input is first stage variable
-                #println("true")
                 for scenario in ts.scenarios
                     sum[:,scenario] = sum[:,scenario] + getproperty(s,field)[r.id]
                 end
@@ -382,10 +379,53 @@ function sum_group_resources(group::Group, field::Symbol, ts::IndexedTimeStruct,
     return total
 end
 
+function sum_group_resources(group::Group, field::Symbol, ts::StochasticTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.resources
+        resource = get_component(id, aggregator)
+        property = getproperty(resource,field)[group.id]
+        println(typeof(property))
+        if isa(property, Vector) # first stage
+            println("first stage")
+            for scenario in ts.scenarios
+                for t in 1:ts.periods
+                    add_to_expression!(total[:, scenario], property[t])
+                end
+            end
+        elseif isa(property, Containers.DenseAxisArray) #second stage
+            println("second stage")
+            total.data .+= property.data
+        end
+    end
+    return total
+end
+
 function sum_group_markets(group::Group, field::Symbol, ts::IndexedTimeStruct, aggregator::Dict)
     total = init_expr_array_full(ts)
     for id in group.markets
         market = get_component(id,aggregator)
         total .+= getproperty(market, field)
     end
+    return total
 end
+
+function sum_group_markets(group::Group, field::Symbol, ts::StochasticTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.markets
+        market = get_component(id,aggregator)
+        property = getproperty(market,field)
+        if isa(property, Vector) # first stage
+            for scenario in ts.scenarios
+                for t in 1:ts.periods
+                    add_to_expression!(total[t, scenario], property[t])
+                    #total[t, scenario] .+= property[t]
+                end
+            end
+        elseif isa(property, Containers.DenseAxisArray)
+            total.data .+= property.data
+        end
+    end
+    return total
+   
+end
+
