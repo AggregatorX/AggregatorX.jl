@@ -14,11 +14,11 @@ function set_optimization_constraints(model::Model, group::FCReGroup, aggregator
     #total_up_capacity_available = init_expr_array_full(ts)
     #total_down_capacity_available = init_expr_array_full(ts)
 
-    for id in group.resources
-        r = get_component(id, aggregator)
+    #for id in group.resources
+    #    r = get_component(id, aggregator)
         #total_up_capacity_available = total_up_capacity_available + r.up_capacity[group.id]
         #total_down_capacity_available = total_down_capacity_available + r.down_capacity[group.id]
-    end
+    #end
 
     #group.up_capacity = total_up_capacity_available
     #group.down_capacity = total_down_capacity_available

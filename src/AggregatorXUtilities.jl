@@ -381,3 +381,11 @@ function sum_group_resources(group::Group, field::Symbol, ts::IndexedTimeStruct,
     end
     return total
 end
+
+function sum_group_markets(group::Group, field::Symbol, ts::IndexedTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.markets
+        market = get_component(id,aggregator)
+        total .+= getproperty(market, field)
+    end
+end
