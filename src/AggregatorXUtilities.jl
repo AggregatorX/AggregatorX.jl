@@ -146,7 +146,8 @@ function parse_data(data::Any, aggregator::Dict{String, Any}) # These should be 
 end
 
 function parse_data(data::Dict{String,Any}, aggregator::Dict{String,Any})
-    return parse_data(data, aggregator["TimeStruct"])
+    DATADIR = aggregator["DATADIR"]
+    return parse_data(data, aggregator["TimeStruct"], DATADIR)
 end
 
 function parse_data(data::Real, N::Integer)
@@ -172,17 +173,33 @@ end
 """
 If stochastic parameter store in DenseAxisArray
 """
-function parse_data(data::Dict{String,Any},ts::StochasticTimeStruct)
+function parse_data(data::Dict{String,Any},ts::StochasticTimeStruct, DATADIR::String)
     S = ts.scenarios
     T = 1:ts.periods
     param = Containers.DenseAxisArray{Number}(undef, T, S)
 
     for s in S
         for t in T
-            param[t,s] = data[s][t]
+            #param[t,s] = data[s][t]            
         end
+        param[:,s] .= _parse_data(data[s], T, DATADIR)        
     end
     return param
+end
+
+function _parse_data(data::Vector{<:Number}, T, DATADIR)
+    return data
+end
+
+function _parse_data(file::String, T, DATADIR)
+    if isabspath(file) # data is located at absolute path
+        data = open(readdlm, file)
+        return data
+    else # data is located in a file in the DATADIR
+        filepath = joinpath(DATADIR, file)
+        data = open(readdlm, filepath)
+        return data
+    end
 end
 
 # for vector of numbers
