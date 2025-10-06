@@ -50,6 +50,22 @@ function idx_to_id(aggregator, categories)
     return id_map
 end
 
+function init_expr_array_full(ts::StochasticTimeStruct)
+    z = Containers.DenseAxisArray{AffExpr}(undef, 1:ts.periods, ts.scenarios)
+    for i in eachindex(z)
+        z.data[i] = 0.0
+    end
+    return z
+end
+
+function init_expr_array_full(ts::IndexedTimeStruct)
+    z = Vector{AffExpr}(undef, ts.periods)
+    for i in eachindex(z)
+        z[i] = 0.0
+    end
+    return z
+end
+
 function init_expr_array(N)
     z = Vector{AffExpr}(undef, N)
     for i in eachindex(z)
@@ -112,7 +128,7 @@ which represent some parameter data for the system. This is the trivial function
 if the vector is already defined in the JSON file.
 """
 
-function parse_data(data::Any, aggregator::Dict{String, Any})
+function parse_data(data::Any, aggregator::Dict{String, Any}) # These should be dispatched...
     if isa(data, String)
         if isabspath(data) # data is located at absolute path
             return parse_data(data)
@@ -127,6 +143,11 @@ function parse_data(data::Any, aggregator::Dict{String, Any})
             return parse_data(data)
         end
     end
+end
+
+function parse_data(data::Dict{String,Any}, aggregator::Dict{String,Any})
+    DATADIR = aggregator["DATADIR"]
+    return parse_data(data, aggregator["TimeStruct"], DATADIR)
 end
 
 function parse_data(data::Real, N::Integer)
@@ -148,6 +169,37 @@ function parse_data(data::Vector{Any})
         throw(TypeError)
     end
     return data
+end
+"""
+If stochastic parameter store in DenseAxisArray
+"""
+function parse_data(data::Dict{String,Any},ts::StochasticTimeStruct, DATADIR::String)
+    S = ts.scenarios
+    T = 1:ts.periods
+    param = Containers.DenseAxisArray{Number}(undef, T, S)
+
+    for s in S
+        for t in T
+            #param[t,s] = data[s][t]            
+        end
+        param[:,s] .= _parse_data(data[s], T, DATADIR)        
+    end
+    return param
+end
+
+function _parse_data(data::Vector{<:Number}, T, DATADIR)
+    return data
+end
+
+function _parse_data(file::String, T, DATADIR)
+    if isabspath(file) # data is located at absolute path
+        data = open(readdlm, file)
+        return data
+    else # data is located in a file in the DATADIR
+        filepath = joinpath(DATADIR, file)
+        data = open(readdlm, filepath)
+        return data
+    end
 end
 
 # for vector of numbers
@@ -273,3 +325,124 @@ function getsource(id, connections)
     end
     return source
 end
+
+function sum_out(r::Component, field::Symbol, ts::IndexedTimeStruct)
+    sum = init_expr_array_full(ts)
+    f = getproperty(r,field)
+    for target in keys(f)
+        sum = sum + f[target]
+    end 
+    return sum
+end
+
+# Assume DenseAxisArray
+function sum_out(r::Component, field::Symbol, ts::StochasticTimeStruct)
+    sum = init_expr_array_full(ts)
+    f = getproperty(r,field)
+    for target in keys(f)
+        sum.data .= sum.data .+ f[target].data
+    end 
+    return sum
+end
+
+function sum_in(r::Component, field::Symbol, ts::IndexedTimeStruct, aggregator)
+    sum = init_expr_array_full(ts)
+    for s in all_components(aggregator)
+        if s.id in r.sources
+            sum = sum + getproperty(s,field)[r.id]
+        end
+    end
+    return sum
+end
+
+function sum_in(r::Component, field::Symbol, ts::StochasticTimeStruct, aggregator)
+    sum = init_expr_array_full(ts)
+    for s in all_components(aggregator)
+        if s.id in r.sources
+            if typeof(getproperty(s, field)[r.id]) == Vector{VariableRef} # input is first stage variable
+                for scenario in ts.scenarios
+                    sum[:,scenario] = sum[:,scenario] + getproperty(s,field)[r.id]
+                end
+            else # input is second stage variable
+                sum.data .= sum.data .+ getproperty(s,field)[r.id].data
+            end
+        end
+    end
+    return sum
+end
+
+function sum_expr(ts::IndexedTimeStruct, expr...)
+    sum = init_expr_array_full(ts)
+    for e in expr
+        sum = sum + e
+    end
+    return sum
+end
+
+function sum_expr(ts::StochasticTimeStruct, expr...)
+    sum = init_expr_array_full(ts)
+    for e in expr
+        sum.data .= sum.data .+ e.data
+    end
+    return sum
+end
+
+function sum_group_resources(group::Group, field::Symbol, ts::IndexedTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.resources
+        resource = get_component(id, aggregator)
+        total .+= getproperty(resource,field)[group.id]
+    end
+    return total
+end
+
+function sum_group_resources(group::Group, field::Symbol, ts::StochasticTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.resources
+        resource = get_component(id, aggregator)
+        property = getproperty(resource,field)[group.id]
+        println(typeof(property))
+        if isa(property, Vector) # first stage
+            println("first stage")
+            for scenario in ts.scenarios
+                for t in 1:ts.periods
+                    add_to_expression!(total[:, scenario], property[t])
+                end
+            end
+        elseif isa(property, Containers.DenseAxisArray) #second stage
+            println("second stage")
+            total.data .+= property.data
+        end
+    end
+    return total
+end
+
+function sum_group_markets(group::Group, field::Symbol, ts::IndexedTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.markets
+        market = get_component(id,aggregator)
+        total .+= getproperty(market, field)
+    end
+    return total
+end
+
+function sum_group_markets(group::Group, field::Symbol, ts::StochasticTimeStruct, aggregator::Dict)
+    total = init_expr_array_full(ts)
+    for id in group.markets
+        market = get_component(id,aggregator)
+        property = getproperty(market,field)
+        if isa(property, Vector) # first stage
+            for scenario in ts.scenarios
+                for t in 1:ts.periods
+                    add_to_expression!(total[t, scenario], property[t])
+                    #total[t, scenario] .+= property[t]
+                end
+            end
+        elseif isa(property, Containers.DenseAxisArray)
+            total.data .+= property.data
+        end
+    end
+    return total
+   
+end
+

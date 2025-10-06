@@ -5,56 +5,7 @@
 
 # - Variables -
 
-# SimpleBattery
-function set_optimization_variables(model::Model, battery::SimpleBattery, 
-    timestruct::TimeStruct) 
-    
-    N = timestruct.periods
 
-    # Output power
-    for k in keys(battery.power)
-        battery.power[k] = @variable(model, [1:N], lower_bound = 0.0,
-            base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k))
-    end
-    
-    # State of charge
-    battery.state_of_charge = @variable(model, [1:N], lower_bound = 0.0,
-        base_name = "soc-SimpleBattery-" * string(battery.id))
-    
-    # Capacity    
-    for k in keys(battery.up_capacity)
-        battery.up_capacity[k] = @variable(model, [1:N], lower_bound = 0.0, 
-            base_name = "up-capacity-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
-    end
-
-    for k in keys(battery.down_capacity)
-        battery.down_capacity[k] = @variable(model, [1:N], lower_bound = 0.0, 
-        base_name = "down-capacity-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
-    end
-
-    # Activation
-    for k in keys(battery.up_activation)
-        battery.up_activation[k] = @variable(model, [1:N], lower_bound = 0.0,
-        base_name = "up-activation-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
-    end
-
-    for k in keys(battery.down_activation)
-        battery.down_activation[k] = @variable(model, [1:N], lower_bound = 0.0,
-        base_name = "down-activation-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
-    end
-
-    # Energy reserve
-    for k in keys(battery.up_energy_reserve)
-        battery.up_energy_reserve[k] = @variable(model, [1:N], lower_bound = 0.0,
-        base_name = "up-energy-reserve-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
-    end
-
-    for k in keys(battery.down_energy_reserve)
-        battery.down_energy_reserve[k] = @variable(model, [1:N], lower_bound = 0.0,
-        base_name = "down-energy-reserve-SimpleBattery-" * string(battery.id) * "-group-" * string(k))
-    end
-    
-end
 
 # SimpleCharger
 """
@@ -96,17 +47,7 @@ function set_optimization_variables(model::Model, charger::SimpleCharger,
     end
 end
 
-function set_optimization_variables(model::Model, gen::Generation, timestruct::TimeStruct)
-    N = timestruct.periods
 
-    for k in keys(gen.power)
-        gen.power[k] = @variable(model, [1:N], base_name = "p-Generation-" * string(gen.id))
-    end
-end
-
-function set_optimization_variables(model::Model, load::FixedLoad, timestruct::TimeStruct)
-    # No variables need
-end
 
 function set_optimization_variables(model::Model, load::VariableLoad, timestruct::TimeStruct)
     N = timestruct.periods
@@ -190,25 +131,7 @@ function set_optimization_variables(model::Model, m::FCRN, timestruct::TimeStruc
     m.down_activation = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRN-down-activation-" * string(m.id))
 end
 
-function set_optimization_variables(model::Model, m::FCRNe, timestruct::TimeStruct)
-    N = timestruct.periods
 
-    # - Variables -
-
-    m.capacity_sold = @variable(model, [1:N], lower_bound = 0.0, base_name = "FCRNe-capacity-" * string(m.id))
-
-    # - Intermediate variables -
-
-    # Symmetric market
-    m.up_capacity_sold    = @expression(model, [i = 1:N], m.capacity_sold[i]) # Used in objective function
-    m.down_capacity_sold  = @expression(model, [i = 1:N], m.capacity_sold[i])
-    
-    # Variables passed to group
-    m.up_capacity    =      @expression(model, [i = 1:N], m.capacity_factor  .* m.up_capacity_sold[i])
-    m.down_capacity  =      @expression(model, [i = 1:N], m.capacity_factor  .* m.down_capacity_sold[i])
-    m.up_energy_reserve   = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i]) # Not needed, pass endurance directly
-    m.down_energy_reserve = @expression(model, [i = 1:N], m.energy_endurance .* m.capacity_sold[i]) # -"-
-end
 
 function set_optimization_variables(model, m::FCRD_Up_LER, timestruct::TimeStruct)
     N = timestruct.periods
@@ -222,13 +145,7 @@ function set_optimization_variables(model, m::FCRD_Up_LER, timestruct::TimeStruc
     m.down_capacity  = @expression(model, [i = 1:N], m.capacity_factor  .* m.capacity_sold[i])
 end
 
-## Nodes
-function set_optimization_variables(model::Model, node::StandardNode, timestruct::TimeStruct)
-    N = timestruct.periods
-    for k in keys(node.power)
-        node.power[k] = @variable(model, [1:N], lower_bound = 0.0, base_name = "p-StandardNode-" * string(node.id) * "-" * string(k))
-    end
-end
+
 
 ## Groups
 function set_optimization_variables(model::Model, group::FFRGroup, timestruct::TimeStruct)
@@ -242,9 +159,7 @@ function set_optimization_variables(model::Model, group::FCRGroup, timestruct::T
     #group.down_activation = @variable(model, [1:timestruct.periods], lower_bound = 0.0, base_name = "FCRgroup-down-activation-" * string(group.id))
 end
 
-function set_optimization_variables(model::Model, group::FCReGroup, timestruct::TimeStruct)
-    # Only intermediate variables used for this group
-end
+
 
 """
     set_optimization_variables(model::Model, groups::Set{Group}, timestruct::TimeStruct)
@@ -324,113 +239,6 @@ function set_optimization_constraints(model::Model, charger::SimpleCharger, aggr
         @constraint(model, total_up_capacity == power_out, base_name = "max-up-capacity-SimpleCharger-" * string(charger.id) )
     end
     # Should perhaps have a connection between direct linkt between available capacity and maximum acitvation
-end
-
-function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator::Dict{String, Any})
-    N = aggregator["TimeStruct"].periods
-    id = r.id
-
-    power_out = init_expr_array(N)
-    for target in keys(r.power)
-        power_out = power_out + r.power[target]
-    end 
-    
-    power_in = init_expr_array(N) # power_in is positive but for a net flow, a net outflow is defined as positive
-    sources = r.sources
-    for r in all_components(aggregator) #union(aggregator["Resource"], aggregator["Market"])
-        if r.id in sources
-            power_in = power_in + r.power[id]
-        end
-    end
-
-    net_power = init_expr_array(N)
-    net_power = power_out - power_in
-
-    total_up_activation = init_expr_array(N)
-    for k in keys(r.up_activation)
-        total_up_activation = total_up_activation + r.up_activation[k]
-    end
-
-    total_down_activation = init_expr_array(N)
-    for k in keys(r.down_activation)
-        total_down_activation = total_down_activation + r.down_activation[k]
-    end
-
-    net_activation = init_expr_array(N)
-    net_activation = total_up_activation - total_down_activation # Positive for net power out, that is up-regulation
-
-    # Energy conserved: Change in state of charge equal net power flow
-    @constraint(model, r.state_of_charge[1] == r.initial_charge, base_name = "soc-init-SimpleBattery" * string(id))
-    @constraint(model, r.state_of_charge[2:N] - r.state_of_charge[1:N-1] + net_power[1:N-1] + net_activation[1:N-1] == 0, base_name = "soc-SimpleBattery-" * string(id))
-    
-    # max charge
-    @constraint(model, r.state_of_charge .<= r.capacity, base_name ="max-soc-SimpleBattery" * string(id))
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] <= r.capacity, base_name ="max-soc_last-SimpleBattery" * string(id)) # last time step
-
-    # min charge
-    @constraint(model, r.state_of_charge .>= 0.0, base_name ="min-soc-SimpleBattery" * string(id))
-    @constraint(model, r.state_of_charge[N] - net_power[N] - net_activation[N] >= 0.0, base_name ="min-soc-last-SimpleBattery" * string(id)) # last time step
-
-    # charge/discharge rates
-    @constraint(model, power_out + total_up_activation .<= r.max_discharge, base_name ="max-discharging-SimpleBattery" * string(id))
-    @constraint(model, power_in + total_down_activation .<= r.max_charge, base_name ="max-charging-SimpleBattery" * string(id))
-
-    total_up_capacity = init_expr_array(N)
-    for k in keys(r.up_capacity)
-        total_up_capacity = total_up_capacity + r.up_capacity[k]
-    end
-
-    total_down_capacity = init_expr_array(N)
-    for k in keys(r.down_capacity)
-        total_down_capacity = total_down_capacity + r.down_capacity[k]
-    end
-
-    # Capacity for up/down regulation. Flow constrained
-    if !(isempty(r.up_capacity)) # Empty if not part of group
-        @constraint(model, total_up_capacity <= r.max_discharge .- power_out .+ power_in, base_name="max-up-capacity-SimpleBattery-" * string(id))
-    end
-    if !(isempty(r.down_capacity))
-        @constraint(model, total_down_capacity <= r.max_charge .- power_in .+ power_out, base_name="max-down-capacity-SimpleBattery-" * string(id) )
-    end
-
-    # Capacity for up/down regulation. SoC constrained
-    #if ( !(isempty(r.up_capacity)) & !(isempty(r.down_capacity)) )
-    #    @constraint(model, r.state_of_charge - net_power + total_down_capacity .<= r.capacity, base_name ="capacity-max-soc-SimpleBattery-" * string(id))
-    #    @constraint(model, r.state_of_charge - net_power - total_up_capacity .>= 0.0, base_name ="capacity-min-soc-SimpleBattery-" * string(id))
-    #end
-
-    # Energy reserve
-    if (!(isempty(r.up_energy_reserve)))
-        total_up_energy_reserve = init_expr_array(N)
-        total_down_energy_reserve = init_expr_array(N)
-        for k in keys(r.up_energy_reserve)
-            total_up_energy_reserve = total_up_energy_reserve + r.up_energy_reserve[k]
-            total_down_energy_reserve = total_down_energy_reserve + r.down_energy_reserve[k]
-        end
-        @constraint(model, r.state_of_charge >= total_up_energy_reserve, base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
-        @constraint(model, r.capacity .- r.state_of_charge >= total_down_energy_reserve, base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
-    end
-    # We have implicitly assumed here that power_out and power_in are not simultaneously
-    # non-zero. The program should throw a warning if this occurs and this should be considered
-    # a case that the software does not handle or an indication of the possibility of A
-    # modelling error.
-end
-
-function set_optimization_constraints(model::Model, gen::Generation, aggregator::Dict{String, Any})
-
-    for k in keys(gen.power)
-        @constraint(model, gen.power[k] .<= gen.pmax, base_name = "pmax-generation-" * string(gen.id))
-        @constraint(model, gen.power[k] .>= gen.pmin, base_name = "pmin-generation-" * string(gen.id))
-    end
-end
-
-function set_optimization_constraints(model::Model, l::FixedLoad, aggregator::Dict{String, Any})
-    N = aggregator["TimeStruct"].periods
-    source = get_component(l.source, aggregator)
-
-    base_name = "fixed-load-" * string(l.id) * "-f-" * string(source.id)
-    c = @constraint(model, source.power[l.id] .== l.load, base_name = base_name)
-    setindex!(l.constraint, c, "energy conservation")
 end
 
 function set_optimization_constraints(model::Model, l::VariableLoad, aggregator::Dict{String, Any})
@@ -565,37 +373,13 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
     @constraint(model, m.down_activation .== m.down_capacity .* df_down ./ dfmax )
 end
 
-function set_optimization_constraints(model::Model, m::FCRNe, aggregator)
-    # - no constraints needed-
-end
+
 
 function set_optimization_constraints(model::Model, m::FCRD_Up_LER, aggregator)
     # - no constraints needed-
 end
 
-## Nodes
-function set_optimization_constraints(model::Model, node::StandardNode, aggregator::Dict{String, Any})
-    N  = aggregator["TimeStruct"].periods
-    id = node.id
 
-    power_out = init_expr_array(N)
-    net_power = init_expr_array(N)
-    power_in  = init_expr_array(N)
-
-    for target in keys(node.power)        
-        power_out = power_out + node.power[target]
-    end 
-        
-    for r in all_components(aggregator) # Resources, markets, nodes, grids
-        if r.id in node.sources
-            power_in = power_in + r.power[id]
-        end
-    end
-
-    net_power = power_out-power_in # Energy conserved
-    
-    @constraint(model, net_power == 0, base_name = "pnet-Standardode-" * string(id))
-end
 
 # Groups
 
@@ -701,93 +485,7 @@ function set_optimization_constraints(model::Model, group::FCRGroup, aggregator:
 
 end
 
-function set_optimization_constraints(model::Model, group::FCReGroup, aggregator::Dict{String, Any})
-    N = aggregator["TimeStruct"].periods
 
-    # Reserved capacity 
-
-    # Group capacity is is capacity of sum of capacity of individual resources
-    total_up_capacity_available = init_expr_array(N)
-    total_down_capacity_available = init_expr_array(N)
-
-    for id in group.resources
-        r = get_component(id, aggregator)
-        total_up_capacity_available = total_up_capacity_available + r.up_capacity[group.id]
-        total_down_capacity_available = total_down_capacity_available + r.down_capacity[group.id]
-    end
-
-    group.up_capacity = total_up_capacity_available
-    group.down_capacity = total_down_capacity_available
-
-    # Capacity sold to markets is limited by available capacity
-    total_up_capacity_reserved = init_expr_array(N)
-    total_down_capacity_reserved = init_expr_array(N)
-
-    for id in group.markets
-        m = get_component(id, aggregator)    
-        total_up_capacity_reserved = total_up_capacity_reserved + m.up_capacity
-        total_down_capacity_reserved = total_down_capacity_reserved + m.down_capacity
-    end
-    
-    @constraint(model, total_up_capacity_reserved <= group.up_capacity, base_name = "up-capacity-limit-FCReGroup" * string(group.id))
-    @constraint(model, total_down_capacity_reserved <= group.down_capacity, base_name = "down-capacity-limit-FCReGroup" * string(group.id))
-
-     # Activation 
-
-    # This FCR group assumes no activation. This constraint ensures that the resources
-    # does not contribute activation to this group. Without any constraint on this
-    # variable, the resources could freely set the value of their activation parameter,
-    # and e.g. down-activate and freely get energy from 'nowhere'.
-    for id in group.resources
-        r = get_component(id,aggregator)
-        @constraint(model, r.up_activation[group.id] == 0, base_name = "no-activation-FCReGroup" * string(group.id))
-        @constraint(model, r.down_activation[group.id] == 0, base_name = "no-activation-FCReGroup" * string(group.id))
-    end
-
-    # Energy reserves
-
-    # Set energy_endurance to maximum of connected markets
-    energy_endurance = 0
-    for id in group.markets
-        m = get_component(id, aggregator)
-        energy_endurance = max(energy_endurance, m.energy_endurance)
-    end
-
-    # Set energy reserve requirement individually for each connected resource in the group.
-    for id in group.resources
-        r = get_component(id,aggregator)
-        base_name = "up-energy-reserve-FCReGroup-" * string(group.id) * "r" * string(id)
-        @constraint(model, r.up_energy_reserve[group.id] >= energy_endurance * r.up_capacity[group.id], base_name = base_name)
-
-        base_name = "down-energy-reserve-FCReGroup-" * string(group.id) * "r" * string(id)
-        @constraint(model, r.down_energy_reserve[group.id] >= energy_endurance * r.down_capacity[group.id], base_name = base_name)
-    end
-    #=
-    # Total energy reserves available in the connected resources
-    total_up_energy_reserve = init_expr_array(N)
-    total_down_energy_reserve = init_expr_array(N)
-    for id in group.resources
-        r = get_component(id,aggregator)
-        total_up_energy_reserve = total_up_energy_reserve + r.up_energy_reserve[group.id]
-        total_down_energy_reserve = total_down_energy_reserve + r.down_energy_reserve[group.id]
-    end
-    group.up_energy_reserve = total_up_energy_reserve
-    group.down_energy_reserve = total_down_energy_reserve
-
-    # Total energy reserve required from markets
-    total_up_energy_reserve_markets = init_expr_array(N)
-    total_down_energy_reserve_markets = init_expr_array(N)
-    for id in group.markets
-        m = get_component(id,aggregator)
-        total_up_energy_reserve_markets = total_up_energy_reserve_markets + m.up_energy_reserve
-        total_down_energy_reserve_markets = total_down_energy_reserve_markets + m.down_energy_reserve
-    end
-
-    # Available energy reserve must be greater or equal to what is required from markets
-    @constraint(model,total_up_energy_reserve_markets <= total_up_energy_reserve, base_name = "up-energy_reserve-balance-FCReGroup" * string(group.id))
-    @constraint(model,total_down_energy_reserve_markets <= total_down_energy_reserve, base_name = "down-energy-reserve-balance-FCReGroup" * string(group.id))
-    =#
-end
 
 # Objective functions contributions
 
@@ -808,6 +506,13 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
             zterm = get_objective_term(g)
             z = z + zterm
         end
+    end
+
+    # Better to loop over all components that define an objective term...:
+
+    ts = aggregator["TimeStruct"]
+    for r in aggregator["Resource"]
+        applicable(get_objective_term, r, ts) ? z = z + get_objective_term(r,ts) : 0
     end
 
     return z
@@ -836,10 +541,7 @@ function get_objective_term(m::FCRN)
     return zterm
 end
 
-function get_objective_term(m::FCRNe)
-    zterm = sum(m.price .* m.capacity_sold .* (-m.sign))
-    return zterm
-end
+
 
 function get_objective_term(m::FCRD_Up_LER)
     zterm = sum(m.price .* m.capacity_sold .* (-m.sign))

@@ -35,13 +35,19 @@ mutable struct IndexedTimeStruct <: TimeStruct
     periods::Int # The number of time steps
 end
 
+struct StochasticTimeStruct <: TimeStruct
+    scenarios   :: Vector{Any}
+    probability :: Vector{Real}
+    periods     :: Int
+end
+
 # -------------
 # - Components
 # -------------
 
 # - Node -
 mutable struct StandardNode <: Node
-    power::Dict{Integer, Vector{VariableRef}}
+    power::Dict{Integer, AbstractArray{VariableRef}}
     sources::Vector{Integer}
     id::Integer
 end
@@ -60,29 +66,29 @@ end
 
 # - SimpleBattery -
 mutable struct SimpleBattery <: Resource
-    power::Dict{Integer, Vector{VariableRef}}
-    sources::Vector{Integer}
-    state_of_charge::Vector{VariableRef}
-    up_capacity::Dict{Integer, Vector{VariableRef}}
-    down_capacity::Dict{Integer, Vector{VariableRef}}
-    up_activation::Dict{Integer, Vector{VariableRef}}
-    down_activation::Dict{Integer, Vector{VariableRef}}
-    up_energy_reserve::Dict{Integer, Vector{VariableRef}}
-    down_energy_reserve::Dict{Integer, Vector{VariableRef}}
-    capacity::AbstractFloat
+    power::             Dict{Integer, AbstractArray{VariableRef}}
+    sources::           Vector{Integer}
+    state_of_charge::   AbstractArray{VariableRef}
+    up_capacity::       Dict{Integer, AbstractArray{VariableRef}}
+    down_capacity::     Dict{Integer, AbstractArray{VariableRef}}
+    up_activation::     Dict{Integer, AbstractArray{VariableRef}}
+    down_activation::   Dict{Integer, AbstractArray{VariableRef}}
+    up_energy_reserve:: Dict{Integer, AbstractArray{VariableRef}}
+    down_energy_reserve::Dict{Integer, AbstractArray{VariableRef}}
+    capacity::      AbstractFloat
     initial_charge::AbstractFloat
-    max_charge::AbstractFloat
-    max_discharge::AbstractFloat
-    class::String
-    id::Integer
+    max_charge::    AbstractFloat
+    max_discharge:: AbstractFloat
+    class::         String
+    id::            Integer
 end
 
-# - Generation -
 mutable struct Generation <: Resource
-    power::Dict{Integer, Vector{VariableRef}}
-    pmax::Vector{Real}
-    pmin::Vector{Real}
-    id::Integer
+    power   ::Dict{Integer, AbstractArray{VariableRef}}
+    cost    ::Vector{Real}  
+    pmax    ::Vector{Real}
+    pmin    ::Vector{Real}
+    id      ::Integer
 end
 
 # ----------
@@ -102,8 +108,8 @@ end
 
 mutable struct FixedLoad <: Load
     source::Integer
-    load::Vector{Real}
-    constraint::Dict{String, Vector{ConstraintRef}}
+    load::AbstractArray
+    constraint::Dict{String, AbstractArray} #AbstractArray{ConstraintRef} not working
     scalar_constraint::Dict{String, ConstraintRef}
     id::Integer
 end
@@ -163,10 +169,14 @@ mutable struct FFRGroup <: Group
 end
 
 mutable struct FCRGroup <: Group
-    up_capacity::Vector{AffExpr}
-    down_capacity::Vector{AffExpr}
-    up_activation::Vector{AffExpr}
-    down_activation::Vector{AffExpr}
+    #up_capacity::Vector{AffExpr}
+    #down_capacity::Vector{AffExpr}
+    #up_activation::Vector{AffExpr}
+    #down_activation::Vector{AffExpr}
+    up_capacity::AbstractArray{AffExpr}
+    down_capacity::AbstractArray{AffExpr}
+    up_activation::AbstractArray{AffExpr}
+    down_activation::AbstractArray{AffExpr}
     resources::Set{Int} # ids of resources in the group.
     markets::Set{Int} # ids of markets connected to the group.
     class::String  
@@ -174,10 +184,14 @@ mutable struct FCRGroup <: Group
 end
 
 mutable struct FCReGroup <: Group
-    up_capacity::Vector{AffExpr}
-    down_capacity::Vector{AffExpr}
-    up_energy_reserve::Vector{AffExpr}
-    down_energy_reserve::Vector{AffExpr}
+    #up_capacity::Vector{AffExpr}
+    #down_capacity::Vector{AffExpr}
+    #up_energy_reserve::Vector{AffExpr}
+    #down_energy_reserve::Vector{AffExpr}
+    up_capacity::AbstractArray{AffExpr}
+    down_capacity::AbstractArray{AffExpr}
+    up_energy_reserve::AbstractArray{AffExpr}
+    down_energy_reserve::AbstractArray{AffExpr}
     up_energy_reserve_factor::Number
     down_energy_reserve_factor::Number
     resources::Set{Int} # ids of resources in the group.
@@ -236,13 +250,20 @@ mutable struct FCRN <: Market
 end
 
 mutable struct FCRNe <: Market
-    capacity_sold::Vector{VariableRef}
-    up_capacity::Vector{AffExpr}
-    down_capacity::Vector{AffExpr}
-    up_capacity_sold::Vector{AffExpr}
-    down_capacity_sold::Vector{AffExpr}
-    up_energy_reserve::Vector{AffExpr}
-    down_energy_reserve::Vector{AffExpr}
+    #capacity_sold::Vector{VariableRef}
+    #up_capacity::Vector{AffExpr}
+    #down_capacity::Vector{AffExpr}
+    #up_capacity_sold::Vector{AffExpr}
+    #down_capacity_sold::Vector{AffExpr}
+    #up_energy_reserve::Vector{AffExpr}
+    #down_energy_reserve::Vector{AffExpr}
+    capacity_sold::AbstractArray{VariableRef}
+    up_capacity::AbstractArray{AffExpr}
+    down_capacity::AbstractArray{AffExpr}
+    up_capacity_sold::AbstractArray{AffExpr}
+    down_capacity_sold::AbstractArray{AffExpr}
+    up_energy_reserve::AbstractArray{AffExpr}
+    down_energy_reserve::AbstractArray{AffExpr}
     energy_endurance::Real
     capacity_factor::Real
     price::Vector{Real}

@@ -209,14 +209,14 @@ end
     up = @test hasfield(SimpleBattery, :up_activation)
     @test hasfield(SimpleBattery, :down_activation)
     sb = get_component(2,aggregator)
-    @test typeof(sb.up_activation) == Dict{Integer, Vector{VariableRef}}
-    @test typeof(sb.down_activation) == Dict{Integer, Vector{VariableRef}}
+    @test typeof(sb.up_activation) == Dict{Integer, AbstractArray{VariableRef}}
+    @test typeof(sb.down_activation) == Dict{Integer, AbstractArray{VariableRef}}
 
     @test typeof(sc.up_activation[7]) == Vector{VariableRef}
     @test typeof(sc.down_activation[7]) == Vector{VariableRef}
 
-    @test typeof(sb.up_activation[7]) == Vector{VariableRef}
-    @test typeof(sb.down_activation[7]) == Vector{VariableRef}
+    @test typeof(sb.up_activation[7]) <: AbstractArray{VariableRef}
+    @test typeof(sb.down_activation[7]) <: AbstractArray{VariableRef}
 
     # Fixed Load
     @test begin
@@ -293,10 +293,11 @@ end
     # Generation - component
     @test begin
         power = Dict{Integer, Vector{AffExpr}}(2 => Vector{AffExpr}(undef, 3))
+        cost = [1,2,3]
         pmax = [1,2,3]
         pmin = [0,0,1]
         id = 1
-        gen = Generation(power, pmax, pmin, id)
+        gen = Generation(power, cost, pmax, pmin, id)
         isa(gen, Generation)
     end
     # Generation - Constructor

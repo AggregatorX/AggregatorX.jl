@@ -5,6 +5,17 @@ function build_aggregatorx_object(tst::Type{IndexedTimeStruct}, ts::Dict{String,
     return IndexedTimeStruct(ts["periods"])
 end
 
+function build_aggregatorx_object(tst::Type{StochasticTimeStruct}, ts::Dict{String, Any})
+    # dict format checker
+    # dict value checker : sum proabilities = 1
+    
+    scenarios   = ts["scenarios"]
+    probability = ts["probability"]
+    periods     = ts["periods"]
+
+    return(StochasticTimeStruct(scenarios, probability, periods))
+end
+
 # ----------------
 # - Connections - 
 #-----------------
@@ -46,7 +57,7 @@ function build_aggregatorx_object(nt::Type{StandardNode}, n::Dict{String, Any}, 
     connections = aggregator["Connection"]
     id = n["id"]
 
-    power = Dict{Integer, Vector{VariableRef}}()
+    power = Dict{Integer, AbstractArray{VariableRef}}()
     sources = Vector{Int}(undef,0)
     for c in connections
         if c.source == id
@@ -111,7 +122,7 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
     class = get_class(b)
 
     # Find all connected components
-    power = Dict{Integer, Vector{VariableRef}}()
+    power = Dict{Integer, AbstractArray{VariableRef}}()
     sources = Vector{Int}(undef,0)
     for c in connections
         if c.source == id
@@ -123,26 +134,26 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
 
     state_of_charge = Vector{VariableRef}()
 
-    up_capacity = Dict{Integer, Vector{VariableRef}}()
-    down_capacity = Dict{Integer, Vector{VariableRef}}()
+    up_capacity = Dict{Integer, AbstractArray{VariableRef}}()
+    down_capacity = Dict{Integer, AbstractArray{VariableRef}}()
 
-    up_activation = Dict{Integer, Vector{VariableRef}}()
-    down_activation = Dict{Integer, Vector{VariableRef}}()
+    up_activation = Dict{Integer, AbstractArray{VariableRef}}()
+    down_activation = Dict{Integer, AbstractArray{VariableRef}}()
 
-    up_energy_reserve = Dict{Integer, Vector{VariableRef}}()
-    down_energy_reserve = Dict{Integer, Vector{VariableRef}}()
+    up_energy_reserve = Dict{Integer, AbstractArray{VariableRef}}()
+    down_energy_reserve = Dict{Integer, AbstractArray{VariableRef}}()
 
     if haskey(aggregator, "Group")
         groups = aggregator["Group"]        
         for g in groups
             if id in g.resources
                 # For each group add an entry in det capacity and activation dicts    
-                up_activation[g.id] = Vector{VariableRef}(undef, N)
-                down_activation[g.id] = Vector{VariableRef}(undef, N)
-                up_capacity[g.id] = Vector{VariableRef}(undef, N)
-                down_capacity[g.id] = Vector{VariableRef}(undef, N)
-                up_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
-                down_energy_reserve[g.id] = Vector{VariableRef}(undef, N)
+                up_activation[g.id] = Vector{VariableRef}()
+                down_activation[g.id] = Vector{VariableRef}()
+                up_capacity[g.id] = Vector{VariableRef}()
+                down_capacity[g.id] = Vector{VariableRef}()
+                up_energy_reserve[g.id] = Vector{VariableRef}()
+                down_energy_reserve[g.id] = Vector{VariableRef}()
             end
         end
     end
@@ -152,52 +163,9 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
      class, b["id"])
 end
 
-# - Generation -
-function build_aggregatorx_object(gt::Type{Generation}, g::Dict{String, Any}, aggregator::Dict{String,Any})
-    N = aggregator["TimeStruct"].periods
-    connections = aggregator["Connection"]
-    
-    id = g["id"]
-    pmax = parse_data(g["pmax"],aggregator)
-    pmin = parse_data(g["pmin"],aggregator)
 
-    power = Dict{Integer, Vector{VariableRef}}()
-    for c in connections
-        if c.source == id
-            power[c.sink] = Vector{VariableRef}(undef,N)
-        end
-    end
 
-    return Generation(power, pmax, pmin, id)
-end
 
-# FixedLoad
-function build_aggregatorx_object(t::Type{FixedLoad}, l::Dict{String, Any}, aggregator::Dict{String,Any})
-    
-    connections = aggregator["Connection"]
-    id = l["id"]
-    N = aggregator["TimeStruct"].periods
-    
-    source = 0
-    for c in connections
-        if c.sink == id
-            source =  c.source
-        end
-    end
-    
-    load = parse_data(l["load"], aggregator)
-    
-    #if length(l["load"]) == 1
-    #    load = parse_data(l["load"], N)
-    #else
-    #    load = parse_data(l["load"])
-    #end
-
-    constraint          = Dict{String, Vector{ConstraintRef}}()
-    scalar_constraint   = Dict{String, ConstraintRef}()
-
-    return FixedLoad(source, load, constraint, scalar_constraint, id)
-end
 
 # VariableLoad
 function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, aggregator::Dict{String, Any})
