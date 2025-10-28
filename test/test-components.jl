@@ -67,6 +67,10 @@
     str = "string"
     standardbattery = StandardBattery(d, vi, aavr, d, d, d, d, d, d, f, f, f, f, f, f, f, str, i)
     @test isa(standardbattery, StandardBattery)
+
+    # AggreagtorX constructor
+    filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test1.json")
+    @test isa(buildaggregator(filepath)[2], Dict{String, Any})
 end
 
 @testset verbose = true "ThermalLoad" begin

@@ -95,7 +95,9 @@ function buildaggregator(systemdescription::String)
                     if applicable(build_aggregatorx_object, componenttype, c, aggregator)
                         component_array[i] = build_aggregatorx_object(componenttype, c, aggregator)      
                     else
-                        println("Matching constructor method not found.")
+                        println("Matching constructor method not found for $componenttype .")
+                        throw(IncompleteSystemException)
+                        # should throw an error...
                     end
                 end
             aggregator[p] = component_array

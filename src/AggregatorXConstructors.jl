@@ -163,9 +163,67 @@ function build_aggregatorx_object(::Type{SimpleBattery}, b::Dict{String, Any}, a
      class, b["id"])
 end
 
+function build_aggregatorx_object(::Type{StandardBattery}, b::Dict{String, Any}, aggregator::Dict{String, Any})
+    # Expected keys in system description:
+    # type, id, class, capacity, inital_charge, max_charge, max_discharge,
+    # charging_loss, discharging_loss, throughput_cost
 
+    connections = aggregator["Connection"]
+    N = aggregator["TimeStruct"].periods
+    
+    id = b["id"]
 
+    # Find all connected components
+    power = Dict{Integer, AbstractArray{VariableRef}}()
+    sources = Vector{Int}(undef,0)
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{VariableRef}()
+        elseif c.sink == id
+            push!(sources, c.source)
+        end
+    end
 
+    state_of_charge = Vector{VariableRef}()
+
+    up_capacity = Dict{Integer, AbstractArray{VariableRef}}()
+    down_capacity = Dict{Integer, AbstractArray{VariableRef}}()
+
+    up_activation = Dict{Integer, AbstractArray{VariableRef}}()
+    down_activation = Dict{Integer, AbstractArray{VariableRef}}()
+
+    up_energy_reserve = Dict{Integer, AbstractArray{VariableRef}}()
+    down_energy_reserve = Dict{Integer, AbstractArray{VariableRef}}()
+
+    if haskey(aggregator, "Group")
+        groups = aggregator["Group"]        
+        for g in groups
+            if id in g.resources
+                # For each group add an entry in det capacity and activation dicts    
+                up_activation[g.id] = Vector{VariableRef}()
+                down_activation[g.id] = Vector{VariableRef}()
+                up_capacity[g.id] = Vector{VariableRef}()
+                down_capacity[g.id] = Vector{VariableRef}()
+                up_energy_reserve[g.id] = Vector{VariableRef}()
+                down_energy_reserve[g.id] = Vector{VariableRef}()
+            end
+        end
+    end
+
+    capacity = b["capacity"]
+    inital_charge = b["inital_charge"]
+    max_charge = b["max_charge"]
+    max_discharge = b["max_discharge"]
+    charging_loss = b["charging_loss"]
+    discharging_loss = b["discharging_loss"]
+    throughput_cost = b["throughput_cost"]
+    
+    class = get_class(b)
+  
+    return StandardBattery(power, sources, state_of_charge, up_capacity, down_capacity,
+    up_activation, down_activation, up_energy_reserve, down_energy_reserve, capacity, inital_charge,
+    max_charge, max_discharge, charging_loss, discharging_loss, throughput_cost, class, id)
+end
 
 # VariableLoad
 function build_aggregatorx_object(t::Type{VariableLoad},l::Dict{String, Any}, aggregator::Dict{String, Any})
