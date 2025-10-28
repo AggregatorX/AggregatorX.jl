@@ -39,6 +39,7 @@ include("AggregatorXMethods.jl")
 
 # - Components -
 include("components/SimpleBattery.jl")
+include("components/StandardBattery.jl")
 include("components/StandardNode.jl")
 include("components/FixedLoad.jl")
 include("components/Generation.jl")

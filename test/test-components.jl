@@ -71,6 +71,31 @@
     # AggreagtorX constructor
     filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test1.json")
     @test isa(buildaggregator(filepath)[2], Dict{String, Any})
+
+    @testset verbose = true "StandardBattery optimization setup" begin
+        filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test1.json")
+        sys, aggregator = buildaggregator(filepath)
+        standardbattery = get_component(4, aggregator)
+        timestruct = aggregator["TimeStruct"]
+        
+        model = Model()
+        # Test if variable setter exists
+        call = try
+            set_optimization_variables(model, standardbattery, timestruct)
+        catch e
+            e
+        end
+        @test !(call isa MethodError)              
+        @test isnothing(call)
+        
+        # Test initialization of variables
+        #filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test1.json")
+        #sys, aggregator = buildaggregator(filepath)
+        #standardbattery = get_component(4, aggregator)
+        #set_optimization_variables(model, standardbattery, timestruct)
+
+        @test variable_by_name(model, "p-StandardBattery-4-2[1]") == standardbattery.power[2][1]
+    end
 end
 
 @testset verbose = true "ThermalLoad" begin
@@ -175,6 +200,7 @@ end
         catch e
             e
         end
+        print(call)
         @test !(call isa MethodError)              
         @test call
 
