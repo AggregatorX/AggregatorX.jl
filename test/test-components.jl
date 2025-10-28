@@ -95,6 +95,32 @@
         #set_optimization_variables(model, standardbattery, timestruct)
 
         @test variable_by_name(model, "p-StandardBattery-4-2[1]") == standardbattery.power[2][1]
+
+        # Test if constraint setter exists
+        call = try
+            set_optimization_constraints(model, standardbattery, aggregator)
+        catch e
+            e
+        end
+        @test !(call isa MethodError) 
+    end
+
+    @testset verbose = true "StandardBattery optimization" begin
+        filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test1.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test objective_value(model) ≈ -2 atol=1e-6
+
+        filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test2.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test objective_value(model) ≈ -2.4 atol=1e-6
+
+         filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test3.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test objective_value(model) ≈ -2.72 atol=1e-6
     end
 end
 
