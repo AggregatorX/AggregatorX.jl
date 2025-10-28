@@ -1,8 +1,72 @@
 @testset verbose = true "StandardBattery" begin
+    failed = false
+
     @testset "StandardBattery definition" begin
         t = @test @isdefined(StandardBattery);
         failed = isa(t, Test.Fail) ? true : false
     end
+
+    if !failed
+        # Field names
+        field_names = fieldnames(StandardBattery)
+        @test field_names == (
+            :power,
+            :sources,
+            :state_of_charge,
+            :up_capacity,
+            :down_capacity,
+            :up_activation,
+            :down_activation,
+            :up_energy_reserve,
+            :down_energy_reserve,
+            :capacity,
+            :initial_charge,
+            :max_charge,
+            :max_discharge,
+            :charging_loss,
+            :discharging_loss,
+            :throughput_cost,
+            :class,
+            :id,
+        )
+    end
+
+    if !failed
+        # Field types
+        field_types = [fieldtype(StandardBattery, i) for i in 1:length(field_names)]
+        @test field_types == [
+            Dict{Integer, AbstractArray{VariableRef}},
+            Vector{Integer},
+            AbstractArray{VariableRef},
+            Dict{Integer, AbstractArray{VariableRef}},
+            Dict{Integer, AbstractArray{VariableRef}},
+            Dict{Integer, AbstractArray{VariableRef}},
+            Dict{Integer, AbstractArray{VariableRef}},
+            Dict{Integer, AbstractArray{VariableRef}},
+            Dict{Integer, AbstractArray{VariableRef}},
+            AbstractFloat,
+            AbstractFloat,
+            AbstractFloat,
+            AbstractFloat,
+            AbstractFloat,
+            AbstractFloat,
+            AbstractFloat,
+            String,
+            Integer
+        ]
+    end
+
+    # Default constructor
+    vi = Vector{Integer}()
+    vr = Vector{Real}()
+    vvr = Vector{VariableRef}()
+    aavr = Vector{VariableRef}()
+    d = Dict{Integer, AbstractArray{VariableRef}}()
+    f = 1.1
+    i = 1
+    str = "string"
+    standardbattery = StandardBattery(d, vi, aavr, d, d, d, d, d, d, f, f, f, f, f, f, f, str, i)
+    @test isa(standardbattery, StandardBattery)
 end
 
 @testset verbose = true "ThermalLoad" begin
