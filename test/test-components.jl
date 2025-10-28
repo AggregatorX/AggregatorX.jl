@@ -1,3 +1,10 @@
+@testset verbose = true "StandardBattery" begin
+    @testset "StandardBattery definition" begin
+        t = @test @isdefined(StandardBattery);
+        failed = isa(t, Test.Fail) ? true : false
+    end
+end
+
 @testset verbose = true "ThermalLoad" begin
     failed = false
 

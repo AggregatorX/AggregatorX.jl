@@ -83,6 +83,27 @@ mutable struct SimpleBattery <: Resource
     id::            Integer
 end
 
+mutable struct StandardBattery <: Resource
+    power::             Dict{Integer, AbstractArray{VariableRef}}
+    sources::           Vector{Integer}
+    state_of_charge::   AbstractArray{VariableRef}
+    up_capacity::       Dict{Integer, AbstractArray{VariableRef}}
+    down_capacity::     Dict{Integer, AbstractArray{VariableRef}}
+    up_activation::     Dict{Integer, AbstractArray{VariableRef}}
+    down_activation::   Dict{Integer, AbstractArray{VariableRef}}
+    up_energy_reserve:: Dict{Integer, AbstractArray{VariableRef}}
+    down_energy_reserve::Dict{Integer, AbstractArray{VariableRef}}
+    capacity::          AbstractFloat
+    initial_charge::    AbstractFloat
+    max_charge::        AbstractFloat
+    max_discharge::     AbstractFloat
+    charging_loss::     AbstractFloat
+    discharging_loss::  AbstractFloat
+    throughput_cost::   AbstractFloat
+    class::             String
+    id::                Integer
+end
+
 mutable struct Generation <: Resource
     power   ::Dict{Integer, AbstractArray{VariableRef}}
     cost    ::Vector{Real}  
