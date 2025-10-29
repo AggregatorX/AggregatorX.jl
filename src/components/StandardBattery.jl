@@ -186,3 +186,16 @@ function set_optimization_constraints(model::Model, r::StandardBattery, aggregat
     # modelling error.
 
 end
+
+function get_objective_term(b::StandardBattery, ts::IndexedTimeStruct, aggregator::Dict{String, Any})
+    throughput_cost = b.throughput_cost
+    power_out = sum_out(b, :power, ts)
+    power_in = sum_in(b, :power, ts, aggregator)
+    total_up_activation = sum_out(b, :up_activation, ts)
+    total_down_activation = sum_out(b, :down_activation, ts)
+    
+    zterm = AffExpr(0)
+    zterm = add_to_expression!(zterm, throughput_cost * ( sum(power_out .+ power_in)
+                            + sum(total_up_activation .+ total_down_activation) ))
+    return -zterm
+end

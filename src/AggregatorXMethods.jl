@@ -512,7 +512,11 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
 
     ts = aggregator["TimeStruct"]
     for r in aggregator["Resource"]
-        applicable(get_objective_term, r, ts) ? z = z + get_objective_term(r,ts) : 0
+        if applicable(get_objective_term, r, ts)
+            z = z + get_objective_term(r, ts)
+        elseif applicable(get_objective_term, r, ts, aggregator) # Probably should be standard, need aggregator object to deal with sources
+            z = z + get_objective_term(r, ts, aggregator)
+        end
     end
 
     return z

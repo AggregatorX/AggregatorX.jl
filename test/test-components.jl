@@ -117,10 +117,15 @@
         model = optimizeaggregator(aggregator, optimizer)
         @test objective_value(model) ≈ -2.4 atol=1e-6
 
-         filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test3.json")
+        filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test3.json")
         sys, aggregator = buildaggregator(filepath)
         model = optimizeaggregator(aggregator, optimizer)
         @test objective_value(model) ≈ -2.72 atol=1e-6
+
+        filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test4.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test objective_value(model) ≈ -2.884 atol=1e-6
     end
 end
 
