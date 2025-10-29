@@ -211,7 +211,7 @@ function build_aggregatorx_object(::Type{StandardBattery}, b::Dict{String, Any},
     end
 
     capacity = b["capacity"]
-    inital_charge = b["inital_charge"]
+    initial_charge = b["initial_charge"]
     max_charge = b["max_charge"]
     max_discharge = b["max_discharge"]
     charging_loss = b["charging_loss"]
@@ -221,7 +221,7 @@ function build_aggregatorx_object(::Type{StandardBattery}, b::Dict{String, Any},
     class = get_class(b)
   
     return StandardBattery(power, sources, state_of_charge, up_capacity, down_capacity,
-    up_activation, down_activation, up_energy_reserve, down_energy_reserve, capacity, inital_charge,
+    up_activation, down_activation, up_energy_reserve, down_energy_reserve, capacity, initial_charge,
     max_charge, max_discharge, charging_loss, discharging_loss, throughput_cost, class, id)
 end
 
