@@ -279,7 +279,7 @@ function build_aggregatorx_object(lt::Type{ThermalLoad}, l::Dict{String, Any}, a
 
     power = Vector{AffExpr}()
     
-    load = parse_data(l["load"])    
+    load = parse_data(l["load"], aggregator)    
     if length(load) != N
         throw(MismatchedSystemException)
     end
