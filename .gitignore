@@ -7,4 +7,5 @@ plz_solve_my_problem.jl
 variables.jl
 variable-system.jl
 manifest.toml
+docs/manifest.toml
 docs/build
