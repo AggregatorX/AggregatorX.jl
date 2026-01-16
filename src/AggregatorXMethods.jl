@@ -369,7 +369,7 @@ function set_optimization_constraints(model::Model, m::FCRN, aggregator)
     df_up[df_down .> dfmax] .= 0
 
     # Link activation to sold capacity and frequency deviation
-    @constraint(model, m.up_activation .== m.up_capacity .* df_up ./ dfmax )
+    @constraint(model, m.up_activation .== m.up_capacity .* (-df_up) ./ dfmax )
     @constraint(model, m.down_activation .== m.down_capacity .* df_down ./ dfmax )
 end
 
