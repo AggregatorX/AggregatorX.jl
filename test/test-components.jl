@@ -132,10 +132,73 @@ end
 @testset verbose = true "SimpleBatteryVarParam" begin
     failed = false
 
+    # Check that type is defined
     @testset "SimpleBatteryVarParam definition" begin
         t = @test @isdefined(SimpleBatteryVarParam);
         failed = isa(t, Test.Fail) ? true : false
     end
+
+    # Check appropriate field names
+    if !failed
+        # Field names
+        field_names = fieldnames(SimpleBatteryVarParam)
+        @test field_names == (
+            :power,
+            :sources,
+            :state_of_charge,
+            :up_capacity,
+            :down_capacity,
+            :up_activation,
+            :down_activation,
+            :up_energy_reserve,
+            :down_energy_reserve,
+            :capacity,
+            :initial_charge,
+            :max_charge,
+            :max_discharge,
+            :class,
+            :id,
+        )
+    end
+
+    if !failed
+    # Check appropriate field types
+    field_types = [fieldtype(SimpleBatteryVarParam, i) for i in 1:length(field_names)]
+    @test field_types == [
+        Dict{Integer, AbstractArray{VariableRef}},
+        Vector{Integer},
+        AbstractArray{VariableRef},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        AbstractArray{<:Real},
+        AbstractFloat,
+        AbstractArray{<:Real},
+        AbstractArray{<:Real},
+        String,
+        Integer
+    ]
+    end
+
+    # Default constructor
+    d = Dict{Integer, Vector{VariableRef}}()
+    vi = Vector{Integer}()
+    vvr = Vector{VariableRef}()
+    vr = Vector{Real}()
+    f = 1.1
+    str = "string"
+    i = 1
+
+    simplebatteryvarparam = SimpleBatteryVarParam(d, vi, vvr, d, d, d, d, d, d, vr, f, vr, vr, str, i)
+    @test isa(simplebatteryvarparam, SimpleBatteryVarParam)
+
+    # Access and modification
+    simplebatteryvarparam.id = 2
+    @test simplebatteryvarparam.id == 2
+    
 end
 
 @testset verbose = true "ThermalLoad" begin

@@ -93,10 +93,10 @@ mutable struct SimpleBatteryVarParam <: Resource
     down_activation::   Dict{Integer, AbstractArray{VariableRef}}
     up_energy_reserve:: Dict{Integer, AbstractArray{VariableRef}}
     down_energy_reserve::Dict{Integer, AbstractArray{VariableRef}}
-    capacity::          AbstractArray{AbstractFloat} # Variable parameter
+    capacity::          AbstractArray{<:Real} # Variable parameter
     initial_charge::    AbstractFloat
-    max_charge::        AbstractArray{AbstractFloat} # Variable parameter
-    max_discharge::     AbstractArray{AbstractFloat} # Variable parameter
+    max_charge::        AbstractArray{<:Real} # Variable parameter
+    max_discharge::     AbstractArray{<:Real} # Variable parameter
     class::             String
     id::                Integer
 end
