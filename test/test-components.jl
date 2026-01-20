@@ -129,6 +129,15 @@
     end
 end
 
+@testset verbose = true "SimpleBatteryVarParam" begin
+    failed = false
+
+    @testset "SimpleBatteryVarParam definition" begin
+        t = @test @isdefined(SimpleBatteryVarParam);
+        failed = isa(t, Test.Fail) ? true : false
+    end
+end
+
 @testset verbose = true "ThermalLoad" begin
     failed = false
 
