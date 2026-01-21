@@ -164,6 +164,7 @@ An important feature of AggregatorX is that new components can be added to repre
 * Add methods to set variables, constraints and objective terms.
     * Make a test for each method. The type of test will depend on the particular component and method content.
     * Implement method and test it.
+    * Remember to include files defined in folder components.
 * Make test cases
     * One or more test cases that implements the component and with analytical results
     * Focus on edge cases

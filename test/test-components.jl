@@ -199,6 +199,26 @@ end
     simplebatteryvarparam.id = 2
     @test simplebatteryvarparam.id == 2
     
+    # AggreagtorX constructor# AggregatorX constructor
+    filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-1.json")
+    @test isa(buildaggregator(filepath)[2], Dict{String, Any})
+
+    @testset verbose = true "SimpleBatteryVarParam optimization setup" begin
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-1.json")
+        sys, aggregator = buildaggregator(filepath)
+        battery = get_component(3, aggregator)
+        timestruct = aggregator["TimeStruct"]
+        model = Model()
+        # Test if applicable variable setter exists
+        call = try
+            set_optimization_variables(model, battery, timestruct)
+            true
+        catch e
+            e
+        end
+        @test !(call isa MethodError)
+        @test call # try block returned true              
+    end
 end
 
 @testset verbose = true "ThermalLoad" begin
@@ -318,11 +338,11 @@ end
 
         # Test if constraint setter exists
         call = try
-            set_optimization_constraints(model, thermalload, aggregator)
+            set_optimization_constraints(model, thermalload, aggregator) # This concrete method returns true, but this might not be a good generic design concept (since it is set not get)
         catch e
             e
         end
-        @test !(call isa MethodError) 
+        @test !(call isa MethodError) # This throws a different error, must check that it is true, perhaps test for subset of error
 
     end
 

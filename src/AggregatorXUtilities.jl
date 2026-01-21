@@ -164,7 +164,7 @@ function parse_data(data::Vector{Any})
     # Check if the elements are strings or numbers
     element = data[1]
     if typeof(element) <: AbstractString || typeof(element) <: Number
-        parse_data(element, data)
+        return parse_data(element, data)
     else
         throw(TypeError)
     end
