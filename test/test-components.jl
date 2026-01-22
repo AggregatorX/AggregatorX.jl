@@ -129,6 +129,127 @@
     end
 end
 
+@testset verbose = true "SimpleBatteryVarParam" begin
+    failed = false
+
+    # Check that type is defined
+    @testset "SimpleBatteryVarParam definition" begin
+        t = @test @isdefined(SimpleBatteryVarParam);
+        failed = isa(t, Test.Fail) ? true : false
+    end
+
+    # Check appropriate field names
+    if !failed
+        # Field names
+        field_names = fieldnames(SimpleBatteryVarParam)
+        @test field_names == (
+            :power,
+            :sources,
+            :state_of_charge,
+            :up_capacity,
+            :down_capacity,
+            :up_activation,
+            :down_activation,
+            :up_energy_reserve,
+            :down_energy_reserve,
+            :capacity,
+            :initial_charge,
+            :max_charge,
+            :max_discharge,
+            :class,
+            :id,
+        )
+    end
+
+    if !failed
+    # Check appropriate field types
+    field_types = [fieldtype(SimpleBatteryVarParam, i) for i in 1:length(field_names)]
+    @test field_types == [
+        Dict{Integer, AbstractArray{VariableRef}},
+        Vector{Integer},
+        AbstractArray{VariableRef},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        Dict{Integer, AbstractArray{VariableRef}},
+        AbstractArray{<:Real},
+        AbstractFloat,
+        AbstractArray{<:Real},
+        AbstractArray{<:Real},
+        String,
+        Integer
+    ]
+    end
+
+    # Default constructor
+    d = Dict{Integer, Vector{VariableRef}}()
+    vi = Vector{Integer}()
+    vvr = Vector{VariableRef}()
+    vr = Vector{Real}()
+    f = 1.1
+    str = "string"
+    i = 1
+
+    simplebatteryvarparam = SimpleBatteryVarParam(d, vi, vvr, d, d, d, d, d, d, vr, f, vr, vr, str, i)
+    @test isa(simplebatteryvarparam, SimpleBatteryVarParam)
+
+    # Access and modification
+    simplebatteryvarparam.id = 2
+    @test simplebatteryvarparam.id == 2
+    
+    # AggreagtorX constructor# AggregatorX constructor
+    filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-1.json")
+    @test isa(buildaggregator(filepath)[2], Dict{String, Any})
+
+    @testset verbose = true "SimpleBatteryVarParam optimization setup" begin
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-1.json")
+        sys, aggregator = buildaggregator(filepath)
+        battery = get_component(3, aggregator)
+        timestruct = aggregator["TimeStruct"]
+        model = Model()
+        # Test if applicable variable setter exists
+        call = try
+            set_optimization_variables(model, battery, timestruct)
+            true
+        catch e
+            e
+        end
+        @test !(call isa MethodError)
+        @test call # try block returned true              
+    end
+
+    @testset verbose = true "SimpleBatteryVarParam optimization" begin
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-2.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test is_solved_and_feasible(model) 
+        if is_solved_and_feasible(model)
+            @test objective_value(model) ≈ -6 atol=1e-6
+        end
+        
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-3.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test is_solved_and_feasible(model) 
+        if is_solved_and_feasible(model)
+            @test objective_value(model) ≈ -5 atol=1e-6
+        end   
+
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-4.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test is_solved_and_feasible(model) 
+        if is_solved_and_feasible(model)
+            @test objective_value(model) ≈ -4 atol=1e-6
+        end   
+    end
+end
+
 @testset verbose = true "ThermalLoad" begin
     failed = false
 
@@ -246,11 +367,11 @@ end
 
         # Test if constraint setter exists
         call = try
-            set_optimization_constraints(model, thermalload, aggregator)
+            set_optimization_constraints(model, thermalload, aggregator) # This concrete method returns true, but this might not be a good generic design concept (since it is set not get)
         catch e
             e
         end
-        @test !(call isa MethodError) 
+        @test !(call isa MethodError) # This throws a different error, must check that it is true, perhaps test for subset of error
 
     end
 

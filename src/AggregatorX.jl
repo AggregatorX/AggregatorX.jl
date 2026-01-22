@@ -11,7 +11,7 @@ export optimizeaggregator
 export FFRGroup, FCReGroup, FCRGroup # Groups
 export IndexedTimeStruct, TimeStruct # TimeStructs
 export StandardNode
-export SimpleCharger, SimpleBattery, StandardBattery, MegaCharger, Generation # Resources
+export SimpleCharger, SimpleBattery, SimpleBatteryVarParam, StandardBattery, MegaCharger, Generation # Resources
 export LinearTariff # Grids
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN, FCRNe, FCRMarket, FCR_LERMarket, FCRD_Up_LER # Markets
 export MinAverageLoad, MinLoad, FixedLoad, VariableLoad, ThermalLoad # Loads 
@@ -39,6 +39,7 @@ include("AggregatorXMethods.jl")
 
 # - Components -
 include("components/SimpleBattery.jl")
+include("components/SimpleBattaryVarParam.jl")
 include("components/StandardBattery.jl")
 include("components/StandardNode.jl")
 include("components/FixedLoad.jl")

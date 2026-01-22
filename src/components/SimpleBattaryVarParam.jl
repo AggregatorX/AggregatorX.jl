@@ -1,52 +1,52 @@
-function set_optimization_variables(model::Model, battery::SimpleBattery, 
+function set_optimization_variables(model::Model, battery::SimpleBatteryVarParam, 
     timestruct::TimeStruct) 
 
     # Output power
     for k in keys(battery.power)
-        base_name = "p-SimpleBattery-" * string(battery.id) * "-" * string(k)
+        base_name = "p-SimpleBatteryVarParam-" * string(battery.id) * "-" * string(k)
         battery.power[k] = set_variables_full_set(model, timestruct, base_name)
     end
     
     # State of charge
-    base_name = "soc-SimpleBattery-" * string(battery.id)
+    base_name = "soc-SimpleBatteryVarParam-" * string(battery.id)
     battery.state_of_charge =set_variables_full_set(model, timestruct, base_name)
    
     # Capacity    
     for k in keys(battery.up_capacity)
-        base_name = "up-capacity-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
+        base_name = "up-capacity-SimpleBatteryVarParam-" * string(battery.id) * "-group-" * string(k)
         battery.up_capacity[k] = set_variables_full_set(model, timestruct, base_name)
     end
 
     for k in keys(battery.down_capacity)
-        base_name = "down-capacity-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
+        base_name = "down-capacity-SimpleBatteryVarParam-" * string(battery.id) * "-group-" * string(k)
         battery.down_capacity[k] = set_variables_full_set(model, timestruct, base_name)
     end
 
     # Activation
     for k in keys(battery.up_activation)
-        base_name = "up-activation-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
+        base_name = "up-activation-SimpleBatteryVarParam-" * string(battery.id) * "-group-" * string(k)
         battery.up_activation[k] = set_variables_full_set(model, timestruct, base_name)
     end
 
     for k in keys(battery.down_activation)
-        base_name = "down-activation-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
+        base_name = "down-activation-SimpleBatteryVarParam-" * string(battery.id) * "-group-" * string(k)
         battery.down_activation[k] = set_variables_full_set(model, timestruct, base_name)
     end
 
     # Energy reserve
     for k in keys(battery.up_energy_reserve)
-        base_name = "up-energy-reserve-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
+        base_name = "up-energy-reserve-SimpleBatteryVarParam-" * string(battery.id) * "-group-" * string(k)
         battery.up_energy_reserve[k] = set_variables_full_set(model, timestruct, base_name)
     end
 
     for k in keys(battery.down_energy_reserve)
-        base_name = "down-energy-reserve-SimpleBattery-" * string(battery.id) * "-group-" * string(k)
+        base_name = "down-energy-reserve-SimpleBatteryVarParam-" * string(battery.id) * "-group-" * string(k)
         battery.down_energy_reserve[k] = set_variables_full_set(model, timestruct,base_name)
     end
     
 end
 
-function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator::Dict{String, Any})
+function set_optimization_constraints(model::Model, r::SimpleBatteryVarParam, aggregator::Dict{String, Any})
     ts = aggregator["TimeStruct"]
     N = ts.periods
     id = r.id
@@ -83,7 +83,7 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
     set_constraint_upper_bound(model, ts, r.state_of_charge, r.capacity, base_name)
     
     base_name ="max-soc_last-SimpleBattery" * string(id) # ... last time step
-    c = set_constraint_upper_bound_last(model, ts, r.state_of_charge, delta, r.capacity, base_name)
+    c = set_constraint_upper_bound_last(model, ts, r.state_of_charge, delta, r.capacity[end], base_name)
 
     base_name ="min-soc-SimpleBattery" * string(id)
     set_constraint_lower_bound(model, ts, r.state_of_charge, 0.0, base_name)
@@ -115,10 +115,10 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
         
         if isa(ts, IndexedTimeStruct)
             @constraint(model, [i = 1:ts.periods], r.state_of_charge[i] >= total_up_energy_reserve[i], base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
-            @constraint(model, [i = 1:ts.periods], r.capacity - r.state_of_charge[i] >= total_down_energy_reserve[i], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
+            @constraint(model, [i = 1:ts.periods], r.capacity[i] - r.state_of_charge[i] >= total_down_energy_reserve[i], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
         elseif isa(ts, StochasticTimeStruct)
             @constraint(model, [i = 1:ts.periods, j = ts.scenarios], r.state_of_charge[i,j] >= total_up_energy_reserve[i,j], base_name = "up-energy-reserve-SimpleBattery-" * string(id) )
-            @constraint(model, [i = 1:ts.periods, j = ts.scenarios], r.capacity - r.state_of_charge[i,j] >= total_down_energy_reserve[i,j], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
+            @constraint(model, [i = 1:ts.periods, j = ts.scenarios], r.capacity[i,j] - r.state_of_charge[i,j] >= total_down_energy_reserve[i,j], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
         end
     end
     
