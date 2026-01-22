@@ -24,12 +24,13 @@ end
 
 function set_optimization_constraints(model::Model, load::ThermalLoad, aggregator::Dict{String, Any})
     # Shorthand
+    ts    = aggregator["TimeStruct"]
     N     = aggregator["TimeStruct"].periods
     id    = load.id
     T     = load.temperature
     C     = load.heat_capacity
     H     = load.heat_loss_factor
-    Ta = load.ambient_temperature
+    Ta    = load.ambient_temperature
     Pout  = load.load
     aup   = init_expr_array(N)
     adown = init_expr_array(N)
@@ -63,4 +64,24 @@ function set_optimization_constraints(model::Model, load::ThermalLoad, aggregato
     c1 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) <= load.max_temperature, base_name = "Max T end")
     c2 = @constraint(model, T[N] + C*(Pin[N] - Pout[N] - aup[N] + adown[N]) - H *(T[N]-Ta[N]) >= load.min_temperature, base_name = "Min T end")
     push!(load.constraints, c1,c2)
+
+    # Reserved capacity constraints
+    if !(isempty(load.up_capacity)) # Empty if not part of group
+        total_up_capacity = sum_out(load, :up_capacity, ts)
+        @constraint(model, total_up_capacity .<= Pin, base_name="max-up-capacity-ThermalLoad-" * string(id))
+    end
+    if !(isempty(load.down_capacity))
+        total_down_capacity = sum_out(load, :down_capacity, ts)
+        @constraint(model, total_down_capacity .<= load.max_power .- Pin, base_name="max-down-capacity-ThermalLoad-" * string(id) )
+    end
+
+    # Energy reserve constraints
+    if !(isempty(load.up_energy_reserve))
+        total_up_energy_reserve = sum_out(load, :up_energy_reserve, ts)
+        @constraint(model, total_up_energy_reserve .<= (load.max_temperature .- T .* (1 + H) .+ H * Ta)./C, base_name="max-up-energy-reserve-ThermalLoad-" * string(id))
+    end
+    if !(isempty(load.down_energy_reserve))
+        total_down_energy_reserve = sum_out(load, :down_energy_reserve, ts)
+        @constraint(model, total_down_energy_reserve .<= (T .* (1 - H) .+ H * Ta .- load.min_temperature)./C, base_name="max-down-energy-reserve-ThermalLoad-" * string(id))
+    end
 end
