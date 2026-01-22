@@ -219,6 +219,35 @@ end
         @test !(call isa MethodError)
         @test call # try block returned true              
     end
+
+    @testset verbose = true "SimpleBatteryVarParam optimization" begin
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-2.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test is_solved_and_feasible(model) 
+        if is_solved_and_feasible(model)
+            @test objective_value(model) ≈ -6 atol=1e-6
+        end
+        
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-3.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test is_solved_and_feasible(model) 
+        if is_solved_and_feasible(model)
+            @test objective_value(model) ≈ -5 atol=1e-6
+        end   
+
+        filepath = joinpath(@__DIR__, "test-systems", "simple-battery-var-param-test-4.json")
+        sys, aggregator = buildaggregator(filepath)
+        model = optimizeaggregator(aggregator, optimizer)
+        @test isa(model, Model)
+        @test is_solved_and_feasible(model) 
+        if is_solved_and_feasible(model)
+            @test objective_value(model) ≈ -4 atol=1e-6
+        end   
+    end
 end
 
 @testset verbose = true "ThermalLoad" begin

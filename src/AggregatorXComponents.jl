@@ -200,7 +200,18 @@ end
 # -----------
 # - Groups -
 # -----------
-
+"""
+# FFRGroup
+## JSON template
+'''
+{
+    "class" : "FFRGroup",
+    "resources" : [],
+    "markets" : [],
+    "id" : 7
+}
+'''
+"""
 mutable struct FFRGroup <: Group
     up_capacity::Vector{AffExpr}
     resources::Set{Int} # ids of resources in the group.
@@ -224,6 +235,24 @@ mutable struct FCRGroup <: Group
     id::Integer
 end
 
+"""
+# FCReGroup
+
+## JSON template
+'''
+{
+    "type" : "FCRGroup",
+    "resources" : [],
+    "markets" : [],
+    "id" : N 
+    "class" : "FCR"
+}
+'''
+-resources: Vector of resource ids
+-markets:   Vector of market ids
+-id:        Integer id of the group
+-class:     String # Mandatory but not used, to be removed in future versions.
+"""
 mutable struct FCReGroup <: Group
     #up_capacity::Vector{AffExpr}
     #down_capacity::Vector{AffExpr}
@@ -261,6 +290,31 @@ mutable struct SimpleDAMarket <: Market
     id::Integer
 end
 
+"""
+# FFRProfil
+
+## JSON template
+'''
+{
+    "type" : "FFRProfil",
+    "price" : N,
+    "armed" : [],
+    "sign" : -1,
+    "class" : "FFR",
+    "id" : N
+    "minimum_bid" : N
+}
+'''
+Required fields:
+-price: Vector of AbstractFloat
+-armed: Vector of Bool
+-sign: Integer
+-class: String
+-id: Integer
+Optional fields:
+-minimum_bid: AbstractFloat
+
+"""
 mutable struct FFRProfil <: Market
     up_capacity_common::Union{VariableRef, Nothing} # Nothing to allow uninitalized during construction
     up_capacity::Vector{AffExpr} # Reserved capacity.

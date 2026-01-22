@@ -83,7 +83,7 @@ function set_optimization_constraints(model::Model, r::SimpleBatteryVarParam, ag
     set_constraint_upper_bound(model, ts, r.state_of_charge, r.capacity, base_name)
     
     base_name ="max-soc_last-SimpleBattery" * string(id) # ... last time step
-    c = set_constraint_upper_bound_last(model, ts, r.state_of_charge, delta, r.capacity[-1], base_name)
+    c = set_constraint_upper_bound_last(model, ts, r.state_of_charge, delta, r.capacity[end], base_name)
 
     base_name ="min-soc-SimpleBattery" * string(id)
     set_constraint_lower_bound(model, ts, r.state_of_charge, 0.0, base_name)
