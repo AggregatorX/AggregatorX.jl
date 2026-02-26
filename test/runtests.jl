@@ -2,25 +2,26 @@ using Test
 using JuMP
 using HiGHS
 import JSON
+using AggregatorX
 
 optimizer = HiGHS.Optimizer
 
 cd(joinpath(@__DIR__, "test-systems")) # Set working directory (system path) to where system files are stored.
 
-loaded = false
-for n in names(Main)    
-    if n == :AggregatorX
-        global loaded = true
-    end
-end
+#loaded = false
+#for n in names(Main)    
+#    if n == :AggregatorX
+#        global loaded = true
+#    end
+#end
 
 # Load AggregatorX
-if !loaded # Errors occur if module is loaded multiple times
-    include("../src/AggregatorX.jl")
-    using .AggregatorX
-end
+#if !loaded # Errors occur if module is loaded multiple times
+#    include("../src/AggregatorX.jl")
+#    using .AggregatorX
+#end
 
-using .AggregatorX
+#using .AggregatorX
 
 println("\n Running component tests from test-components.jl")
 

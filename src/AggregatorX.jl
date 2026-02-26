@@ -2,7 +2,7 @@ module AggregatorX
 
 import JSON
 using JuMP
-
+using InteractiveUtils
 # export user functions
 export buildaggregator
 export optimizeaggregator
