@@ -1,38 +1,35 @@
-### Abstract types ###
+# Type definitions
+
+# =============== Abstract types ====================
 
 abstract type AggregatorXAny end
 
-abstract type TimeStruct <: AggregatorXAny end
-
+abstract type TimeStruct         <: AggregatorXAny end
 abstract type AbstractConnection <: AggregatorXAny end
+abstract type Component          <: AggregatorXAny end
+abstract type Group              <: AggregatorXAny end
 
-abstract type Component <: AggregatorXAny end
+abstract type Node      <: Component end
+abstract type Market    <: Component end
+abstract type Resource  <: Component end
 
-abstract type Group <: AggregatorXAny end
-
-abstract type Market <: Component end
-
-abstract type FCRMarket <: Market end
-
+abstract type FCRMarket     <: Market end
 abstract type FCR_LERMarket <: FCRMarket end
 
-abstract type Resource <: Component end
-
 abstract type Grid <: Resource end
-
 abstract type Load <: Resource end
 
-abstract type Node <: Component end
+# ================ Concrete types ==================
 
-### Concrete types ###
+# ---------------- Time structures -----------------
 
-# -------------------
-# - Time structure -
-# -------------------
+"""
+    IndexedTimeStruct
 
-# IndexedTimeStruct has no relation to absolute time, it is simply an index.
+A time structure represented by a single index representing time points.
+"""
 mutable struct IndexedTimeStruct <: TimeStruct 
-    periods::Int # The number of time steps
+    periods::Int 
 end
 
 struct StochasticTimeStruct <: TimeStruct
@@ -41,16 +38,17 @@ struct StochasticTimeStruct <: TimeStruct
     periods     :: Int
 end
 
-# -------------
-# - Components
-# -------------
+# ---------------- Components ---------------------
 
-# - Node -
+# --- Nodes ---
+
 mutable struct StandardNode <: Node
-    power::Dict{Integer, AbstractArray{VariableRef}}
-    sources::Vector{Integer}
-    id::Integer
+    power   ::Dict{Integer, AbstractArray{VariableRef}}
+    sources ::Vector{Integer}
+    id      ::Integer
 end
+
+# --- Resources ---
 
 # - SimpleCharger -
 mutable struct SimpleCharger <: Resource 
@@ -122,8 +120,6 @@ mutable struct StandardBattery <: Resource
     id::                Integer
 end
 
-
-
 mutable struct Generation <: Resource
     power   ::Dict{Integer, AbstractArray{VariableRef}}
     cost    ::Vector{Real}  
@@ -132,11 +128,10 @@ mutable struct Generation <: Resource
     id      ::Integer
 end
 
-# ----------
-# - Loads -
-# ----------
+# --- Loads ---
 
-mutable struct MinLoad <: Load # Depreceated, use VariableLoad with fixed lower_bound and no upper_bound (e.g. infinity)
+# Depreceated, use VariableLoad with fixed lower_bound and no upper_bound (e.g. infinity)
+mutable struct MinLoad <: Load 
     pmin::Number
     source::Integer
     id::Integer
@@ -185,9 +180,8 @@ mutable struct ThermalLoad <: Load
     id                 ::Integer
 end
 
-# ----------
-# - Grids -
-# ----------
+# --- Grids ---
+
 
 mutable struct LinearTariff <: Grid
     power::Dict{Integer, Vector{VariableRef}}
@@ -197,9 +191,8 @@ mutable struct LinearTariff <: Grid
     id::Integer
 end
 
-# -----------
-# - Groups -
-# -----------
+# --- Groups ---
+
 """
 # FFRGroup
 ## JSON template
@@ -221,10 +214,6 @@ mutable struct FFRGroup <: Group
 end
 
 mutable struct FCRGroup <: Group
-    #up_capacity::Vector{AffExpr}
-    #down_capacity::Vector{AffExpr}
-    #up_activation::Vector{AffExpr}
-    #down_activation::Vector{AffExpr}
     up_capacity::AbstractArray{AffExpr}
     down_capacity::AbstractArray{AffExpr}
     up_activation::AbstractArray{AffExpr}
@@ -254,10 +243,6 @@ end
 -class:     String # Mandatory but not used, to be removed in future versions.
 """
 mutable struct FCReGroup <: Group
-    #up_capacity::Vector{AffExpr}
-    #down_capacity::Vector{AffExpr}
-    #up_energy_reserve::Vector{AffExpr}
-    #down_energy_reserve::Vector{AffExpr}
     up_capacity::AbstractArray{AffExpr}
     down_capacity::AbstractArray{AffExpr}
     up_energy_reserve::AbstractArray{AffExpr}
@@ -268,9 +253,8 @@ mutable struct FCReGroup <: Group
     markets::Set{Int} # ids of markets connected to the group.
     id::Integer
 end
-# ------------
-# - Markets -
-# ------------
+
+# --- Markets ---
 
 mutable struct SimpleMarket <: Market
     power::Dict{Integer, Vector{VariableRef}}
@@ -293,7 +277,7 @@ end
 """
 # FFRProfil
 
-## JSON template
+    # JSON template
 '''
 {
     "type" : "FFRProfil",
@@ -379,13 +363,12 @@ mutable struct FCRD_Up_LER <: FCR_LERMarket
     id                  ::Integer
 end
 
-# Outer constructor
+# Outer constructors
 FCRD_Up_LER(energy_endurance, capacity_factor, price, sign, id) = 
-FCRD_Up_LER(Vector{VariableRef}(), Vector{AffExpr}(), Vector{AffExpr}(), energy_endurance, capacity_factor, price, sign, id )
+FCRD_Up_LER(Vector{VariableRef}(), Vector{AffExpr}(), Vector{AffExpr}(), 
+            energy_endurance, capacity_factor, price, sign, id )
 
-# ----------------
-# - Connections -
-# ----------------
+# --- Connections ---
 
 mutable struct Connection <: AbstractConnection
     source::Integer
