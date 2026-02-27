@@ -445,6 +445,30 @@ function build_aggregatorx_object(gt::Type{LinearTariff}, g::Dict{String, Any}, 
     return LinearTariff(power, sources, price, upper_bound, id)
 end
 
+function build_aggregatorx_object(_::Type{LimitedConnection}, obj::Dict{String, Any}, 
+    aggregator::Dict{String, Any})
+
+    connections = aggregator["Connection"]
+    N = aggregator["TimeStruct"].periods
+    id = obj["id"]
+    power = Dict{Integer,Vector{VariableRef}}()
+    sources = Vector{Integer}(undef,0)
+    for c in connections
+        if c.source == id
+            power[c.sink] = Vector{VariableRef}(undef,N)
+        end
+        if c.sink == id
+            push!(sources, c.source)
+        end
+    end
+
+    upper_bound = parse_data(obj["upper_bound"], aggregator)
+    capacity_markets = parse_data(obj["capacity_markets"], aggregator)
+    activation_markets = parse_data(obj["activation_markets"], aggregator)
+    
+
+    return LimitedConnection(power, sources, upper_bound, capacity_markets, activation_markets, id)
+end
 # ------------
 # - Markets -
 # ------------

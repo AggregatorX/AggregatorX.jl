@@ -191,11 +191,26 @@ mutable struct LinearTariff <: Grid
     id::Integer
 end
 
+"""
+    LimitedConnection
+
+Represents a physical grid with a limited capacity. Reserved capacity and direct
+activation markets are taken into account.
+"""
+mutable struct LimitedConnection <: Grid
+    power               ::Dict{Integer, Vector{VariableRef}}
+    sources             ::Vector{Integer}
+    upper_bound         ::Vector{Real}
+    capacity_markets    ::Vector{Integer}
+    activation_markets  ::Vector{Integer}
+    id                  ::Integer
+end
+
 # --- Groups ---
 
 """
 # FFRGroup
-## JSON template
+    # JSON template
 '''
 {
     "class" : "FFRGroup",

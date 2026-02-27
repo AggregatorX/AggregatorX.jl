@@ -160,7 +160,7 @@ end
 
 function parse_data(data::Vector{Any})
     # JSON parse returns a Vector{Any} for a vector [..] in the data file
-
+    isempty(data) && return data
     # Check if the elements are strings or numbers
     element = data[1]
     if typeof(element) <: AbstractString || typeof(element) <: Number

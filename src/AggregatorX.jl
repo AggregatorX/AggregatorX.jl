@@ -3,16 +3,19 @@ module AggregatorX
 import JSON
 using JuMP
 using InteractiveUtils
-# export user functions
+
+# ------------- Exports ----------------
+# --- User functions ---
 export buildaggregator
 export optimizeaggregator
 
-# export all concrete types
+# --- Types ---
 export FFRGroup, FCReGroup, FCRGroup # Groups
 export IndexedTimeStruct, TimeStruct # TimeStructs
 export StandardNode
 export SimpleCharger, SimpleBattery, SimpleBatteryVarParam, StandardBattery, MegaCharger, Generation # Resources
-export LinearTariff # Grids
+# - Grids -
+export LinearTariff, LimitedConnection
 export SimpleMarket, SimpleDAMarket, FFRProfil, FCRN, FCRNe, FCRMarket, FCR_LERMarket, FCRD_Up_LER # Markets
 export MinAverageLoad, MinLoad, FixedLoad, VariableLoad, ThermalLoad # Loads 
 export Connection # Connections

@@ -1,3 +1,4 @@
+include("testLimitedConnection.jl")
 @testset verbose = true "StandardBattery" begin
     failed = false
 
