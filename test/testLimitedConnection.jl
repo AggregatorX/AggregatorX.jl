@@ -45,7 +45,7 @@ test1 = joinpath(@__DIR__, "test-systems", "LimitedConnection-test1.json")
         # Minimum aggregator object
         aggregator = Dict{String, Any}()
         typetable = AggregatorX.build_typetable()
-        io = open(test1, "r")
+        io = open(test1, "r") # TODO: add more complex systems with balancing markets
         sys = JSON.parse(io)
         ids = all_ids(sys)
         aggregator["TimeStruct"] = AggregatorX.build_aggregatorx_object(IndexedTimeStruct, sys["TimeStruct"])
@@ -59,5 +59,26 @@ test1 = joinpath(@__DIR__, "test-systems", "LimitedConnection-test1.json")
     end
 
     @testset verbose=true "$typename optimization setup" begin
+        # build system
+        sys, aggregator = buildaggregator(test1)
+        limitedconnection = get_component(2, aggregator)
+        timestruct = aggregator["TimeStruct"]
+        model = Model()
+
+        # Test if variable setter exists
+        res = try
+            set_optimization_variables(model, limitedconnection, timestruct)
+        catch e
+            e
+        end
+        @test !(res isa Exception) 
+
+        # Test if constraint setter exists
+        res = try
+            set_optimization_constraints(model, limitedconnection, aggregator)
+        catch e
+            e
+        end
+        @test !(res isa Exception)
     end
 end

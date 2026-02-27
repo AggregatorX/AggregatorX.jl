@@ -86,8 +86,8 @@ include("testLimitedConnection.jl")
         catch e
             e
         end
-        @test !(call isa MethodError)              
-        @test isnothing(call)
+        @test !(call isa MethodError)             
+        # @test isnothing(call) # Not safe. Only in cases a for loop has no iteration does this occur
         
         # Test initialization of variables
         #filepath = joinpath(@__DIR__, "test-systems", "standard-battery-test1.json")
