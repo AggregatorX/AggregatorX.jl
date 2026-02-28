@@ -51,6 +51,7 @@ include("components/Generation.jl")
 include("components/FCRNe.jl")
 include("components/FCReGroup.jl")
 include("components/LimitedConnection.jl")
+include("components/LinearTariff.jl")
 # --------------
 
 include("AggregatorXUtilities.jl")
