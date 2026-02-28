@@ -59,26 +59,16 @@ test1 = joinpath(@__DIR__, "test-systems", "LimitedConnection-test1.json")
     end
 
     @testset verbose=true "$typename optimization setup" begin
-        # build system
+        # build system        
         sys, aggregator = buildaggregator(test1)
         limitedconnection = get_component(2, aggregator)
         timestruct = aggregator["TimeStruct"]
         model = Model()
-
+        
         # Test if variable setter exists
-        res = try
-            set_optimization_variables(model, limitedconnection, timestruct)
-        catch e
-            e
-        end
-        @test !(res isa Exception) 
+        @test applicable(set_optimization_variables, model, limitedconnection, timestruct)
 
-        # Test if constraint setter exists
-        res = try
-            set_optimization_constraints(model, limitedconnection, aggregator)
-        catch e
-            e
-        end
-        @test !(res isa Exception)
+        # Test if constraint setter exists 
+        @test applicable(set_optimization_constraints,model, limitedconnection, aggregator)
     end
 end

@@ -460,14 +460,7 @@ function get_objective_term(m::FCRN)
     return zterm
 end
 
-
-
 function get_objective_term(m::FCRD_Up_LER)
     zterm = sum(m.price .* m.capacity_sold .* (-m.sign))
     return zterm
-end
-
-function get_objective_term(g::LinearTariff)
-    target = collect(keys(g.power))[1]
-    zterm = sum(-g.price .* g.power[target])
 end
