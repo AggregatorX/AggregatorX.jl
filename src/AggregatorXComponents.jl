@@ -62,7 +62,23 @@ mutable struct SimpleCharger <: Resource
     id::Integer
 end
 
-# - SimpleBattery -
+"""
+    SimpleBattery
+
+Battery model with given capacity and maximum charging and discharging rates.
+No losses are included.
+
+JSON template
+{
+    "type":SimpleBattery
+    "capacity":
+    "initial_charge":
+    "max_charge":
+    "max_discharge":
+    "class":
+    "id":
+}
+"""
 mutable struct SimpleBattery <: Resource
     power::             Dict{Integer, AbstractArray{VariableRef}}
     sources::           Vector{Integer}
@@ -195,7 +211,8 @@ end
     LimitedConnection
 
 Represents a physical grid with a limited capacity. Reserved capacity and direct
-activation markets are taken into account.
+activation markets are taken into account. Assume symmetric capacity limitation
+for inflow and outflow.
 """
 mutable struct LimitedConnection <: Grid
     power               ::Dict{Integer, Vector{VariableRef}}
@@ -205,6 +222,7 @@ mutable struct LimitedConnection <: Grid
     activation_markets  ::Vector{Integer}
     id                  ::Integer
 end
+# TODO: Add nonsymmetric variant
 
 # --- Groups ---
 
@@ -240,9 +258,9 @@ mutable struct FCRGroup <: Group
 end
 
 """
-# FCReGroup
+    FCReGroup
 
-## JSON template
+JSON template
 '''
 {
     "type" : "FCRGroup",

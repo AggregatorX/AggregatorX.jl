@@ -418,8 +418,10 @@ function set_objective(model::Model, aggregator::Dict{String, Any})
     # Grid tariff
     if haskey(aggregator,"Grid")
         for g in aggregator["Grid"]
-            zterm = get_objective_term(g)
-            z = z + zterm
+            if applicable(get_objective_term,g)
+                zterm = get_objective_term(g)
+                z = z + zterm
+            end
         end
     end
 

@@ -121,6 +121,8 @@ function set_optimization_constraints(model::Model, r::SimpleBattery, aggregator
             @constraint(model, [i = 1:ts.periods, j = ts.scenarios], r.capacity - r.state_of_charge[i,j] >= total_down_energy_reserve[i,j], base_name = "down-energy-reserve-SimpleBattery-" * string(id) )
         end
     end
+    # TODO: This should probably be stricter. It should also included that the energy capacity is 
+    # depleted by planned power flow. Something like soc[i] - p[i] > total_energy_reserve
     
 end
 
