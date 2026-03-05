@@ -11,8 +11,9 @@
     ],
     "Grid" :[
         {
-            "type" : "LinearTariff",
-            "price" : 0,
+            "type" : "LimitedConnection",
+            "capacity_markets": [6],
+            "activation_markets": [],
             "upper_bound" : [2, 2, 2, 1, 1, 2, 2, 2],
             "id" : 2
         }
