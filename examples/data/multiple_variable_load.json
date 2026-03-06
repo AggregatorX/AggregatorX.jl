@@ -1,0 +1,59 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 8
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 2
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 1, 2, 2, 3, 3, 4, 4],
+            "sign" : 1,
+            "id" : 1
+        },
+        {
+            "type" : "SimpleMarket",
+            "price" : [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+            "sign" : -1,
+            "id" : 6
+        },
+        {
+            "type" : "SimpleMarket",
+            "price" : [2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            "sign" : -1,
+            "id" : 7
+        },
+        {
+            "type" : "SimpleMarket",
+            "price" : [3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+            "sign" : -1,
+            "id" : 8
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "VariableLoad", 
+            "upper_bound" : 3,
+            "lower_bound" : 0,
+            "id" : 3
+        },
+        {
+            "type" : "VariableLoad", 
+            "upper_bound" : [1,2,3,1,2,3,1,2],
+            "lower_bound" : 0,
+            "id" : 4
+        },
+        {
+            "type" : "VariableLoad", 
+            "upper_bound" : 3,
+            "lower_bound" : 1,
+            "id" : 5
+        }
+    ],
+    "Connection" : [[1,2], [2,3], [2,4], [2,5], [3,6], [4,7], [5,8]]
+}
