@@ -1,6 +1,6 @@
 *.stackdump
-*.json
 .ipynb_checkpoints/
+.vscode/
 notebook-edit/
 start.jl
 plz_solve_my_problem.jl

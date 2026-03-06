@@ -1,0 +1,40 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 2,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 2
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "SimpleBatteryVarParam",
+            "capacity" : [10,10],
+            "initial_charge" : 0,
+            "max_charge" : [2,2],
+            "max_discharge" : [2,1],
+            "id" : 4,
+            "class" : ""
+        },
+        {
+            "type" : "FixedLoad",
+            "load" : [3,2],
+            "id" : 3
+
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 2],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 1
+        }
+    ],
+     "Connection" : [[1,2], [2,3], [2,4], [4,2]]
+}

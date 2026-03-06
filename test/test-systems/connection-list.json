@@ -1,0 +1,65 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 10,
+        "id" : 1
+    },
+    
+    "Grid" : [
+        {
+            "type" : "SimpleGrid",
+            "price" : [0.7, 0.7, 0.9, 1.0, 0.4, 0.8, 0.5, 0.3, 0.3, 0.1],
+            "id" : 3
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "SimpleCharger",
+            "max_power" : 0.5,
+            "class" : "FFR",
+            "id" : 4
+        },
+        {
+            "type" : "SimpleBattery",
+            "capacity" : 2,
+            "initial_charge" : 0.2,
+            "max_charge" : 0.6,
+            "max_discharge" : 0.5,            
+            "class" : "FFR",
+            "id" : 5
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleMarket",
+            "price" : [0.3, 0.3, 0.1, 0.8, 0.5, 0.3, 0.7, 0.9, 1.0, 0.4],
+            "sign" : -1,
+            "class" : "Load",
+            "id" : 6
+        },
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [0.3, 0.3, 0.1, 0.8, 0.5, 0.3, 0.7, 0.9, 1.0, 0.4],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 8
+        },
+        {
+            "type" : "FFRProfil",
+            "price" : 0.5,
+            "armed" : [1,1,1,1,0,0,0,1,1,1],
+            "sign" : -1,
+            "class" : "FFR",
+            "id" : 9
+        }
+    ],
+    "Group" : [
+        {
+            "class" : "FFRGroup",
+            "resources" : [4,5],
+            "markets" : [9],
+            "id" : 7
+        }
+    ],
+    "Connection" : [[4,5], [8,4], [4,6], [5,4]]
+}

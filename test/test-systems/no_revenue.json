@@ -1,0 +1,32 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 2,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",            
+            "id" : 3
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "SimpleCharger",
+            "max_power" : 0.5,
+            "class" : "FFR",
+            "id" : 1
+        }
+    ],
+    "Market" : [        
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 1],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 2
+        }  
+    ],
+    "Group" : [],
+    "Connection" : [[2,3],[3,1]]
+}

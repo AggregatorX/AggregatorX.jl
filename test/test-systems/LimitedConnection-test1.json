@@ -1,0 +1,40 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 2,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 3
+        }
+    ],
+    "Grid" : [
+        {
+            "type" : "LimitedConnection",
+            "sources" : [1],
+            "upper_bound" : 1,
+            "capacity_markets" : [],
+            "activation_markets" : [],
+            "id" : 2
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "FixedLoad",
+            "load" : [3,2],
+            "id" : 4
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 1
+        }
+    ],
+     "Connection" : [[1,2], [2,3], [3,4]]
+}

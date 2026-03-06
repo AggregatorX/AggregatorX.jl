@@ -1,0 +1,66 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 2,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 6
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "SimpleCharger",
+            "max_power" : 1.0,
+            "class" : "FCR",
+            "id" : 1
+        },
+        {
+            "type" : "SimpleBattery",
+            "capacity" : 1.0,
+            "initial_charge" : 0.0,
+            "max_charge" : 1.0,
+            "max_discharge" : 1.0,            
+            "class" : "FCR",
+            "id" : 2
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleMarket",
+            "price" : [1.0,0.5],
+            "sign" : -1,
+            "class" : "Load",
+            "id" : 4
+        },
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 1],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 3
+        },
+        {
+            "type" : "FCRN",
+            "price_capacity" : [1,2],
+            "price_up_activation" : [3,4],
+            "price_down_activation" : [3,4],
+            "df" : [0.02, 0.03],
+            "dfmax" : 0.1,
+            "sign" : -1,
+            "class" : "FCR",
+            "id" : 5
+        }
+    ],
+    "Group" : [
+        {
+            "class" : "FCRGroup",
+            "resources" : [1,2],
+            "markets" : [5],
+            "id" : 7
+        }
+    ],
+    "Connection" : [[3,6], [6,1], [1,4], [6,2], [2,6]]
+}

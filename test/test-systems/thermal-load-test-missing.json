@@ -1,0 +1,35 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 2,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 2
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "ThermalLoad",
+            "load" : [1,2],
+            "max_temperature" : 95,
+            "min_temperature" : 70,
+            "ambient_temperature" : 25,
+            "heat_capacity" : 1,
+            "max_power" : 1,
+            "id" : 3
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 1],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 1
+        }
+    ],
+     "Connection" : [[1,2], [2,3]]
+}

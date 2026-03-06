@@ -1,0 +1,53 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 5,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 2
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "ThermalLoad",
+            "load" : [4,4,4,4,4],
+            "inital_temperature" : 100,
+            "max_temperature" : 110,
+            "min_temperature" : 90,
+            "ambient_temperature" : 50,
+            "heat_capacity" : 1,
+            "heat_loss_factor" : 0,
+            "max_power" : 3,
+            "id" : 3
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 1, 1, 1, 1],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 1
+        },
+        {
+            "type" : "FFRProfil",
+            "price" : 1,
+            "armed" : [1, 1, 1, 1, 1],
+            "sign" : -1,
+            "class" : "FFR",
+            "id" : 5
+        }
+    ],
+    "Group" : [
+        {
+            "class" : "FFRGroup",
+            "resources" : [3],
+            "markets" : [5],
+            "id" : 4
+        }
+    ],
+     "Connection" : [[1,2], [2,3]]
+}

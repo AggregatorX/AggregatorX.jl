@@ -1,0 +1,50 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 4,
+        "id" : 0
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 2
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "SimpleBattery",
+            "capacity" : 1.0,
+            "initial_charge" : 0.0,
+            "max_charge" : 1.0,
+            "max_discharge" : 1.0,            
+            "class" : "FCR",
+            "id" : 3
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [1, 1, 1, 1],
+            "sign" : 1,
+            "class" : "DA",
+            "id" : 1
+        }, 
+        {
+            "type" : "FCRNe",
+            "energy_endurance" : 1,
+            "capacity_factor" : 1.2,
+            "price" : [10, 10, 10, 10],
+            "sign" : -1,
+            "id" : 5
+        }
+    ],
+    "Group" : [
+        {
+            "class" : "FCReGroup",
+            "resources" : [3],
+            "markets" : [5],
+            "id" : 4
+        }
+    ],
+    "Connection" : [[1,2], [2,3],[3,2]]
+}
