@@ -1,0 +1,68 @@
+{
+    "TimeStruct" : {
+        "type" : "IndexedTimeStruct",
+        "periods" : 8
+    },
+    "Node" : [
+        {
+            "type" : "StandardNode",
+            "id" : 3
+        }
+    ],
+    "Grid" :[
+        {
+            "type" : "LimitedConnection",
+            "capacity_markets": [6],
+            "activation_markets": [],
+            "upper_bound" : [2, 2, 2, 1, 1, 2, 2, 2],
+            "id" : 2
+        }
+    ],
+    "Market" : [
+        {
+            "type" : "SimpleDAMarket",
+            "price" : [50, 65, 45, 36, 76, 66, 55, 65],
+            "sign" : 1,
+            "id" : 1
+        },
+        {
+            "type" : "SimpleMarket",
+            "price" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
+            "sign" : -1,
+            "id" : 8
+        },
+        {
+            "type" : "FCRNe",
+            "price" : [10, 9, 8, 9, 8, 10, 11, 12],
+            "energy_endurance" : 1,
+            "capacity_factor" : 1,
+            "sign" : -1,
+            "id" : 6
+        }
+    ],
+    "Resource" : [
+        {
+            "type" : "VariableLoad", 
+            "upper_bound" : [0.6, 0.9, 1.9, 2, 0.7, 0.8, 0.9, 1.2],
+            "lower_bound" : [0, 0, 0, 0, 0, 0, 0, 0],
+            "id" : 4
+        },
+        {
+            "type" : "SimpleBattery",
+            "capacity" : 1.0,
+            "initial_charge" : 0.0,
+            "max_charge" : 0.5,
+            "max_discharge" : 0.5,            
+            "id" : 5
+        }
+    ],
+    "Group" : [
+        {
+            "class" : "FCReGroup",
+            "resources" : [5],
+            "markets" : [6],
+            "id" : 7
+        }
+    ],
+    "Connection" : [[1,2], [2,3], [3,4], [5,3], [3,5], [4,8]]
+}
