@@ -1,4 +1,5 @@
 *.stackdump
+*.cov
 .ipynb_checkpoints/
 .vscode/
 notebook-edit/
