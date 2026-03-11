@@ -2,24 +2,26 @@
 
 This document explains how (and to some degree why) the package AggregatorX is designed and used. The main purpose is to enable users to efficiently extend and contribute to the code.
 
-# Introduction
+# The type hierarchy
 
-## Usage
+A core idea is that a system of interest can be represented by discrete components and that these discrete componets can be reused across different systems. These components are represented by composite types (`struct`) in Julia and the type hierachy gives a succinct exposition of the philosophy behind the software design as well as the terms that are used to describe the software.
 
-Before diving into the details let us give a breif description of the motivation of the software and a typical workflow.
+`AggregatorXAny` is the top level type. The top level type has four subtypes
 
-### Motivation
+* `TimeStruct`
+* `AbstractConnection`
+* `Groups`
+* `Components`
 
-The main motivation for AggregatorX is to create a piece of software that simplifies the analysis of flexible energy resources and their participation in multiple energy and balancing markets. By analysis we here mean optimization models that try to optimize the scheduled energy flow according to some defined profit. The idea is that most flexible energy resource and markets have many similar features and the software automates all the manual work of setting up the the optimization model (variables, constraints, objective function) based on a high level description of the system under study.
+The first three are more `structural elements` which defines how things are connected, and the 'space' (typically time... ;D) over which variables are defined. The last `Components` is the supertype of all the discrete types that make up the system (covering the range of concepts from a battery to a balancing market).
 
-### Work flow
+The first three also have subtypes but the `Component` type has the richest set of suptypes. It has (currently) four different subtypes
 
-Here is a short description of atypical the work flow, hopefully to illustrate the simplicity of setting up and running an optimization model:
+* `Resources`
+* `Markets`
+* `Node`
+* `Grids`
 
-* Describe your system of interest in a JSON file. This file is refered to as the *system description*. This file can have any name but typically called `system.json` and we will use this as a name in the following.
-* Import the AggregatorX package, `using AggregatorX`.
-* Build the system using `aggregator = buildaggregatorx("system.json")`. What this does is to create objects of AggregatorX types with the number and types of objects and their parameters based on the content of `system.json`. The aggregatorX objects are stored in the variable `aggregator` as a dictionary.
-* Create and run an optimization of the system with `optimizeaggregator(aggregator, optimizer)`. This creates a JuMP model based on the information in the `aggregator` object. It then tries to optimize the model using the solver referred to by `optimizer`.
 
 ## Some words (of wisdom)
 A conceptual and mathematical description of what the software does is provided in the document `tex\mathematical-description.tex`. It is probably a good idea to read this document first to understand to what the software tries to acheive, before diving into the nitty-gritty of the software design. 
@@ -37,41 +39,7 @@ Some users may also not be familiar with the Julia programming language or the J
 
 OK, let's take a deep dive into the nitty gritty (Oh boy, I can't wait...)
 
-## File structure
 
-Let us first point to where you can find things. 
-
-`AggregatorX.jl`
-
-This is where the main module is defined. It only contains a list of function which the module exports (available when `using` the package) as well as an `include` statement for all the files where all the other code as been organized.
-
-`AggregatorXComponents.jl`
-
-The type system is often an essential part of a piece of Julia software and important for software design. This file describes the hierarchy of new abstract types defined in AggregatorX as well as all the conrecte types (i.e `structs`) that may be instantiated. These concrete types typically represent physical (e.g. battery) or conceptual (e.g. a market) objects in the system we want to study. When you want to create a new type to represent some new physical object, you start here by defining the necessary fields that describe the characteristics of the object. The system description you write provide the parameter values that go into these types during a particular run of the software.
-
-`AggregatorXExceptions.jl`
-
-Defines specialized exceptions that are used by the package to provide detailed error information.
-
-`BuildAggregatorX.j`
-
-This file defines the function `buildaggregator()`. What this function does is to take the path of the system description as an argument and return a dictionary that contains instances of the various components defined in `AggregatorXComponents.jl`. It basicall translates what you have defined in your system description to the internal data structure of AggregatorX. The function first parses the system description file into individual components. Each component has a `type` field in the JSON file. The software translates this to an AggregatorX type using a dictionary (called typetable) which translates string type descriptions to a Julia type. It then calls `build_aggregatorx_object()` with the type as an argument. This function call dispatches to different functions depending on the type argument, which contains the appropriate code for that given type. All the instantiated objects are grouped in a dictionary which is returned by `buildaggregator()`. We will refer to this dictionary as the `aggregator` object/dictionary.
-
-`AggregatorXConstructors.jl`
-
-This file contains the definitions of all the different `build_aggregatorx_object()` functions called from `buildaggregator()`. Each of these functions takes the data from the system description file and instantiates the AggragatorX objects with the appropriate fields with data from the system description. Each function returns the instantiated object.
-
-`OptimizeAggregator.jl`
-
-This file contains the single function `optimizeaggregator()`. This function does two things. First it sets up the optimization problem based on the information in the `aggregator` object. This is done by repeated calls to `set_optimization_variables()`, `set_optimization_constraints()` and `set_objective()` which respectively defines the variables, constraints and objective function in a JuMP model. Finally it calls `optimize!(model)` to try to optimize the model and return the (hopefully) feasible solution.
-
-`AggregatorXMethods.jl`
-
-This is the meat and potatoes of the software. This is were the JuMP optimization model is set up. There are specialiced functions for each type of component. The most complex part of the software is how the constrains are set up.
-
-`plz_solve_my_problem.jl`
-
-This friendly file solves whatever problems you might have:D. Just kidding, it is just a script that contains all the commands needed to run the whole optimization procedure. All you need to do is changed the system description file.
 
 # Software design
 
